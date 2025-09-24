@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { UserPlus, ArrowLeft, Bell, Download } from 'lucide-react';
 
 // Mock data for manuscripts
 const mockManuscripts = [
@@ -59,6 +61,54 @@ const mockManuscripts = [
   }
 ];
 
+// Mock data for "Waiting for Review" tab
+const mockWaitingForReviewManuscripts = [
+  {
+    id: '234567',
+    title: 'Advanced Machine Learning Applications in Medical Diagnosis',
+    keywords: ['Machine Learning', 'Medical AI', 'Diagnosis', 'Healthcare'],
+    abstract: 'This study presents a comprehensive analysis of machine learning algorithms applied to medical diagnosis systems. We evaluated the performance of various deep learning models on medical imaging datasets and demonstrated significant improvements in diagnostic accuracy. Our proposed ensemble method achieved 94.2% accuracy in detecting cardiovascular anomalies, outperforming traditional diagnostic methods by 15%.',
+    authors: 'Sarah Chen*, Michael Rodriguez, Lisa Wang, David Kim',
+    submissionDate: '2024-03-15',
+    manuscriptFile: 'ML_Medical_Diagnosis_v1.pdf',
+    filesZip: '234567_files.zip',
+    reviewers: [
+      { name: 'Dr. James Thompson', deadline: '2024-04-15' },
+      { name: 'Prof. Maria Santos', deadline: '2024-04-15' },
+      { name: 'Dr. Alex Kim', deadline: '2024-04-20' }
+    ]
+  },
+  {
+    id: '234568',
+    title: 'Climate Change Impact on Marine Ecosystems: A Comprehensive Analysis',
+    keywords: ['Climate Change', 'Marine Biology', 'Ecosystem', 'Environmental Science'],
+    abstract: 'We conducted a longitudinal study examining the effects of rising ocean temperatures on marine biodiversity across multiple ecosystems. Data collected from 50 monitoring stations over 10 years reveals alarming trends in species migration patterns and coral reef degradation. Our findings suggest immediate conservation action is required to preserve marine habitats.',
+    authors: 'James Wilson*, Emma Thompson, Robert Johnson',
+    submissionDate: '2024-03-12',
+    manuscriptFile: 'Climate_Marine_Ecosystems_v2.pdf',
+    filesZip: '234568_files.zip',
+    reviewers: [
+      { name: 'Dr. Ocean Martinez', deadline: '2024-04-12' },
+      { name: 'Prof. Green Waters', deadline: '2024-04-18' }
+    ]
+  },
+  {
+    id: '234570',
+    title: 'Sustainable Energy Solutions for Urban Development',
+    keywords: ['Renewable Energy', 'Urban Planning', 'Sustainability', 'Smart Cities'],
+    abstract: 'This research proposes innovative sustainable energy solutions for rapidly growing urban areas. We analyzed energy consumption patterns in 25 major cities and developed an integrated framework combining solar, wind, and geothermal energy sources. Our simulation models predict a 40% reduction in carbon emissions with widespread implementation of our proposed system.',
+    authors: 'Kevin Zhang*, Nina Patel, Carlos Martinez',
+    submissionDate: '2024-03-08',
+    manuscriptFile: 'Sustainable_Urban_Energy_v1.pdf',
+    filesZip: '234570_files.zip',
+    reviewers: [
+      { name: 'Dr. Energy Expert', deadline: '2024-04-08' },
+      { name: 'Prof. Urban Planner', deadline: '2024-04-10' },
+      { name: 'Dr. Sustainability Jones', deadline: '2024-04-15' }
+    ]
+  }
+];
+
 const statusOptions = [
   'Submitted to Journal',
   'With Editor',
@@ -93,9 +143,15 @@ const getStatusColor = (status: string) => {
 
 const Manuscripts = () => {
   const { user } = useAuth();
+  // State for "All" tab filters
   const [titleFilter, setTitleFilter] = useState('');
   const [authorFilter, setAuthorFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // State for "Waiting for Review" tab filters
+  const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
+  const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
+  const [waitingReviewerFilter, setWaitingReviewerFilter] = useState('all');
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -108,6 +164,16 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor && matchesStatus;
   });
 
+  const filteredWaitingForReview = mockWaitingForReviewManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
+    const matchesReviewer = waitingReviewerFilter === '' || waitingReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(waitingReviewerFilter.toLowerCase()));
+    return matchesTitle && matchesAuthor && matchesReviewer;
+  });
+
+  const allReviewers = [...new Set(mockWaitingForReviewManuscripts.flatMap(m => m.reviewers.map(r => r.name)))];
+
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
   };
@@ -116,6 +182,12 @@ const Manuscripts = () => {
     setTitleFilter('');
     setAuthorFilter('');
     setStatusFilter('all');
+  };
+
+  const handleWaitingReset = () => {
+    setWaitingTitleFilter('');
+    setWaitingAuthorFilter('');
+    setWaitingReviewerFilter('all');
   };
 
   return (
@@ -271,8 +343,171 @@ const Manuscripts = () => {
                 </TabsContent>
 
                 <TabsContent value="waiting-review" className="p-6">
-                  <div className="text-center py-8 text-muted-foreground">
-                    Waiting for Review tab content will be implemented next.
+                  {/* Search and Filter Section for Waiting for Review */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={waitingTitleFilter}
+                          onChange={(e) => setWaitingTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Author Name</label>
+                        <Input
+                          placeholder="Search by author..."
+                          value={waitingAuthorFilter}
+                          onChange={(e) => setWaitingAuthorFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
+                        <Select value={waitingReviewerFilter} onValueChange={setWaitingReviewerFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reviewer..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Reviewers</SelectItem>
+                            {allReviewers.map((reviewer) => (
+                              <SelectItem key={reviewer} value={reviewer}>
+                                {reviewer}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSearch}>Search</Button>
+                      <Button variant="outline" onClick={handleWaitingReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  {/* Table Section for Waiting for Review */}
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-80">Article Title</TableHead>
+                          <TableHead className="min-w-96">Abstract</TableHead>
+                          <TableHead>Author Info</TableHead>
+                          <TableHead>Submission Date</TableHead>
+                          <TableHead>Manuscript</TableHead>
+                          <TableHead>Files</TableHead>
+                          <TableHead>Reviewers</TableHead>
+                          <TableHead>Review DDL</TableHead>
+                          <TableHead className="w-32">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredWaitingForReview.map((manuscript) => (
+                          <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <div>
+                                <div className="font-medium mb-1">{manuscript.title}</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {manuscript.keywords.map((keyword, index) => (
+                                    <span
+                                      key={index}
+                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                    >
+                                      {keyword}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm max-w-md">
+                                <p className="line-clamp-3">{manuscript.abstract}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {manuscript.authors.split(', ').map((author, index) => (
+                                  <span key={index}>
+                                    {author}
+                                    {index < manuscript.authors.split(', ').length - 1 && ', '}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                * Corresponding Author
+                              </div>
+                            </TableCell>
+                            <TableCell>{manuscript.submissionDate}</TableCell>
+                            <TableCell>
+                              <button className="text-primary hover:underline flex items-center gap-1">
+                                <Download size={14} />
+                                {manuscript.manuscriptFile}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <button className="text-primary hover:underline flex items-center gap-1">
+                                <Download size={14} />
+                                {manuscript.filesZip}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-sm">
+                                    {reviewer.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-sm">
+                                    {reviewer.deadline}
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <TooltipProvider>
+                                <div className="flex gap-2">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <UserPlus size={16} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Assign Reviewer</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <ArrowLeft size={16} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Send Back to Author</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <Bell size={16} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Remind</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </TooltipProvider>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </TabsContent>
 
