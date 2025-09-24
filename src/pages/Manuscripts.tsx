@@ -95,7 +95,7 @@ const Manuscripts = () => {
   const { user } = useAuth();
   const [titleFilter, setTitleFilter] = useState('');
   const [authorFilter, setAuthorFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -104,7 +104,7 @@ const Manuscripts = () => {
   const filteredManuscripts = mockManuscripts.filter(manuscript => {
     const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
     const matchesAuthor = manuscript.authors.toLowerCase().includes(authorFilter.toLowerCase());
-    const matchesStatus = statusFilter === '' || manuscript.status === statusFilter;
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || manuscript.status === statusFilter;
     return matchesTitle && matchesAuthor && matchesStatus;
   });
 
@@ -115,7 +115,7 @@ const Manuscripts = () => {
   const handleReset = () => {
     setTitleFilter('');
     setAuthorFilter('');
-    setStatusFilter('');
+    setStatusFilter('all');
   };
 
   return (
@@ -189,7 +189,7 @@ const Manuscripts = () => {
                             <SelectValue placeholder="Select status..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Statuses</SelectItem>
+                            <SelectItem value="all">All Statuses</SelectItem>
                             {statusOptions.map((status) => (
                               <SelectItem key={status} value={status}>
                                 {status}
