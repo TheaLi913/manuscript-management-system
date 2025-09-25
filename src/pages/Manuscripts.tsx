@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { UserPlus, ArrowLeft, Bell, Download } from 'lucide-react';
+import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2 } from 'lucide-react';
 
 // Mock data for manuscripts
 const mockManuscripts = [
@@ -61,6 +61,54 @@ const mockManuscripts = [
   }
 ];
 
+// Mock data for waiting for review manuscripts
+const mockWaitingReviewManuscripts = [
+  {
+    id: '234572',
+    username: 'Dr. Alex Kumar',
+    title: 'Artificial Intelligence in Drug Discovery: Novel Approaches and Applications',
+    abstract: 'This study explores the integration of artificial intelligence techniques in pharmaceutical drug discovery processes. We present novel machine learning algorithms that can significantly reduce the time and cost associated with identifying potential drug candidates. Our approach combines deep learning models with molecular simulation to predict drug-target interactions with unprecedented accuracy.',
+    keywords: ['AI', 'Drug Discovery', 'Machine Learning', 'Pharmaceuticals'],
+    authors: 'Alex Kumar*, Jennifer Smith, Michael Brown, Sarah Davis',
+    submissionDate: '2024-03-20',
+    manuscriptFile: 'manuscript_234572.pdf',
+    filesZip: '234572_all_files.zip'
+  },
+  {
+    id: '234573',
+    username: 'Prof. Lisa Wang',
+    title: 'Blockchain Technology for Secure Healthcare Data Management',
+    abstract: 'Healthcare data security remains a critical challenge in the digital age. This paper presents a comprehensive blockchain-based solution for managing patient data while ensuring privacy, security, and interoperability. We demonstrate how distributed ledger technology can revolutionize healthcare information systems and provide patients with greater control over their medical records.',
+    keywords: ['Blockchain', 'Healthcare', 'Data Security', 'Privacy'],
+    authors: 'Lisa Wang*, Robert Chen, Maria Rodriguez',
+    submissionDate: '2024-03-18',
+    manuscriptFile: 'manuscript_234573.pdf',
+    filesZip: '234573_all_files.zip'
+  },
+  {
+    id: '234574',
+    username: 'Dr. John Thompson',
+    title: 'Renewable Energy Integration in Smart Grid Systems',
+    abstract: 'The transition to renewable energy sources presents unique challenges for power grid management. This research investigates advanced control algorithms for integrating solar and wind power into smart grid infrastructures. Our findings demonstrate improved grid stability and efficiency through the implementation of predictive analytics and real-time optimization techniques.',
+    keywords: ['Smart Grid', 'Renewable Energy', 'Control Systems', 'Optimization'],
+    authors: 'John Thompson*, Emily Wilson, David Lee, Anna Patel',
+    submissionDate: '2024-03-16',
+    manuscriptFile: 'manuscript_234574.pdf',
+    filesZip: '234574_all_files.zip'
+  },
+  {
+    id: '234575',
+    username: 'Prof. Sarah Johnson',
+    title: 'Advanced Materials for Sustainable Construction: A Comprehensive Review',
+    abstract: 'The construction industry is rapidly evolving towards sustainable practices. This comprehensive review examines cutting-edge materials and technologies that can reduce the environmental impact of construction projects. We analyze bio-based materials, recycled composites, and smart building materials that contribute to energy efficiency and carbon footprint reduction.',
+    keywords: ['Sustainable Construction', 'Advanced Materials', 'Green Building', 'Environmental Impact'],
+    authors: 'Sarah Johnson*, Mark Davis, Rachel Green',
+    submissionDate: '2024-03-14',
+    manuscriptFile: 'manuscript_234575.pdf',
+    filesZip: '234575_all_files.zip'
+  }
+];
+
 const statusOptions = [
   'Submitted to Journal',
   'With Editor',
@@ -100,6 +148,10 @@ const Manuscripts = () => {
   const [authorFilter, setAuthorFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   
+  // State for "Waiting for Review" tab filters
+  const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
+  const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
+  
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -112,6 +164,12 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor && matchesStatus;
   });
 
+  const filteredWaitingReviewManuscripts = mockWaitingReviewManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
+    return matchesTitle && matchesAuthor;
+  });
+
 
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
@@ -121,6 +179,21 @@ const Manuscripts = () => {
     setTitleFilter('');
     setAuthorFilter('');
     setStatusFilter('all');
+  };
+
+  const handleWaitingReset = () => {
+    setWaitingTitleFilter('');
+    setWaitingAuthorFilter('');
+  };
+
+  const handleSendToReviewer = (manuscriptId: string) => {
+    console.log('Sending to reviewer:', manuscriptId);
+    // TODO: Implement send to reviewer functionality
+  };
+
+  const handleSendBackToAuthor = (manuscriptId: string) => {
+    console.log('Sending back to author:', manuscriptId);
+    // TODO: Implement send back to author functionality
   };
 
 
@@ -289,8 +362,135 @@ const Manuscripts = () => {
                 </TabsContent>
 
                 <TabsContent value="waiting-review" className="p-6">
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Waiting for Review tab content - Coming soon</p>
+                  {/* Search and Filter Section */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={waitingTitleFilter}
+                          onChange={(e) => setWaitingTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Author Name</label>
+                        <Input
+                          placeholder="Search by author..."
+                          value={waitingAuthorFilter}
+                          onChange={(e) => setWaitingAuthorFilter(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={() => {}}>Search</Button>
+                      <Button variant="outline" onClick={handleWaitingReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  {/* Table Section */}
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-80">Article Title</TableHead>
+                          <TableHead className="min-w-96">Abstract</TableHead>
+                          <TableHead>Author Info</TableHead>
+                          <TableHead>Submission Date</TableHead>
+                          <TableHead>Manuscript</TableHead>
+                          <TableHead>Files</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredWaitingReviewManuscripts.map((manuscript) => (
+                          <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <div>
+                                <div className="font-medium mb-1">{manuscript.title}</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {manuscript.keywords.map((keyword, index) => (
+                                    <span
+                                      key={index}
+                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                    >
+                                      {keyword}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm max-w-xs">
+                                <p className="line-clamp-4">{manuscript.abstract}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {manuscript.authors.split(', ').map((author, index) => (
+                                  <span key={index}>
+                                    {author}
+                                    {index < manuscript.authors.split(', ').length - 1 && ', '}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                * Corresponding Author
+                              </div>
+                            </TableCell>
+                            <TableCell>{manuscript.submissionDate}</TableCell>
+                            <TableCell>
+                              <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                <Download size={14} />
+                                {manuscript.manuscriptFile}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                <Download size={14} />
+                                {manuscript.filesZip}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSendToReviewer(manuscript.id)}
+                                      >
+                                        <Send size={14} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Send to Reviewer</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSendBackToAuthor(manuscript.id)}
+                                      >
+                                        <Undo2 size={14} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Send Back to Author</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </TabsContent>
 
