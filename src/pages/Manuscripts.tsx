@@ -292,7 +292,7 @@ const Manuscripts = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold tracking-tight">Manuscripts</h1>
               <p className="text-muted-foreground">
