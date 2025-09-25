@@ -10,7 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 
 // Mock data for manuscripts
 const mockManuscripts = [
@@ -141,8 +148,20 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Schema for send back form validation
+const sendBackSchema = z.object({
+  category: z.enum(['content-quality', 'form-formatting', 'ethics-compliance'], {
+    required_error: "Please select a rejection reason category"
+  }),
+  reason: z.string().trim().min(10, "Detailed reason must be at least 10 characters").max(500, "Detailed reason must be less than 500 characters")
+});
+
+type SendBackFormData = z.infer<typeof sendBackSchema>;
+
 const Manuscripts = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
   // State for "All" tab filters
   const [titleFilter, setTitleFilter] = useState('');
   const [authorFilter, setAuthorFilter] = useState('');
@@ -151,6 +170,22 @@ const Manuscripts = () => {
   // State for "Waiting for Review" tab filters
   const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
   const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
+
+  // State for managing manuscript data
+  const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
+  const [pendingReviewerManuscripts, setPendingReviewerManuscripts] = useState<typeof mockWaitingReviewManuscripts>([]);
+
+  // Dialog states
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
+  const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>('');
+  
+  // Send back form state
+  const [sendBackForm, setSendBackForm] = useState<SendBackFormData>({
+    category: 'content-quality' as const,
+    reason: ''
+  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof SendBackFormData, string>>>({});
   
 
   if (!user) {
@@ -164,7 +199,7 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor && matchesStatus;
   });
 
-  const filteredWaitingReviewManuscripts = mockWaitingReviewManuscripts.filter(manuscript => {
+  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
     const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
     const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
     return matchesTitle && matchesAuthor;
@@ -187,13 +222,68 @@ const Manuscripts = () => {
   };
 
   const handleSendToReviewer = (manuscriptId: string) => {
-    console.log('Sending to reviewer:', manuscriptId);
-    // TODO: Implement send to reviewer functionality
+    setSelectedManuscriptId(manuscriptId);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmSendToReviewer = () => {
+    const manuscript = waitingReviewManuscripts.find(m => m.id === selectedManuscriptId);
+    if (manuscript) {
+      // Remove from waiting review and add to pending reviewer
+      setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
+      setPendingReviewerManuscripts(prev => [...prev, manuscript]);
+      
+      toast({
+        title: "Success",
+        description: "Manuscript has been sent to reviewer successfully.",
+      });
+    }
+    setConfirmDialogOpen(false);
+    setSelectedManuscriptId('');
   };
 
   const handleSendBackToAuthor = (manuscriptId: string) => {
-    console.log('Sending back to author:', manuscriptId);
-    // TODO: Implement send back to author functionality
+    setSelectedManuscriptId(manuscriptId);
+    setSendBackDialogOpen(true);
+  };
+
+  const handleSendBackSubmit = () => {
+    try {
+      sendBackSchema.parse(sendBackForm);
+      setFormErrors({});
+      
+      const manuscript = waitingReviewManuscripts.find(m => m.id === selectedManuscriptId);
+      if (manuscript) {
+        // Remove from waiting review
+        setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
+        
+        const categoryLabels = {
+          'content-quality': 'Content & Quality',
+          'form-formatting': 'Form & Formatting',
+          'ethics-compliance': 'Ethics & Compliance'
+        };
+        
+        toast({
+          title: "Manuscript Sent Back",
+          description: `Manuscript has been sent back to author for: ${categoryLabels[sendBackForm.category]}`,
+        });
+      }
+      
+      // Reset form and close dialog
+      setSendBackForm({ category: 'content-quality', reason: '' });
+      setSendBackDialogOpen(false);
+      setSelectedManuscriptId('');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof SendBackFormData, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0] as keyof SendBackFormData] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      }
+    }
   };
 
 
@@ -509,6 +599,74 @@ const Manuscripts = () => {
             </div>
           </div>
         </main>
+
+        {/* Confirmation Dialog for Send to Reviewer */}
+        <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
+              <AlertDialogDescription>
+                Confirm submission of this manuscript for review?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSendToReviewer}>Confirm</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Dialog for Send Back to Author */}
+        <Dialog open={sendBackDialogOpen} onOpenChange={setSendBackDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Send Back to Author</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <Label>Rejection Reason Category</Label>
+                <RadioGroup
+                  value={sendBackForm.category}
+                  onValueChange={(value) => setSendBackForm(prev => ({ ...prev, category: value as SendBackFormData['category'] }))}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="content-quality" id="content-quality" />
+                    <Label htmlFor="content-quality">Content & Quality</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="form-formatting" id="form-formatting" />
+                    <Label htmlFor="form-formatting">Form & Formatting</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ethics-compliance" id="ethics-compliance" />
+                    <Label htmlFor="ethics-compliance">Ethics & Compliance</Label>
+                  </div>
+                </RadioGroup>
+                {formErrors.category && <p className="text-sm text-destructive">{formErrors.category}</p>}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="reason">Detailed Reason</Label>
+                <Textarea
+                  id="reason"
+                  placeholder="Please provide detailed reason for sending back..."
+                  value={sendBackForm.reason}
+                  onChange={(e) => setSendBackForm(prev => ({ ...prev, reason: e.target.value }))}
+                  className="min-h-[100px]"
+                />
+                {formErrors.reason && <p className="text-sm text-destructive">{formErrors.reason}</p>}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSendBackDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendBackSubmit}>
+                Send Back
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );
