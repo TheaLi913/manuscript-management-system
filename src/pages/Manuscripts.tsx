@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -315,11 +315,64 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor;
   });
 
-  const filteredPendingReviewManuscripts = pendingReviewManuscripts.filter(manuscript => {
+  // Mock data for Assigned Reviewer tab (manuscripts with 3+ accepted reviewers)
+  const mockAssignedManuscripts = [
+    {
+      id: '234580',
+      title: 'Machine Learning Approaches for Climate Change Prediction',
+      abstract: 'This study presents novel machine learning algorithms for predicting climate change patterns using satellite data and atmospheric measurements.',
+      keywords: ['Climate Change', 'Machine Learning', 'Satellite Data', 'Environmental Science'],
+      authors: 'Dr. Climate Smith*, Prof. Earth Jones, Dr. Weather Brown',
+      submissionDate: '2024-02-15',
+      reviewers: [
+        { name: 'Dr. Green Expert', status: 'accepted' },
+        { name: 'Prof. Climate Master', status: 'accepted' },
+        { name: 'Dr. ML Specialist', status: 'accepted' },
+        { name: 'Prof. Data Scientist', status: 'declined' }
+      ],
+      reviewDeadlines: ['2024-04-01', '2024-04-03', '2024-04-05', '2024-04-07']
+    },
+    {
+      id: '234581',
+      title: 'Quantum Computing Applications in Drug Discovery',
+      abstract: 'Exploring the potential of quantum computing algorithms to accelerate drug discovery processes through molecular simulation and optimization.',
+      keywords: ['Quantum Computing', 'Drug Discovery', 'Molecular Simulation', 'Optimization'],
+      authors: 'Dr. Quantum Lee*, Prof. Drug Hunter, Dr. Molecule Expert',
+      submissionDate: '2024-02-12',
+      reviewers: [
+        { name: 'Prof. Quantum Master', status: 'accepted' },
+        { name: 'Dr. Pharma Expert', status: 'accepted' },
+        { name: 'Dr. Computing Guru', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-28', '2024-03-30', '2024-04-02']
+    }
+  ];
+
+  // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
+  const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
+    const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
+    return acceptedCount < 3;
+  });
+
+  // Apply search filters to pending manuscripts
+  const filteredPendingReviewManuscripts = pendingManuscriptsFiltered.filter(manuscript => {
     const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
     const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
     const matchesReviewer = pendingReviewerFilter === 'all' || 
       manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
+  // Assigned reviewer filters
+  const [assignedIdFilter, setAssignedIdFilter] = useState('');
+  const [assignedTitleFilter, setAssignedTitleFilter] = useState('');
+  const [assignedReviewerFilter, setAssignedReviewerFilter] = useState('all');
+
+  const filteredAssignedManuscripts = mockAssignedManuscripts.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(assignedIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(assignedTitleFilter.toLowerCase());
+    const matchesReviewer = assignedReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(assignedReviewerFilter.toLowerCase()));
     return matchesId && matchesTitle && matchesReviewer;
   });
 
@@ -343,6 +396,19 @@ const Manuscripts = () => {
     setPendingIdFilter('');
     setPendingTitleFilter('');
     setPendingReviewerFilter('all');
+  };
+
+  const handleAssignedReset = () => {
+    setAssignedIdFilter('');
+    setAssignedTitleFilter('');
+    setAssignedReviewerFilter('all');
+  };
+
+  const handleRemindReviewer = (manuscriptId: string, reviewerName: string) => {
+    toast({
+      title: "Reminder Sent",
+      description: `A reminder email has been sent to ${reviewerName}.`,
+    });
   };
 
   const handleSendToReviewer = (manuscriptId: string) => {
@@ -1117,6 +1183,153 @@ const Manuscripts = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <TabsContent value="assigned-reviewer" className="p-6">
+          {/* Search and Filter Section */}
+          <div className="mb-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">ID</label>
+                <Input
+                  placeholder="Search by ID..."
+                  value={assignedIdFilter}
+                  onChange={(e) => setAssignedIdFilter(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Title</label>
+                <Input
+                  placeholder="Search by title..."
+                  value={assignedTitleFilter}
+                  onChange={(e) => setAssignedTitleFilter(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
+                <Select value={assignedReviewerFilter} onValueChange={setAssignedReviewerFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select reviewer..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Reviewers</SelectItem>
+                    {mockReviewers.map((reviewer) => (
+                      <SelectItem key={reviewer.id} value={reviewer.name}>
+                        {reviewer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSearch}>Search</Button>
+              <Button variant="outline" onClick={handleAssignedReset}>Reset</Button>
+            </div>
+          </div>
+
+          {/* Assigned Reviewer Table */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Article Title</TableHead>
+                <TableHead>Submission Date</TableHead>
+                <TableHead>Reviewers</TableHead>
+                <TableHead>Review DDL</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredAssignedManuscripts.map((manuscript) => (
+                <TableRow key={manuscript.id}>
+                  <TableCell className="font-medium">{manuscript.id}</TableCell>
+                  <TableCell>
+                    <div className="max-w-xs">
+                      <div className="font-medium">{manuscript.title}</div>
+                      <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {manuscript.keywords.map((keyword, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{manuscript.submissionDate}</TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm">
+                          <span className="text-blue-700 font-medium">
+                            {reviewer.name}
+                          </span>
+                          <Check className="h-3 w-3 text-blue-700" />
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      {manuscript.reviewDeadlines
+                        .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
+                        .map((deadline, index) => (
+                        <div key={index} className="text-sm">
+                          {deadline}
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                        <TooltipProvider key={index}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Bell className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                    >
+                                      Confirm
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Remind {reviewer.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {filteredAssignedManuscripts.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No manuscripts found with assigned reviewers.
+            </div>
+          )}
+        </TabsContent>
+
       </div>
     </SidebarProvider>
   );
