@@ -1077,6 +1077,9 @@ const Manuscripts = () => {
                                     <Check className="h-3 w-3 text-blue-700" />
                                   </div>
                                   <div className="flex items-center gap-3">
+                                    <span className="text-sm">
+                                      {manuscript.reviewDeadlines[index] || 'No deadline'}
+                                    </span>
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
@@ -1109,9 +1112,6 @@ const Manuscripts = () => {
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>
-                                    <span className="text-sm">
-                                      {manuscript.reviewDeadlines[index] || 'No deadline'}
-                                    </span>
                                   </div>
                                 </div>
                               ))}
