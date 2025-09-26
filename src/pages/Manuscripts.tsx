@@ -1118,7 +1118,7 @@ const Manuscripts = () => {
                               {manuscript.reviewDeadlines
                                 .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
                                 .map((deadline, index) => (
-                                <div key={index} className="text-sm py-2 h-10 flex items-center">
+                                <div key={index} className="text-sm py-2">
                                   {deadline}
                                 </div>
                               ))}
