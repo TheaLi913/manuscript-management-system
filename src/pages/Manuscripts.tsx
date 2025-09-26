@@ -282,6 +282,11 @@ const Manuscripts = () => {
   const [decisionTitleFilter, setDecisionTitleFilter] = useState('');
   const [decisionReviewerFilter, setDecisionReviewerFilter] = useState('all');
 
+  // State for "Completed" tab filters
+  const [completedTitleFilter, setCompletedTitleFilter] = useState('');
+  const [completedAuthorFilter, setCompletedAuthorFilter] = useState('');
+  const [completedStatusFilter, setCompletedStatusFilter] = useState('all');
+
   // State for managing manuscript data
   const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
   const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
@@ -467,6 +472,15 @@ const Manuscripts = () => {
     return matchesId && matchesTitle && matchesReviewer;
   });
 
+  // Filter completed manuscripts (Accept or Reject status)
+  const filteredCompletedManuscripts = mockManuscripts.filter(manuscript => {
+    const isCompleted = manuscript.status === 'Accept' || manuscript.status === 'Rejected';
+    const matchesTitle = manuscript.title.toLowerCase().includes(completedTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(completedAuthorFilter.toLowerCase());
+    const matchesStatus = completedStatusFilter === 'all' || manuscript.status === completedStatusFilter;
+    return isCompleted && matchesTitle && matchesAuthor && matchesStatus;
+  });
+
 
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
@@ -499,6 +513,12 @@ const Manuscripts = () => {
     setDecisionIdFilter('');
     setDecisionTitleFilter('');
     setDecisionReviewerFilter('all');
+  };
+
+  const handleCompletedReset = () => {
+    setCompletedTitleFilter('');
+    setCompletedAuthorFilter('');
+    setCompletedStatusFilter('all');
   };
 
   const handleRemindReviewer = (manuscriptId: string, reviewerName: string) => {
@@ -1379,6 +1399,119 @@ const Manuscripts = () => {
                     {filteredWaitingDecisionManuscripts.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         No manuscripts waiting for decision found.
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="completed" className="p-6">
+                  {/* Search and Filter Section */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={completedTitleFilter}
+                          onChange={(e) => setCompletedTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Author Name</label>
+                        <Input
+                          placeholder="Search by author..."
+                          value={completedAuthorFilter}
+                          onChange={(e) => setCompletedAuthorFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Status</label>
+                        <Select value={completedStatusFilter} onValueChange={setCompletedStatusFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="Accept">Accept</SelectItem>
+                            <SelectItem value="Rejected">Rejected</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSearch}>Search</Button>
+                      <Button variant="outline" onClick={handleCompletedReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  {/* Table Section */}
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-24">ID</TableHead>
+                          <TableHead>Username</TableHead>
+                          <TableHead className="min-w-96">Article Title</TableHead>
+                          <TableHead>Author Info</TableHead>
+                          <TableHead>Submission Date</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredCompletedManuscripts.map((manuscript) => (
+                          <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <button className="text-primary hover:underline font-medium">
+                                {manuscript.id}
+                              </button>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {manuscript.username}
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium mb-1">{manuscript.title}</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {manuscript.keywords.map((keyword, index) => (
+                                    <span
+                                      key={index}
+                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                    >
+                                      {keyword}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {manuscript.authors.split(', ').map((author, index) => (
+                                  <span key={index}>
+                                    {author}
+                                    {index < manuscript.authors.split(', ').length - 1 && ', '}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                * Corresponding Author
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {manuscript.submissionDate}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={getStatusColor(manuscript.status)}>
+                                {manuscript.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    {filteredCompletedManuscripts.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No completed manuscripts found.
                       </div>
                     )}
                   </div>
