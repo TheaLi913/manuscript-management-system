@@ -996,9 +996,149 @@ const Manuscripts = () => {
                 </TabsContent>
 
                 <TabsContent value="assigned-reviewer" className="p-6">
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Assigned Reviewer tab content - Coming soon</p>
+                  {/* Search and Filter Section */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">ID</label>
+                        <Input
+                          placeholder="Search by ID..."
+                          value={assignedIdFilter}
+                          onChange={(e) => setAssignedIdFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={assignedTitleFilter}
+                          onChange={(e) => setAssignedTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
+                        <Select value={assignedReviewerFilter} onValueChange={setAssignedReviewerFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reviewer..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Reviewers</SelectItem>
+                            {mockReviewers.map((reviewer) => (
+                              <SelectItem key={reviewer.id} value={reviewer.name}>
+                                {reviewer.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSearch}>Search</Button>
+                      <Button variant="outline" onClick={handleAssignedReset}>Reset</Button>
+                    </div>
                   </div>
+
+                  {/* Assigned Reviewer Table */}
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Article Title</TableHead>
+                        <TableHead>Submission Date</TableHead>
+                        <TableHead>Reviewers</TableHead>
+                        <TableHead>Review DDL</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAssignedManuscripts.map((manuscript) => (
+                        <TableRow key={manuscript.id}>
+                          <TableCell className="font-medium">{manuscript.id}</TableCell>
+                          <TableCell>
+                            <div className="max-w-xs">
+                              <div className="font-medium">{manuscript.title}</div>
+                              <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {manuscript.keywords.map((keyword, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {keyword}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{manuscript.submissionDate}</TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm">
+                                  <span className="text-blue-700 font-medium">
+                                    {reviewer.name}
+                                  </span>
+                                  <Check className="h-3 w-3 text-blue-700" />
+                                </div>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {manuscript.reviewDeadlines
+                                .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
+                                .map((deadline, index) => (
+                                <div key={index} className="text-sm">
+                                  {deadline}
+                                </div>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                                <TooltipProvider key={index}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="sm">
+                                            <Bell className="h-4 w-4" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction 
+                                              onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                            >
+                                              Confirm
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Remind {reviewer.name}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+
+                  {filteredAssignedManuscripts.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No manuscripts found with assigned reviewers.
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
@@ -1183,153 +1323,6 @@ const Manuscripts = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
-        <TabsContent value="assigned-reviewer" className="p-6">
-          {/* Search and Filter Section */}
-          <div className="mb-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">ID</label>
-                <Input
-                  placeholder="Search by ID..."
-                  value={assignedIdFilter}
-                  onChange={(e) => setAssignedIdFilter(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Title</label>
-                <Input
-                  placeholder="Search by title..."
-                  value={assignedTitleFilter}
-                  onChange={(e) => setAssignedTitleFilter(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
-                <Select value={assignedReviewerFilter} onValueChange={setAssignedReviewerFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select reviewer..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Reviewers</SelectItem>
-                    {mockReviewers.map((reviewer) => (
-                      <SelectItem key={reviewer.id} value={reviewer.name}>
-                        {reviewer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleSearch}>Search</Button>
-              <Button variant="outline" onClick={handleAssignedReset}>Reset</Button>
-            </div>
-          </div>
-
-          {/* Assigned Reviewer Table */}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Article Title</TableHead>
-                <TableHead>Submission Date</TableHead>
-                <TableHead>Reviewers</TableHead>
-                <TableHead>Review DDL</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAssignedManuscripts.map((manuscript) => (
-                <TableRow key={manuscript.id}>
-                  <TableCell className="font-medium">{manuscript.id}</TableCell>
-                  <TableCell>
-                    <div className="max-w-xs">
-                      <div className="font-medium">{manuscript.title}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {manuscript.keywords.map((keyword, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {keyword}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{manuscript.submissionDate}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <span className="text-blue-700 font-medium">
-                            {reviewer.name}
-                          </span>
-                          <Check className="h-3 w-3 text-blue-700" />
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {manuscript.reviewDeadlines
-                        .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
-                        .map((deadline, index) => (
-                        <div key={index} className="text-sm">
-                          {deadline}
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                        <TooltipProvider key={index}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <Bell className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
-                                    >
-                                      Confirm
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Remind {reviewer.name}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {filteredAssignedManuscripts.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No manuscripts found with assigned reviewers.
-            </div>
-          )}
-        </TabsContent>
-
       </div>
     </SidebarProvider>
   );
