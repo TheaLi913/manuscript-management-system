@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, X } from 'lucide-react';
+import { CalendarIcon, Plus, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -131,8 +131,12 @@ const mockPendingReviewManuscripts = [
     keywords: ['Neural Networks', 'NLP', 'Transformers', 'Deep Learning'],
     authors: 'Michael Brown*, Jessica Lee, Robert Taylor, Amanda White',
     submissionDate: '2024-02-28',
-    reviewers: ['Dr. Emma Wilson', 'Prof. David Chen'],
-    reviewDeadlines: ['2024-04-15', '2024-04-18']
+    reviewers: [
+      { name: 'Dr. Emma Wilson', status: 'accepted' },
+      { name: 'Prof. David Chen', status: 'declined' },
+      { name: 'Dr. Lisa Park', status: 'accepted' }
+    ],
+    reviewDeadlines: ['2024-04-15', '2024-04-18', '2024-04-22']
   },
   {
     id: '234577',
@@ -142,7 +146,11 @@ const mockPendingReviewManuscripts = [
     keywords: ['Quantum Cryptography', 'Post-Quantum Security', 'Encryption', 'Cybersecurity'],
     authors: 'Jennifer Davis*, Mark Johnson, Lisa Anderson',
     submissionDate: '2024-02-25',
-    reviewers: ['Prof. Alan Smith', 'Dr. Sarah Connor', 'Dr. Kevin Liu'],
+    reviewers: [
+      { name: 'Prof. Alan Smith', status: 'accepted' },
+      { name: 'Dr. Sarah Connor', status: 'pending' },
+      { name: 'Dr. Kevin Liu', status: 'declined' }
+    ],
     reviewDeadlines: ['2024-04-10', '2024-04-12', '2024-04-20']
   },
   {
@@ -164,8 +172,11 @@ const mockPendingReviewManuscripts = [
     keywords: ['Regenerative Medicine', 'Biomedical Engineering', 'Tissue Engineering', 'Stem Cells'],
     authors: 'Anna Kowalski*, Thomas Mueller, Sophie Zhang',
     submissionDate: '2024-02-20',
-    reviewers: ['Prof. Helen Carter'],
-    reviewDeadlines: ['2024-04-05']
+    reviewers: [
+      { name: 'Prof. Helen Carter', status: 'pending' },
+      { name: 'Dr. Rachel Green', status: 'accepted' }
+    ],
+    reviewDeadlines: ['2024-04-05', '2024-04-08']
   }
 ];
 
@@ -308,7 +319,7 @@ const Manuscripts = () => {
     const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
     const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
     const matchesReviewer = pendingReviewerFilter === 'all' || 
-      manuscript.reviewers.some(reviewer => reviewer.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
     return matchesId && matchesTitle && matchesReviewer;
   });
 
@@ -447,7 +458,7 @@ const Manuscripts = () => {
           m.id === selectedManuscriptId 
             ? {
                 ...m,
-                reviewers: validatedData.reviewers.map(r => r.reviewerName),
+                reviewers: validatedData.reviewers.map(r => ({ name: r.reviewerName, status: 'pending' })),
                 reviewDeadlines: validatedData.reviewers.map(r => format(r.deadline, 'yyyy-MM-dd'))
               }
             : m
@@ -878,8 +889,19 @@ const Manuscripts = () => {
                               {manuscript.reviewers.length > 0 ? (
                                 <div className="space-y-1">
                                   {manuscript.reviewers.map((reviewer, index) => (
-                                    <div key={index} className="text-sm">
-                                      {reviewer}
+                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                      <span className={`${
+                                        reviewer.status === 'accepted' 
+                                          ? 'text-blue-700 font-medium' 
+                                          : reviewer.status === 'declined'
+                                          ? 'text-gray-500 line-through'
+                                          : 'text-gray-700'
+                                      }`}>
+                                        {reviewer.name}
+                                      </span>
+                                      {reviewer.status === 'accepted' && (
+                                        <Check className="h-3 w-3 text-blue-700" />
+                                      )}
                                     </div>
                                   ))}
                                 </div>
