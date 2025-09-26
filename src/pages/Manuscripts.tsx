@@ -1071,11 +1071,45 @@ const Manuscripts = () => {
                           <TableCell>
                             <div className="space-y-1">
                               {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                                <div key={index} className="flex items-center gap-2 text-sm">
-                                  <span className="text-blue-700 font-medium">
-                                    {reviewer.name}
-                                  </span>
-                                  <Check className="h-3 w-3 text-blue-700" />
+                                <div key={index} className="flex items-center justify-between py-1">
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <span className="text-blue-700 font-medium">
+                                      {reviewer.name}
+                                    </span>
+                                    <Check className="h-3 w-3 text-blue-700" />
+                                  </div>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="sm">
+                                              <Bell className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                              </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                              <AlertDialogAction 
+                                                onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                              >
+                                                Confirm
+                                              </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Remind {reviewer.name}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
                               ))}
                             </div>
@@ -1085,49 +1119,14 @@ const Manuscripts = () => {
                               {manuscript.reviewDeadlines
                                 .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
                                 .map((deadline, index) => (
-                                <div key={index} className="text-sm">
+                                <div key={index} className="text-sm py-1">
                                   {deadline}
                                 </div>
                               ))}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-2">
-                              {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                                <TooltipProvider key={index}>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                          <Button variant="ghost" size="sm">
-                                            <Bell className="h-4 w-4" />
-                                          </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction 
-                                              onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
-                                            >
-                                              Confirm
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Remind {reviewer.name}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              ))}
-                            </div>
+                            {/* Empty cell since actions are now inline with reviewers */}
                           </TableCell>
                         </TableRow>
                       ))}
