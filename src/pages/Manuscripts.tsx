@@ -15,7 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { CalendarIcon, Plus, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -116,6 +121,68 @@ const mockWaitingReviewManuscripts = [
   }
 ];
 
+// Mock data for pending reviewer manuscripts
+const mockPendingReviewManuscripts = [
+  {
+    id: '234576',
+    username: 'Dr. Michael Brown',
+    title: 'Advanced Neural Networks for Natural Language Processing',
+    abstract: 'Natural language processing has seen significant advancements with the introduction of transformer architectures. This research presents novel neural network designs that improve upon existing models in terms of efficiency and accuracy. We demonstrate state-of-the-art performance on various NLP benchmarks while reducing computational requirements.',
+    keywords: ['Neural Networks', 'NLP', 'Transformers', 'Deep Learning'],
+    authors: 'Michael Brown*, Jessica Lee, Robert Taylor, Amanda White',
+    submissionDate: '2024-02-28',
+    reviewers: ['Dr. Emma Wilson', 'Prof. David Chen'],
+    reviewDeadlines: ['2024-04-15', '2024-04-18']
+  },
+  {
+    id: '234577',
+    username: 'Prof. Jennifer Davis',
+    title: 'Quantum Cryptography: Security in the Post-Quantum Era',
+    abstract: 'As quantum computers become more powerful, traditional cryptographic methods face unprecedented threats. This study investigates quantum-resistant cryptographic protocols and their practical implementation. We present a comprehensive analysis of post-quantum cryptography and propose novel security frameworks for future digital communications.',
+    keywords: ['Quantum Cryptography', 'Post-Quantum Security', 'Encryption', 'Cybersecurity'],
+    authors: 'Jennifer Davis*, Mark Johnson, Lisa Anderson',
+    submissionDate: '2024-02-25',
+    reviewers: ['Prof. Alan Smith', 'Dr. Sarah Connor', 'Dr. Kevin Liu'],
+    reviewDeadlines: ['2024-04-10', '2024-04-12', '2024-04-20']
+  },
+  {
+    id: '234578',
+    username: 'Dr. Robert Garcia',
+    title: 'Sustainable Agriculture Technologies for Climate Adaptation',
+    abstract: 'Climate change poses significant challenges to global food security. This research explores innovative agricultural technologies that can help farmers adapt to changing climate conditions. We present precision farming techniques, drought-resistant crop varieties, and smart irrigation systems that optimize resource usage while maintaining productivity.',
+    keywords: ['Sustainable Agriculture', 'Climate Adaptation', 'Precision Farming', 'Food Security'],
+    authors: 'Robert Garcia*, Maria Santos, Carlos Hernandez',
+    submissionDate: '2024-02-22',
+    reviewers: [],
+    reviewDeadlines: []
+  },
+  {
+    id: '234579',
+    username: 'Dr. Anna Kowalski',
+    title: 'Biomedical Engineering Applications in Regenerative Medicine',
+    abstract: 'Regenerative medicine represents a paradigm shift in healthcare, offering potential cures for previously incurable conditions. This comprehensive review examines the latest biomedical engineering approaches in tissue engineering, stem cell therapy, and organ regeneration. We analyze current clinical trials and discuss future prospects for personalized regenerative treatments.',
+    keywords: ['Regenerative Medicine', 'Biomedical Engineering', 'Tissue Engineering', 'Stem Cells'],
+    authors: 'Anna Kowalski*, Thomas Mueller, Sophie Zhang',
+    submissionDate: '2024-02-20',
+    reviewers: ['Prof. Helen Carter'],
+    reviewDeadlines: ['2024-04-05']
+  }
+];
+
+// Mock reviewer data
+const mockReviewers = [
+  { id: '1', name: 'Dr. Emma Wilson', expertise: 'Machine Learning' },
+  { id: '2', name: 'Prof. David Chen', expertise: 'Computer Science' },
+  { id: '3', name: 'Prof. Alan Smith', expertise: 'Cryptography' },
+  { id: '4', name: 'Dr. Sarah Connor', expertise: 'Cybersecurity' },
+  { id: '5', name: 'Dr. Kevin Liu', expertise: 'Quantum Computing' },
+  { id: '6', name: 'Prof. Helen Carter', expertise: 'Biomedical Engineering' },
+  { id: '7', name: 'Dr. Rachel Green', expertise: 'Environmental Science' },
+  { id: '8', name: 'Prof. James Wilson', expertise: 'Materials Science' },
+  { id: '9', name: 'Dr. Lisa Park', expertise: 'Neuroscience' },
+  { id: '10', name: 'Prof. Mark Thompson', expertise: 'Physics' }
+];
+
 const statusOptions = [
   'Submitted to Journal',
   'With Editor',
@@ -158,6 +225,24 @@ const sendBackSchema = z.object({
 
 type SendBackFormData = z.infer<typeof sendBackSchema>;
 
+// Type for reviewer assignment
+type ReviewerAssignment = {
+  reviewerId: string;
+  reviewerName: string;
+  deadline: Date | undefined;
+};
+
+// Schema for assign reviewer form validation
+const assignReviewerSchema = z.object({
+  reviewers: z.array(z.object({
+    reviewerId: z.string().min(1, "Please select a reviewer"),
+    reviewerName: z.string(),
+    deadline: z.date({ required_error: "Please select a deadline" })
+  })).min(1, "At least one reviewer must be assigned")
+});
+
+type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
+
 const Manuscripts = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -171,13 +256,19 @@ const Manuscripts = () => {
   const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
   const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
 
+  // State for "Pending Review" tab filters
+  const [pendingIdFilter, setPendingIdFilter] = useState('');
+  const [pendingTitleFilter, setPendingTitleFilter] = useState('');
+  const [pendingReviewerFilter, setPendingReviewerFilter] = useState('all');
+
   // State for managing manuscript data
   const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
-  const [pendingReviewerManuscripts, setPendingReviewerManuscripts] = useState<typeof mockWaitingReviewManuscripts>([]);
+  const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
 
   // Dialog states
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
+  const [assignReviewerDialogOpen, setAssignReviewerDialogOpen] = useState(false);
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>('');
   
   // Send back form state
@@ -186,6 +277,14 @@ const Manuscripts = () => {
     reason: ''
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof SendBackFormData, string>>>({});
+
+  // Assign reviewer form state
+  const [reviewerAssignments, setReviewerAssignments] = useState<ReviewerAssignment[]>([{
+    reviewerId: '',
+    reviewerName: '',
+    deadline: undefined
+  }]);
+  const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
   
 
   if (!user) {
@@ -205,6 +304,14 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor;
   });
 
+  const filteredPendingReviewManuscripts = pendingReviewManuscripts.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
+    const matchesReviewer = pendingReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
 
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
@@ -221,6 +328,12 @@ const Manuscripts = () => {
     setWaitingAuthorFilter('');
   };
 
+  const handlePendingReset = () => {
+    setPendingIdFilter('');
+    setPendingTitleFilter('');
+    setPendingReviewerFilter('all');
+  };
+
   const handleSendToReviewer = (manuscriptId: string) => {
     setSelectedManuscriptId(manuscriptId);
     setConfirmDialogOpen(true);
@@ -231,7 +344,12 @@ const Manuscripts = () => {
     if (manuscript) {
       // Remove from waiting review and add to pending reviewer
       setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
-      setPendingReviewerManuscripts(prev => [...prev, manuscript]);
+      const newPendingManuscript = {
+        ...manuscript,
+        reviewers: [],
+        reviewDeadlines: []
+      };
+      setPendingReviewManuscripts(prev => [...prev, newPendingManuscript]);
       
       toast({
         title: "Success",
@@ -282,6 +400,76 @@ const Manuscripts = () => {
           }
         });
         setFormErrors(errors);
+      }
+    }
+  };
+
+  const handleAssignReviewer = (manuscriptId: string) => {
+    setSelectedManuscriptId(manuscriptId);
+    setAssignReviewerDialogOpen(true);
+  };
+
+  const handleAddReviewer = () => {
+    setReviewerAssignments(prev => [...prev, {
+      reviewerId: '',
+      reviewerName: '',
+      deadline: undefined
+    }]);
+  };
+
+  const handleRemoveReviewer = (index: number) => {
+    if (reviewerAssignments.length > 1) {
+      setReviewerAssignments(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleReviewerSelect = (index: number, reviewerId: string, reviewerName: string) => {
+    setReviewerAssignments(prev => prev.map((assignment, i) => 
+      i === index ? { ...assignment, reviewerId, reviewerName } : assignment
+    ));
+  };
+
+  const handleDeadlineSelect = (index: number, deadline: Date | undefined) => {
+    setReviewerAssignments(prev => prev.map((assignment, i) => 
+      i === index ? { ...assignment, deadline } : assignment
+    ));
+  };
+
+  const handleAssignReviewerSubmit = () => {
+    try {
+      const validatedData = assignReviewerSchema.parse({ reviewers: reviewerAssignments });
+      setAssignReviewerErrors([]);
+      
+      const manuscript = pendingReviewManuscripts.find(m => m.id === selectedManuscriptId);
+      if (manuscript) {
+        // Update manuscript with assigned reviewers
+        setPendingReviewManuscripts(prev => prev.map(m => 
+          m.id === selectedManuscriptId 
+            ? {
+                ...m,
+                reviewers: validatedData.reviewers.map(r => r.reviewerName),
+                reviewDeadlines: validatedData.reviewers.map(r => format(r.deadline, 'yyyy-MM-dd'))
+              }
+            : m
+        ));
+        
+        toast({
+          title: "Reviewers Assigned",
+          description: `${validatedData.reviewers.length} reviewer(s) have been assigned to the manuscript.`,
+        });
+      }
+      
+      // Reset form and close dialog
+      setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
+      setAssignReviewerDialogOpen(false);
+      setSelectedManuscriptId('');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: string[] = [];
+        error.errors.forEach((err) => {
+          errors.push(err.message);
+        });
+        setAssignReviewerErrors(errors);
       }
     }
   };
@@ -585,8 +773,137 @@ const Manuscripts = () => {
                 </TabsContent>
 
                 <TabsContent value="pending-reviewer" className="p-6">
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Pending Reviewer tab content - Coming soon</p>
+                  {/* Search and Filter Section */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">ID</label>
+                        <Input
+                          placeholder="Search by ID..."
+                          value={pendingIdFilter}
+                          onChange={(e) => setPendingIdFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={pendingTitleFilter}
+                          onChange={(e) => setPendingTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
+                        <Select value={pendingReviewerFilter} onValueChange={setPendingReviewerFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reviewer..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Reviewers</SelectItem>
+                            {mockReviewers.map((reviewer) => (
+                              <SelectItem key={reviewer.id} value={reviewer.name}>
+                                {reviewer.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={() => {}}>Search</Button>
+                      <Button variant="outline" onClick={handlePendingReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  {/* Table Section */}
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-20">ID</TableHead>
+                          <TableHead className="min-w-60">Article Title</TableHead>
+                          <TableHead className="min-w-80">Abstract</TableHead>
+                          <TableHead>Submission Date</TableHead>
+                          <TableHead className="w-32">Action</TableHead>
+                          <TableHead>Reviewers</TableHead>
+                          <TableHead>Review DDL</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPendingReviewManuscripts.map((manuscript) => (
+                          <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <button className="text-primary hover:underline font-medium">
+                                {manuscript.id}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{manuscript.title}</div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {manuscript.keywords.map((keyword, index) => (
+                                  <span
+                                    key={index}
+                                    className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                  >
+                                    {keyword}
+                                  </span>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-muted-foreground line-clamp-3">
+                                {manuscript.abstract}
+                              </div>
+                            </TableCell>
+                            <TableCell>{manuscript.submissionDate}</TableCell>
+                            <TableCell>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleAssignReviewer(manuscript.id)}
+                                    >
+                                      <UserCheck size={14} />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Assign Reviewer</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableCell>
+                            <TableCell>
+                              {manuscript.reviewers.length > 0 ? (
+                                <div className="space-y-1">
+                                  {manuscript.reviewers.map((reviewer, index) => (
+                                    <div key={index} className="text-sm">
+                                      {reviewer}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {manuscript.reviewDeadlines.length > 0 ? (
+                                <div className="space-y-1">
+                                  {manuscript.reviewDeadlines.map((deadline, index) => (
+                                    <div key={index} className="text-sm">
+                                      {deadline}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </TabsContent>
 
@@ -615,6 +932,117 @@ const Manuscripts = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Dialog for Assign Reviewer */}
+        <Dialog open={assignReviewerDialogOpen} onOpenChange={setAssignReviewerDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Assign Reviewer</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {assignReviewerErrors.length > 0 && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  {assignReviewerErrors.map((error, index) => (
+                    <p key={index} className="text-sm text-destructive">{error}</p>
+                  ))}
+                </div>
+              )}
+              
+              {reviewerAssignments.map((assignment, index) => (
+                <div key={index} className="space-y-3 p-4 border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Reviewer {index + 1}</h4>
+                    {reviewerAssignments.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveReviewer(index)}
+                      >
+                        <X size={14} />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Reviewer Name</Label>
+                    <Select
+                      value={assignment.reviewerId}
+                      onValueChange={(value) => {
+                        const reviewer = mockReviewers.find(r => r.id === value);
+                        if (reviewer) {
+                          handleReviewerSelect(index, value, reviewer.name);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Search and select reviewer..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockReviewers.map((reviewer) => (
+                          <SelectItem key={reviewer.id} value={reviewer.id}>
+                            <div>
+                              <div className="font-medium">{reviewer.name}</div>
+                              <div className="text-xs text-muted-foreground">{reviewer.expertise}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Review Deadline</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !assignment.deadline && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {assignment.deadline ? format(assignment.deadline, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={assignment.deadline}
+                          onSelect={(date) => handleDeadlineSelect(index, date)}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              ))}
+              
+              <Button
+                variant="outline"
+                onClick={handleAddReviewer}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Another Reviewer
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setAssignReviewerDialogOpen(false);
+                setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
+                setAssignReviewerErrors([]);
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAssignReviewerSubmit}>
+                Assign Reviewers
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Dialog for Send Back to Author */}
         <Dialog open={sendBackDialogOpen} onOpenChange={setSendBackDialogOpen}>
