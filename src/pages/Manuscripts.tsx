@@ -20,7 +20,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck } from 'lucide-react';
+import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck, Gavel } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -277,6 +277,11 @@ const Manuscripts = () => {
   const [pendingTitleFilter, setPendingTitleFilter] = useState('');
   const [pendingReviewerFilter, setPendingReviewerFilter] = useState('all');
 
+  // State for "Waiting for Decision" tab filters
+  const [decisionIdFilter, setDecisionIdFilter] = useState('');
+  const [decisionTitleFilter, setDecisionTitleFilter] = useState('');
+  const [decisionReviewerFilter, setDecisionReviewerFilter] = useState('all');
+
   // State for managing manuscript data
   const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
   const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
@@ -348,6 +353,74 @@ const Manuscripts = () => {
     }
   ];
 
+  // Mock data for Waiting for Decision tab (manuscripts with completed reviews)
+  const mockWaitingDecisionManuscripts = [
+    {
+      id: '234582',
+      title: 'Deep Learning Applications in Medical Image Analysis',
+      authors: 'Dr. Medical Smith*, Prof. AI Jones, Dr. Vision Brown',
+      submissionDate: '2024-01-20',
+      reviewers: [
+        { 
+          name: 'Dr. Expert One', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'This manuscript presents novel and significant contributions to medical image analysis. The methodology is sound and the results are impressive.',
+          publicComments: 'The authors have provided comprehensive analysis and validation. Minor revisions suggested for clarity in section 3.2.',
+          submissionDate: '2024-03-25'
+        },
+        { 
+          name: 'Prof. Expert Two', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good work overall, but some concerns about the dataset size and generalizability need to be addressed.',
+          publicComments: 'Please expand the discussion on limitations and provide more details on the validation methodology.',
+          submissionDate: '2024-03-22'
+        },
+        { 
+          name: 'Dr. Expert Three', 
+          score: 9, 
+          decision: 'Accept',
+          confidentialComments: 'Excellent research with clear clinical relevance. Recommend acceptance with minor formatting adjustments.',
+          publicComments: 'Outstanding contribution to the field. Please address the minor formatting issues noted in the attached comments.',
+          submissionDate: '2024-03-28'
+        }
+      ]
+    },
+    {
+      id: '234583',
+      title: 'Blockchain Security in Financial Systems',
+      authors: 'Prof. Crypto Lee*, Dr. Security Wang, Dr. Finance Chen',
+      submissionDate: '2024-01-15',
+      reviewers: [
+        { 
+          name: 'Dr. Blockchain Expert', 
+          score: 6, 
+          decision: 'Major Revision',
+          confidentialComments: 'The core idea is interesting but the paper lacks sufficient technical depth and proper evaluation against existing methods.',
+          publicComments: 'Significant improvements needed in the technical implementation section. Please provide comprehensive comparison with state-of-the-art methods.',
+          submissionDate: '2024-03-20'
+        },
+        { 
+          name: 'Prof. Security Master', 
+          score: 5, 
+          decision: 'Reject',
+          confidentialComments: 'While the topic is relevant, the execution falls short of publication standards. Major methodological flaws identified.',
+          publicComments: 'The paper requires substantial revision of the methodology and additional experimental validation.',
+          submissionDate: '2024-03-18'
+        },
+        { 
+          name: 'Dr. Finance Specialist', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good practical insights but needs better integration with existing financial security frameworks.',
+          publicComments: 'Please strengthen the literature review and provide more detailed analysis of real-world applicability.',
+          submissionDate: '2024-03-24'
+        }
+      ]
+    }
+  ];
+
   // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
   const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
     const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
@@ -360,6 +433,15 @@ const Manuscripts = () => {
     const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
     const matchesReviewer = pendingReviewerFilter === 'all' || 
       manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
+  // Apply search filters to waiting for decision manuscripts
+  const filteredWaitingDecisionManuscripts = mockWaitingDecisionManuscripts.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(decisionIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(decisionTitleFilter.toLowerCase());
+    const matchesReviewer = decisionReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name === decisionReviewerFilter);
     return matchesId && matchesTitle && matchesReviewer;
   });
 
@@ -402,6 +484,12 @@ const Manuscripts = () => {
     setAssignedIdFilter('');
     setAssignedTitleFilter('');
     setAssignedReviewerFilter('all');
+  };
+
+  const handleDecisionReset = () => {
+    setDecisionIdFilter('');
+    setDecisionTitleFilter('');
+    setDecisionReviewerFilter('all');
   };
 
   const handleRemindReviewer = (manuscriptId: string, reviewerName: string) => {
@@ -1127,6 +1215,166 @@ const Manuscripts = () => {
                       No manuscripts found with assigned reviewers.
                     </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="waiting-decision" className="p-6">
+                  {/* Search and Filter Section */}
+                  <div className="mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">ID</label>
+                        <Input
+                          placeholder="Search by ID..."
+                          value={decisionIdFilter}
+                          onChange={(e) => setDecisionIdFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Title</label>
+                        <Input
+                          placeholder="Search by title..."
+                          value={decisionTitleFilter}
+                          onChange={(e) => setDecisionTitleFilter(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Reviewer Name</label>
+                        <Select value={decisionReviewerFilter} onValueChange={setDecisionReviewerFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reviewer..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Reviewers</SelectItem>
+                            {Array.from(new Set(mockWaitingDecisionManuscripts.flatMap(m => m.reviewers.map(r => r.name)))).map((reviewerName) => (
+                              <SelectItem key={reviewerName} value={reviewerName}>
+                                {reviewerName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={() => {}}>Search</Button>
+                      <Button variant="outline" onClick={handleDecisionReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  {/* Table Section */}
+                  <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-20">ID</TableHead>
+                          <TableHead className="min-w-60">Article Title</TableHead>
+                          <TableHead className="min-w-48">Reviewers</TableHead>
+                          <TableHead className="min-w-32">Score</TableHead>
+                          <TableHead className="min-w-96">Comments</TableHead>
+                          <TableHead>Submission Date</TableHead>
+                          <TableHead className="w-24">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredWaitingDecisionManuscripts.map((manuscript) => (
+                          <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <button className="text-primary hover:underline font-medium">
+                                {manuscript.id}
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{manuscript.title}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-sm">
+                                    {reviewer.name}
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-sm">
+                                    <div className="font-medium">{reviewer.score}/10</div>
+                                    <div className={`text-xs ${
+                                      reviewer.decision === 'Accept' ? 'text-green-700' :
+                                      reviewer.decision === 'Reject' ? 'text-red-700' :
+                                      reviewer.decision === 'Minor Revision' ? 'text-orange-700' :
+                                      reviewer.decision === 'Major Revision' ? 'text-yellow-700' :
+                                      'text-gray-700'
+                                    }`}>
+                                      {reviewer.decision}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-2 max-w-md">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-xs border-l-2 border-gray-200 pl-2">
+                                    <div className="text-blue-700 font-medium mb-1">
+                                      Confidential (Editor):
+                                    </div>
+                                    <div className="text-blue-600 mb-2 line-clamp-2">
+                                      {reviewer.confidentialComments}
+                                    </div>
+                                    <div className="text-gray-700 font-medium mb-1">
+                                      Public (Author):
+                                    </div>
+                                    <div className="text-gray-600 line-clamp-2">
+                                      {reviewer.publicComments}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {manuscript.reviewers.map((reviewer, index) => (
+                                  <div key={index} className="text-sm">
+                                    {reviewer.submissionDate}
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        toast({
+                                          title: "Decision Made",
+                                          description: `Decision for manuscript ${manuscript.id} has been processed.`,
+                                        });
+                                      }}
+                                    >
+                                      <Gavel size={14} />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Decide</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+
+                    {filteredWaitingDecisionManuscripts.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No manuscripts waiting for decision found.
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
