@@ -227,6 +227,19 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Function to get reviewer name styling based on status
+const getReviewerNameStyle = (status: string) => {
+  switch (status) {
+    case 'accepted':
+      return 'text-blue-700 font-medium';
+    case 'declined':
+      return 'text-gray-500 line-through';
+    case 'pending':
+    default:
+      return 'text-gray-700';
+  }
+};
+
 // Schema for send back form validation
 const sendBackSchema = z.object({
   category: z.enum(['content-quality', 'form-formatting', 'ethics-compliance'], {
@@ -278,6 +291,11 @@ const Manuscripts = () => {
   const [pendingTitleFilter, setPendingTitleFilter] = useState('');
   const [pendingReviewerFilter, setPendingReviewerFilter] = useState('all');
 
+  // State for "Assigned Reviewer" tab filters
+  const [assignedIdFilter, setAssignedIdFilter] = useState('');
+  const [assignedTitleFilter, setAssignedTitleFilter] = useState('');
+  const [assignedReviewerFilter, setAssignedReviewerFilter] = useState('all');
+
   // State for managing manuscript data
   const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
   const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
@@ -302,19 +320,6 @@ const Manuscripts = () => {
     deadline: undefined
   }]);
   const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
-
-  const filteredManuscripts = mockManuscripts.filter(manuscript => {
-    const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(authorFilter.toLowerCase());
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || manuscript.status === statusFilter;
-    return matchesTitle && matchesAuthor && matchesStatus;
-  });
-
-  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
-    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
-    return matchesTitle && matchesAuthor;
-  });
 
   // Mock data for Assigned Reviewer tab (manuscripts with 3+ accepted reviewers)
   const mockAssignedManuscripts = [
@@ -349,6 +354,20 @@ const Manuscripts = () => {
     }
   ];
 
+  // Filter functions
+  const filteredManuscripts = mockManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(authorFilter.toLowerCase());
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || manuscript.status === statusFilter;
+    return matchesTitle && matchesAuthor && matchesStatus;
+  });
+
+  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
+    return matchesTitle && matchesAuthor;
+  });
+
   // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
   const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
     const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
@@ -364,11 +383,6 @@ const Manuscripts = () => {
     return matchesId && matchesTitle && matchesReviewer;
   });
 
-  // Assigned reviewer filters
-  const [assignedIdFilter, setAssignedIdFilter] = useState('');
-  const [assignedTitleFilter, setAssignedTitleFilter] = useState('');
-  const [assignedReviewerFilter, setAssignedReviewerFilter] = useState('all');
-
   const filteredAssignedManuscripts = mockAssignedManuscripts.filter(manuscript => {
     const matchesId = manuscript.id.toLowerCase().includes(assignedIdFilter.toLowerCase());
     const matchesTitle = manuscript.title.toLowerCase().includes(assignedTitleFilter.toLowerCase());
@@ -377,7 +391,7 @@ const Manuscripts = () => {
     return matchesId && matchesTitle && matchesReviewer;
   });
 
-
+  // Handler functions
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
   };
@@ -448,36 +462,27 @@ const Manuscripts = () => {
       sendBackSchema.parse(sendBackForm);
       setFormErrors({});
       
-      const manuscript = waitingReviewManuscripts.find(m => m.id === selectedManuscriptId);
-      if (manuscript) {
-        // Remove from waiting review
-        setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
-        
-        const categoryLabels = {
-          'content-quality': 'Content & Quality',
-          'form-formatting': 'Form & Formatting',
-          'ethics-compliance': 'Ethics & Compliance'
-        };
-        
-        toast({
-          title: "Manuscript Sent Back",
-          description: `Manuscript has been sent back to author for: ${categoryLabels[sendBackForm.category]}`,
-        });
-      }
+      // Remove manuscript from waiting review
+      setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
       
-      // Reset form and close dialog
-      setSendBackForm({ category: 'content-quality', reason: '' });
+      toast({
+        title: "Success",
+        description: "Manuscript has been sent back to author successfully.",
+      });
+      
       setSendBackDialogOpen(false);
       setSelectedManuscriptId('');
+      setSendBackForm({ category: 'content-quality', reason: '' });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors: Partial<Record<keyof SendBackFormData, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            errors[err.path[0] as keyof SendBackFormData] = err.message;
+        const fieldErrors: Partial<Record<keyof SendBackFormData, string>> = {};
+        error.errors.forEach(err => {
+          if (err.path.length > 0) {
+            const field = err.path[0] as keyof SendBackFormData;
+            fieldErrors[field] = err.message;
           }
         });
-        setFormErrors(errors);
+        setFormErrors(fieldErrors);
       }
     }
   };
@@ -487,125 +492,80 @@ const Manuscripts = () => {
     setAssignReviewerDialogOpen(true);
   };
 
-  const handleAddReviewer = () => {
-    setReviewerAssignments(prev => [...prev, {
-      reviewerId: '',
-      reviewerName: '',
-      deadline: undefined
-    }]);
-  };
-
-  const handleRemoveReviewer = (index: number) => {
-    if (reviewerAssignments.length > 1) {
-      setReviewerAssignments(prev => prev.filter((_, i) => i !== index));
-    }
-  };
-
   const handleReviewerSelect = (index: number, reviewerId: string, reviewerName: string) => {
     setReviewerAssignments(prev => prev.map((assignment, i) => 
       i === index ? { ...assignment, reviewerId, reviewerName } : assignment
     ));
   };
 
-  const handleDeadlineSelect = (index: number, deadline: Date | undefined) => {
+  const handleDeadlineSelect = (index: number, date: Date | undefined) => {
     setReviewerAssignments(prev => prev.map((assignment, i) => 
-      i === index ? { ...assignment, deadline } : assignment
+      i === index ? { ...assignment, deadline: date } : assignment
     ));
+  };
+
+  const handleAddReviewer = () => {
+    setReviewerAssignments(prev => [...prev, { reviewerId: '', reviewerName: '', deadline: undefined }]);
+  };
+
+  const handleRemoveReviewer = (index: number) => {
+    setReviewerAssignments(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAssignReviewerSubmit = () => {
     try {
-      const validatedData = assignReviewerSchema.parse({ reviewers: reviewerAssignments });
+      assignReviewerSchema.parse({ reviewers: reviewerAssignments });
       setAssignReviewerErrors([]);
       
+      // Find the manuscript and update it
       const manuscript = pendingReviewManuscripts.find(m => m.id === selectedManuscriptId);
       if (manuscript) {
-        // Update manuscript with assigned reviewers
+        const newReviewers = reviewerAssignments.map(assignment => ({
+          name: assignment.reviewerName,
+          status: 'accepted' as const
+        }));
+        
+        const newDeadlines = reviewerAssignments.map(assignment => 
+          assignment.deadline ? format(assignment.deadline, 'yyyy-MM-dd') : ''
+        );
+        
         setPendingReviewManuscripts(prev => prev.map(m => 
           m.id === selectedManuscriptId 
-            ? {
-                ...m,
-                reviewers: validatedData.reviewers.map(r => ({ name: r.reviewerName, status: 'pending' })),
-                reviewDeadlines: validatedData.reviewers.map(r => format(r.deadline, 'yyyy-MM-dd'))
-              }
+            ? { ...m, reviewers: [...m.reviewers, ...newReviewers], reviewDeadlines: [...m.reviewDeadlines, ...newDeadlines] }
             : m
         ));
         
         toast({
-          title: "Reviewers Assigned",
-          description: `${validatedData.reviewers.length} reviewer(s) have been assigned to the manuscript.`,
+          title: "Success",
+          description: "Reviewers have been assigned successfully.",
         });
       }
       
-      // Reset form and close dialog
-      setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
       setAssignReviewerDialogOpen(false);
       setSelectedManuscriptId('');
+      setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors: string[] = [];
-        error.errors.forEach((err) => {
-          errors.push(err.message);
-        });
+        const errors = error.errors.map(err => err.message);
         setAssignReviewerErrors(errors);
       }
     }
   };
 
-
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="flex w-full h-screen bg-background">
         <AppSidebar />
-        <main className="flex-1 p-6">
-          <div className="mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold tracking-tight">Manuscripts</h1>
-              <p className="text-muted-foreground">
-                Manage and review manuscript submissions
-              </p>
-            </div>
-
-            <div className="bg-card rounded-lg border">
-              <Tabs defaultValue="all" className="w-full">
-                <div className="border-b border-border">
-                  <TabsList className="h-12 w-full justify-start rounded-none bg-transparent p-0">
-                    <TabsTrigger 
-                      value="all" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      All
-                    </TabsTrigger>
-                     <TabsTrigger 
-                      value="waiting-review" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Waiting for Review
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="pending-reviewer" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Pending Reviewer
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="assigned-reviewer" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Assigned Reviewer
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="waiting-decision" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Waiting for Decision
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="completed" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                    >
-                      Completed
-                    </TabsTrigger>
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-auto">
+              <Tabs defaultValue="all" className="h-full">
+                <div className="border-b">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="waiting-review">Waiting for Review</TabsTrigger>
+                    <TabsTrigger value="pending-reviewer">Pending Review</TabsTrigger>
+                    <TabsTrigger value="assigned-reviewer">Assigned Reviewer</TabsTrigger>
                   </TabsList>
                 </div>
 
@@ -636,7 +596,7 @@ const Manuscripts = () => {
                             <SelectValue placeholder="Select status..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="all">All Status</SelectItem>
                             {statusOptions.map((status) => (
                               <SelectItem key={status} value={status}>
                                 {status}
@@ -654,11 +614,11 @@ const Manuscripts = () => {
 
                   {/* Table Section */}
                   <div className="border rounded-lg overflow-hidden">
-                    <ResizablePanelGroup direction="horizontal" className="min-h-[400px]">
+                    <ResizablePanelGroup direction="horizontal" className="h-[600px]">
                       <ResizablePanel defaultSize={8} minSize={5}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">ID</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredManuscripts.map((manuscript) => (
                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <button className="text-primary hover:underline font-medium">
@@ -672,25 +632,10 @@ const Manuscripts = () => {
                       
                       <ResizableHandle withHandle />
                       
-                      <ResizablePanel defaultSize={15} minSize={10}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Username</div>
-                          <div className="divide-y">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`username-${manuscript.id}`} className="p-3 hover:bg-muted/50 font-medium">
-                                {manuscript.username}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </ResizablePanel>
-                      
-                      <ResizableHandle withHandle />
-                      
-                      <ResizablePanel defaultSize={35} minSize={20}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Article Title</div>
-                          <div className="divide-y">
+                      <ResizablePanel defaultSize={45} minSize={30}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredManuscripts.map((manuscript) => (
                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="font-medium mb-1">{manuscript.title}</div>
@@ -713,9 +658,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={20} minSize={15}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Author Info</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Author Info</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredManuscripts.map((manuscript) => (
                               <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="text-sm">
@@ -738,9 +683,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={12} minSize={10}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Submission Date</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredManuscripts.map((manuscript) => (
                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 {manuscript.submissionDate}
@@ -752,10 +697,10 @@ const Manuscripts = () => {
                       
                       <ResizableHandle withHandle />
                       
-                      <ResizablePanel defaultSize={10} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Status</div>
-                          <div className="divide-y">
+                      <ResizablePanel defaultSize={15} minSize={10}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Status</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredManuscripts.map((manuscript) => (
                               <div key={`status-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <Badge variant="outline" className={getStatusColor(manuscript.status)}>
@@ -799,11 +744,11 @@ const Manuscripts = () => {
 
                   {/* Table Section */}
                   <div className="border rounded-lg overflow-hidden">
-                    <ResizablePanelGroup direction="horizontal" className="min-h-[400px]">
+                    <ResizablePanelGroup direction="horizontal" className="h-[600px]">
                       <ResizablePanel defaultSize={25} minSize={15}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Article Title</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="font-medium mb-1">{manuscript.title}</div>
@@ -822,13 +767,13 @@ const Manuscripts = () => {
                           </div>
                         </div>
                       </ResizablePanel>
-                      
+
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={25} minSize={15}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Abstract</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Abstract</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`abstract-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="text-sm max-w-xs">
@@ -843,9 +788,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={18} minSize={12}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Author Info</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Author Info</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="text-sm">
@@ -868,9 +813,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={10} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Submission Date</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 {manuscript.submissionDate}
@@ -883,9 +828,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={10} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Manuscript</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Manuscript</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`manuscript-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <button className="text-primary hover:underline text-sm flex items-center gap-1">
@@ -901,9 +846,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={8} minSize={6}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Files</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Files</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`files-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <button className="text-primary hover:underline text-sm flex items-center gap-1">
@@ -919,9 +864,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={4} minSize={3}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Actions</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Actions</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredWaitingReviewManuscripts.map((manuscript) => (
                               <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="flex gap-2">
@@ -1012,11 +957,11 @@ const Manuscripts = () => {
 
                   {/* Table Section */}
                   <div className="border rounded-lg overflow-hidden">
-                    <ResizablePanelGroup direction="horizontal" className="min-h-[400px]">
+                    <ResizablePanelGroup direction="horizontal" className="h-[600px]">
                       <ResizablePanel defaultSize={8} minSize={5}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">ID</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredPendingReviewManuscripts.map((manuscript) => (
                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <button className="text-primary hover:underline font-medium">
@@ -1030,21 +975,19 @@ const Manuscripts = () => {
                       
                       <ResizableHandle withHandle />
                       
-                      <ResizablePanel defaultSize={25} minSize={15}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Article Title</div>
-                          <div className="divide-y">
+                      <ResizablePanel defaultSize={30} minSize={20}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredPendingReviewManuscripts.map((manuscript) => (
                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="font-medium">{manuscript.title}</div>
-                                <div className="flex flex-wrap gap-1 mt-1">
+                                <div className="font-medium mb-1">{manuscript.title}</div>
+                                <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
+                                <div className="flex flex-wrap gap-1 mt-2">
                                   {manuscript.keywords.map((keyword, index) => (
-                                    <span
-                                      key={index}
-                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
-                                    >
+                                    <Badge key={index} variant="secondary" className="text-xs">
                                       {keyword}
-                                    </span>
+                                    </Badge>
                                   ))}
                                 </div>
                               </div>
@@ -1055,27 +998,10 @@ const Manuscripts = () => {
                       
                       <ResizableHandle withHandle />
                       
-                      <ResizablePanel defaultSize={30} minSize={20}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Abstract</div>
-                          <div className="divide-y">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`abstract-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="text-sm text-muted-foreground line-clamp-3">
-                                  {manuscript.abstract}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </ResizablePanel>
-                      
-                      <ResizableHandle withHandle />
-                      
-                      <ResizablePanel defaultSize={10} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Submission Date</div>
-                          <div className="divide-y">
+                      <ResizablePanel defaultSize={12} minSize={8}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredPendingReviewManuscripts.map((manuscript) => (
                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 {manuscript.submissionDate}
@@ -1087,12 +1013,82 @@ const Manuscripts = () => {
                       
                       <ResizableHandle withHandle />
                       
-                      <ResizablePanel defaultSize={8} minSize={6}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Action</div>
-                          <div className="divide-y">
+                      <ResizablePanel defaultSize={40} minSize={30}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Reviewers & Deadlines</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`action-${manuscript.id}`} className="p-3 hover:bg-muted/50">
+                              <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50">
+                                <div className="space-y-2">
+                                  {manuscript.reviewers.length > 0 ? (
+                                    manuscript.reviewers.map((reviewer, index) => (
+                                      <div key={index} className="flex items-center justify-between py-1">
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className={getReviewerNameStyle(reviewer.status)}>
+                                            {reviewer.name}
+                                          </span>
+                                          {reviewer.status === 'accepted' && <Check className="h-3 w-3 text-blue-700" />}
+                                          {reviewer.status === 'declined' && <X className="h-3 w-3 text-red-500" />}
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-sm">
+                                            {manuscript.reviewDeadlines[index] || 'No deadline'}
+                                          </span>
+                                          {reviewer.status === 'accepted' && (
+                                            <TooltipProvider>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                      <Button variant="ghost" size="sm">
+                                                        <Bell className="h-4 w-4" />
+                                                      </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                      <AlertDialogHeader>
+                                                        <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                          Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                                        </AlertDialogDescription>
+                                                      </AlertDialogHeader>
+                                                      <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction 
+                                                          onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                                        >
+                                                          Confirm
+                                                        </AlertDialogAction>
+                                                      </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                  </AlertDialog>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p>Remind {reviewer.name}</p>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </TooltipProvider>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="text-sm text-muted-foreground">No reviewers assigned</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </ResizablePanel>
+                      
+                      <ResizableHandle withHandle />
+                      
+                      <ResizablePanel defaultSize={10} minSize={8}>
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Actions</div>
+                          <div className="flex-1 divide-y overflow-auto">
+                            {filteredPendingReviewManuscripts.map((manuscript) => (
+                              <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -1101,7 +1097,7 @@ const Manuscripts = () => {
                                         size="sm"
                                         onClick={() => handleAssignReviewer(manuscript.id)}
                                       >
-                                        <UserCheck size={14} />
+                                        <UserPlus size={14} />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -1114,69 +1110,14 @@ const Manuscripts = () => {
                           </div>
                         </div>
                       </ResizablePanel>
-                      
-                      <ResizableHandle withHandle />
-                      
-                      <ResizablePanel defaultSize={12} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Reviewers</div>
-                          <div className="divide-y">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.reviewers.length > 0 ? (
-                                  <div className="space-y-1">
-                                    {manuscript.reviewers.map((reviewer, index) => (
-                                      <div key={index} className="flex items-center gap-2 text-sm">
-                                        <span className={`${
-                                          reviewer.status === 'accepted' 
-                                            ? 'text-blue-700 font-medium' 
-                                            : reviewer.status === 'declined'
-                                            ? 'text-gray-500 line-through'
-                                            : 'text-gray-700'
-                                        }`}>
-                                          {reviewer.name}
-                                        </span>
-                                        {reviewer.status === 'accepted' && (
-                                          <Check className="h-3 w-3 text-blue-700" />
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">—</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </ResizablePanel>
-                      
-                      <ResizableHandle withHandle />
-                      
-                      <ResizablePanel defaultSize={7} minSize={5}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Review DDL</div>
-                          <div className="divide-y">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`deadline-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.reviewDeadlines.length > 0 ? (
-                                  <div className="space-y-1">
-                                    {manuscript.reviewDeadlines.map((deadline, index) => (
-                                      <div key={index} className="text-sm">
-                                        {deadline}
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">—</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </ResizablePanel>
                     </ResizablePanelGroup>
                   </div>
+
+                  {filteredPendingReviewManuscripts.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No manuscripts found that need reviewer assignment.
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="assigned-reviewer" className="p-6">
@@ -1224,11 +1165,11 @@ const Manuscripts = () => {
 
                   {/* Assigned Reviewer Table */}
                   <div className="border rounded-lg overflow-hidden">
-                    <ResizablePanelGroup direction="horizontal" className="min-h-[400px]">
+                    <ResizablePanelGroup direction="horizontal" className="h-[600px]">
                       <ResizablePanel defaultSize={10} minSize={8}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">ID</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredAssignedManuscripts.map((manuscript) => (
                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50 font-medium">
                                 {manuscript.id}
@@ -1241,9 +1182,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={40} minSize={30}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Article Title</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredAssignedManuscripts.map((manuscript) => (
                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="font-medium">{manuscript.title}</div>
@@ -1264,9 +1205,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={15} minSize={10}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Submission Date</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredAssignedManuscripts.map((manuscript) => (
                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 {manuscript.submissionDate}
@@ -1279,9 +1220,9 @@ const Manuscripts = () => {
                       <ResizableHandle withHandle />
                       
                       <ResizablePanel defaultSize={35} minSize={25}>
-                        <div className="h-full">
-                          <div className="border-b bg-muted/50 p-3 font-medium">Reviewers & Deadlines</div>
-                          <div className="divide-y">
+                        <div className="h-full flex flex-col">
+                          <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Reviewers & Deadlines</div>
+                          <div className="flex-1 divide-y overflow-auto">
                             {filteredAssignedManuscripts.map((manuscript) => (
                               <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50">
                                 <div className="space-y-2">
