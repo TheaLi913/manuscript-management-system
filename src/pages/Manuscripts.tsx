@@ -1045,8 +1045,7 @@ const Manuscripts = () => {
                         <TableHead>ID</TableHead>
                         <TableHead>Article Title</TableHead>
                         <TableHead>Submission Date</TableHead>
-                        <TableHead>Reviewers</TableHead>
-                        <TableHead>Review DDL</TableHead>
+                        <TableHead>Reviewers & Deadlines</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1068,58 +1067,52 @@ const Manuscripts = () => {
                           </TableCell>
                           <TableCell>{manuscript.submissionDate}</TableCell>
                           <TableCell>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                                <div key={index} className="flex items-center justify-between py-2">
+                                <div key={index} className="flex items-center justify-between py-1">
                                   <div className="flex items-center gap-2 text-sm">
                                     <span className="text-blue-700 font-medium">
                                       {reviewer.name}
                                     </span>
                                     <Check className="h-3 w-3 text-blue-700" />
                                   </div>
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <AlertDialog>
-                                          <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="sm">
-                                              <Bell className="h-4 w-4" />
-                                            </Button>
-                                          </AlertDialogTrigger>
-                                          <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                              <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
-                                              <AlertDialogDescription>
-                                                Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
-                                              </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                              <AlertDialogAction 
-                                                onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
-                                              >
-                                                Confirm
-                                              </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                          </AlertDialogContent>
-                                        </AlertDialog>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Remind {reviewer.name}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {manuscript.reviewDeadlines
-                                .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
-                                .map((deadline, index) => (
-                                <div key={index} className="text-sm py-2">
-                                  {deadline}
+                                  <div className="flex items-center gap-3">
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                              <Button variant="ghost" size="sm">
+                                                <Bell className="h-4 w-4" />
+                                              </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                              <AlertDialogHeader>
+                                                <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                  Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                                </AlertDialogDescription>
+                                              </AlertDialogHeader>
+                                              <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction 
+                                                  onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                                >
+                                                  Confirm
+                                                </AlertDialogAction>
+                                              </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                          </AlertDialog>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Remind {reviewer.name}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <span className="text-sm">
+                                      {manuscript.reviewDeadlines[index] || 'No deadline'}
+                                    </span>
+                                  </div>
                                 </div>
                               ))}
                             </div>
