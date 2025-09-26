@@ -619,13 +619,13 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <button className="text-primary hover:underline font-medium">
-                                  {manuscript.id}
-                                </button>
-                              </div>
-                            ))}
+                             {filteredManuscripts.map((manuscript) => (
+                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-20 flex items-start">
+                                 <button className="text-primary hover:underline font-medium">
+                                   {manuscript.id}
+                                 </button>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -636,21 +636,21 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="font-medium mb-1">{manuscript.title}</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {manuscript.keywords.map((keyword, index) => (
-                                    <span
-                                      key={index}
-                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
-                                    >
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredManuscripts.map((manuscript) => (
+                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-20 flex flex-col justify-start">
+                                 <div className="font-medium mb-1">{manuscript.title}</div>
+                                 <div className="flex flex-wrap gap-1">
+                                   {manuscript.keywords.map((keyword, index) => (
+                                     <span
+                                       key={index}
+                                       className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                     >
+                                       {keyword}
+                                     </span>
+                                   ))}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -661,21 +661,21 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Author Info</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="text-sm">
-                                  {manuscript.authors.split(', ').map((author, index) => (
-                                    <span key={index}>
-                                      {author}
-                                      {index < manuscript.authors.split(', ').length - 1 && ', '}
-                                    </span>
-                                  ))}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  * Corresponding Author
-                                </div>
-                              </div>
-                            ))}
+                             {filteredManuscripts.map((manuscript) => (
+                               <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-20 flex flex-col justify-start">
+                                 <div className="text-sm">
+                                   {manuscript.authors.split(', ').map((author, index) => (
+                                     <span key={index}>
+                                       {author}
+                                       {index < manuscript.authors.split(', ').length - 1 && ', '}
+                                     </span>
+                                   ))}
+                                 </div>
+                                 <div className="text-xs text-muted-foreground mt-1">
+                                   * Corresponding Author
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -686,11 +686,11 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.submissionDate}
-                              </div>
-                            ))}
+                             {filteredManuscripts.map((manuscript) => (
+                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-20 flex items-start">
+                                 {manuscript.submissionDate}
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -701,13 +701,13 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Status</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredManuscripts.map((manuscript) => (
-                              <div key={`status-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <Badge variant="outline" className={getStatusColor(manuscript.status)}>
-                                  {manuscript.status}
-                                </Badge>
-                              </div>
-                            ))}
+                             {filteredManuscripts.map((manuscript) => (
+                               <div key={`status-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-20 flex items-start">
+                                 <Badge variant="outline" className={getStatusColor(manuscript.status)}>
+                                   {manuscript.status}
+                                 </Badge>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -749,21 +749,21 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="font-medium mb-1">{manuscript.title}</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {manuscript.keywords.map((keyword, index) => (
-                                    <span
-                                      key={index}
-                                      className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
-                                    >
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="font-medium mb-1">{manuscript.title}</div>
+                                 <div className="flex flex-wrap gap-1">
+                                   {manuscript.keywords.map((keyword, index) => (
+                                     <span
+                                       key={index}
+                                       className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                     >
+                                       {keyword}
+                                     </span>
+                                   ))}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -774,13 +774,13 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Abstract</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`abstract-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="text-sm max-w-xs">
-                                  <p className="line-clamp-4">{manuscript.abstract}</p>
-                                </div>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`abstract-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <div className="text-sm max-w-xs">
+                                   <p className="line-clamp-4">{manuscript.abstract}</p>
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -791,21 +791,21 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Author Info</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="text-sm">
-                                  {manuscript.authors.split(', ').map((author, index) => (
-                                    <span key={index}>
-                                      {author}
-                                      {index < manuscript.authors.split(', ').length - 1 && ', '}
-                                    </span>
-                                  ))}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  * Corresponding Author
-                                </div>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`author-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="text-sm">
+                                   {manuscript.authors.split(', ').map((author, index) => (
+                                     <span key={index}>
+                                       {author}
+                                       {index < manuscript.authors.split(', ').length - 1 && ', '}
+                                     </span>
+                                   ))}
+                                 </div>
+                                 <div className="text-xs text-muted-foreground mt-1">
+                                   * Corresponding Author
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -816,11 +816,11 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.submissionDate}
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 {manuscript.submissionDate}
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -831,14 +831,14 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Manuscript</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`manuscript-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <button className="text-primary hover:underline text-sm flex items-center gap-1">
-                                  <Download size={14} />
-                                  {manuscript.manuscriptFile}
-                                </button>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`manuscript-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                   <Download size={14} />
+                                   {manuscript.manuscriptFile}
+                                 </button>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -849,14 +849,14 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Files</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`files-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <button className="text-primary hover:underline text-sm flex items-center gap-1">
-                                  <Download size={14} />
-                                  {manuscript.filesZip}
-                                </button>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`files-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                   <Download size={14} />
+                                   {manuscript.filesZip}
+                                 </button>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -867,44 +867,44 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Actions</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredWaitingReviewManuscripts.map((manuscript) => (
-                              <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="flex gap-2">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleSendToReviewer(manuscript.id)}
-                                        >
-                                          <Send size={14} />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Send to Reviewer</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleSendBackToAuthor(manuscript.id)}
-                                        >
-                                          <Undo2 size={14} />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Send Back to Author</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
-                              </div>
-                            ))}
+                             {filteredWaitingReviewManuscripts.map((manuscript) => (
+                               <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <div className="flex gap-2">
+                                   <TooltipProvider>
+                                     <Tooltip>
+                                       <TooltipTrigger asChild>
+                                         <Button
+                                           variant="outline"
+                                           size="sm"
+                                           onClick={() => handleSendToReviewer(manuscript.id)}
+                                         >
+                                           <Send size={14} />
+                                         </Button>
+                                       </TooltipTrigger>
+                                       <TooltipContent>
+                                         <p>Send to Reviewer</p>
+                                       </TooltipContent>
+                                     </Tooltip>
+                                   </TooltipProvider>
+                                   <TooltipProvider>
+                                     <Tooltip>
+                                       <TooltipTrigger asChild>
+                                         <Button
+                                           variant="outline"
+                                           size="sm"
+                                           onClick={() => handleSendBackToAuthor(manuscript.id)}
+                                         >
+                                           <Undo2 size={14} />
+                                         </Button>
+                                       </TooltipTrigger>
+                                       <TooltipContent>
+                                         <p>Send Back to Author</p>
+                                       </TooltipContent>
+                                     </Tooltip>
+                                   </TooltipProvider>
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -962,13 +962,13 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <button className="text-primary hover:underline font-medium">
-                                  {manuscript.id}
-                                </button>
-                              </div>
-                            ))}
+                             {filteredPendingReviewManuscripts.map((manuscript) => (
+                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <button className="text-primary hover:underline font-medium">
+                                   {manuscript.id}
+                                 </button>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -979,19 +979,19 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="font-medium mb-1">{manuscript.title}</div>
-                                <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {manuscript.keywords.map((keyword, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {keyword}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredPendingReviewManuscripts.map((manuscript) => (
+                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="font-medium mb-1">{manuscript.title}</div>
+                                 <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
+                                 <div className="flex flex-wrap gap-1 mt-2">
+                                   {manuscript.keywords.map((keyword, index) => (
+                                     <Badge key={index} variant="secondary" className="text-xs">
+                                       {keyword}
+                                     </Badge>
+                                   ))}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1002,11 +1002,11 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.submissionDate}
-                              </div>
-                            ))}
+                             {filteredPendingReviewManuscripts.map((manuscript) => (
+                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 {manuscript.submissionDate}
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1017,66 +1017,66 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Reviewers & Deadlines</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="space-y-2">
-                                  {manuscript.reviewers.length > 0 ? (
-                                    manuscript.reviewers.map((reviewer, index) => (
-                                      <div key={index} className="flex items-center justify-between py-1">
-                                        <div className="flex items-center gap-2 text-sm">
-                                          <span className={getReviewerNameStyle(reviewer.status)}>
-                                            {reviewer.name}
-                                          </span>
-                                          {reviewer.status === 'accepted' && <Check className="h-3 w-3 text-blue-700" />}
-                                          {reviewer.status === 'declined' && <X className="h-3 w-3 text-red-500" />}
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                          <span className="text-sm">
-                                            {manuscript.reviewDeadlines[index] || 'No deadline'}
-                                          </span>
-                                          {reviewer.status === 'accepted' && (
-                                            <TooltipProvider>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                      <Button variant="ghost" size="sm">
-                                                        <Bell className="h-4 w-4" />
-                                                      </Button>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                      <AlertDialogHeader>
-                                                        <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                          Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
-                                                        </AlertDialogDescription>
-                                                      </AlertDialogHeader>
-                                                      <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction 
-                                                          onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
-                                                        >
-                                                          Confirm
-                                                        </AlertDialogAction>
-                                                      </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                  </AlertDialog>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Remind {reviewer.name}</p>
-                                                </TooltipContent>
-                                              </Tooltip>
-                                            </TooltipProvider>
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div className="text-sm text-muted-foreground">No reviewers assigned</div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredPendingReviewManuscripts.map((manuscript) => (
+                               <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="space-y-2">
+                                   {manuscript.reviewers.length > 0 ? (
+                                     manuscript.reviewers.map((reviewer, index) => (
+                                       <div key={index} className="flex items-center justify-between py-1">
+                                         <div className="flex items-center gap-2 text-sm">
+                                           <span className={getReviewerNameStyle(reviewer.status)}>
+                                             {reviewer.name}
+                                           </span>
+                                           {reviewer.status === 'accepted' && <Check className="h-3 w-3 text-blue-700" />}
+                                           {reviewer.status === 'declined' && <X className="h-3 w-3 text-red-500" />}
+                                         </div>
+                                         <div className="flex items-center gap-3">
+                                           <span className="text-sm">
+                                             {manuscript.reviewDeadlines[index] || 'No deadline'}
+                                           </span>
+                                           {reviewer.status === 'accepted' && (
+                                             <TooltipProvider>
+                                               <Tooltip>
+                                                 <TooltipTrigger asChild>
+                                                   <AlertDialog>
+                                                     <AlertDialogTrigger asChild>
+                                                       <Button variant="ghost" size="sm">
+                                                         <Bell className="h-4 w-4" />
+                                                       </Button>
+                                                     </AlertDialogTrigger>
+                                                     <AlertDialogContent>
+                                                       <AlertDialogHeader>
+                                                         <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                                         <AlertDialogDescription>
+                                                           Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                                         </AlertDialogDescription>
+                                                       </AlertDialogHeader>
+                                                       <AlertDialogFooter>
+                                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                         <AlertDialogAction 
+                                                           onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                                         >
+                                                           Confirm
+                                                         </AlertDialogAction>
+                                                       </AlertDialogFooter>
+                                                     </AlertDialogContent>
+                                                   </AlertDialog>
+                                                 </TooltipTrigger>
+                                                 <TooltipContent>
+                                                   <p>Remind {reviewer.name}</p>
+                                                 </TooltipContent>
+                                               </Tooltip>
+                                             </TooltipProvider>
+                                           )}
+                                         </div>
+                                       </div>
+                                     ))
+                                   ) : (
+                                     <div className="text-sm text-muted-foreground">No reviewers assigned</div>
+                                   )}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1087,26 +1087,26 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Actions</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredPendingReviewManuscripts.map((manuscript) => (
-                              <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleAssignReviewer(manuscript.id)}
-                                      >
-                                        <UserPlus size={14} />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Assign Reviewer</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            ))}
+                             {filteredPendingReviewManuscripts.map((manuscript) => (
+                               <div key={`actions-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 <TooltipProvider>
+                                   <Tooltip>
+                                     <TooltipTrigger asChild>
+                                       <Button
+                                         variant="outline"
+                                         size="sm"
+                                         onClick={() => handleAssignReviewer(manuscript.id)}
+                                       >
+                                         <UserPlus size={14} />
+                                       </Button>
+                                     </TooltipTrigger>
+                                     <TooltipContent>
+                                       <p>Assign Reviewer</p>
+                                     </TooltipContent>
+                                   </Tooltip>
+                                 </TooltipProvider>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1170,11 +1170,11 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">ID</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredAssignedManuscripts.map((manuscript) => (
-                              <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50 font-medium">
-                                {manuscript.id}
-                              </div>
-                            ))}
+                             {filteredAssignedManuscripts.map((manuscript) => (
+                               <div key={`id-${manuscript.id}`} className="p-3 hover:bg-muted/50 font-medium h-32 flex items-start">
+                                 {manuscript.id}
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1185,19 +1185,19 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Article Title</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredAssignedManuscripts.map((manuscript) => (
-                              <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="font-medium">{manuscript.title}</div>
-                                <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {manuscript.keywords.map((keyword, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {keyword}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredAssignedManuscripts.map((manuscript) => (
+                               <div key={`title-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="font-medium">{manuscript.title}</div>
+                                 <div className="text-sm text-muted-foreground mt-1">{manuscript.authors}</div>
+                                 <div className="flex flex-wrap gap-1 mt-2">
+                                   {manuscript.keywords.map((keyword, index) => (
+                                     <Badge key={index} variant="secondary" className="text-xs">
+                                       {keyword}
+                                     </Badge>
+                                   ))}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1208,11 +1208,11 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Submission Date</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredAssignedManuscripts.map((manuscript) => (
-                              <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                {manuscript.submissionDate}
-                              </div>
-                            ))}
+                             {filteredAssignedManuscripts.map((manuscript) => (
+                               <div key={`date-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex items-start">
+                                 {manuscript.submissionDate}
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
@@ -1223,59 +1223,59 @@ const Manuscripts = () => {
                         <div className="h-full flex flex-col">
                           <div className="border-b bg-muted/50 p-3 font-medium sticky top-0">Reviewers & Deadlines</div>
                           <div className="flex-1 divide-y overflow-auto">
-                            {filteredAssignedManuscripts.map((manuscript) => (
-                              <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50">
-                                <div className="space-y-2">
-                                  {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                                    <div key={index} className="flex items-center justify-between py-1">
-                                      <div className="flex items-center gap-2 text-sm">
-                                        <span className="text-blue-700 font-medium">
-                                          {reviewer.name}
-                                        </span>
-                                        <Check className="h-3 w-3 text-blue-700" />
-                                      </div>
-                                      <div className="flex items-center gap-3">
-                                        <span className="text-sm">
-                                          {manuscript.reviewDeadlines[index] || 'No deadline'}
-                                        </span>
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                  <Button variant="ghost" size="sm">
-                                                    <Bell className="h-4 w-4" />
-                                                  </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                  <AlertDialogHeader>
-                                                    <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                      Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
-                                                    </AlertDialogDescription>
-                                                  </AlertDialogHeader>
-                                                  <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction 
-                                                      onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
-                                                    >
-                                                      Confirm
-                                                    </AlertDialogAction>
-                                                  </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                              </AlertDialog>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p>Remind {reviewer.name}</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
+                             {filteredAssignedManuscripts.map((manuscript) => (
+                               <div key={`reviewers-${manuscript.id}`} className="p-3 hover:bg-muted/50 h-32 flex flex-col justify-start">
+                                 <div className="space-y-2">
+                                   {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                                     <div key={index} className="flex items-center justify-between py-1">
+                                       <div className="flex items-center gap-2 text-sm">
+                                         <span className="text-blue-700 font-medium">
+                                           {reviewer.name}
+                                         </span>
+                                         <Check className="h-3 w-3 text-blue-700" />
+                                       </div>
+                                       <div className="flex items-center gap-3">
+                                         <span className="text-sm">
+                                           {manuscript.reviewDeadlines[index] || 'No deadline'}
+                                         </span>
+                                         <TooltipProvider>
+                                           <Tooltip>
+                                             <TooltipTrigger asChild>
+                                               <AlertDialog>
+                                                 <AlertDialogTrigger asChild>
+                                                   <Button variant="ghost" size="sm">
+                                                     <Bell className="h-4 w-4" />
+                                                   </Button>
+                                                 </AlertDialogTrigger>
+                                                 <AlertDialogContent>
+                                                   <AlertDialogHeader>
+                                                     <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                                     <AlertDialogDescription>
+                                                       Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                                     </AlertDialogDescription>
+                                                   </AlertDialogHeader>
+                                                   <AlertDialogFooter>
+                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                     <AlertDialogAction 
+                                                       onClick={() => handleRemindReviewer(manuscript.id, reviewer.name)}
+                                                     >
+                                                       Confirm
+                                                     </AlertDialogAction>
+                                                   </AlertDialogFooter>
+                                                 </AlertDialogContent>
+                                               </AlertDialog>
+                                             </TooltipTrigger>
+                                             <TooltipContent>
+                                               <p>Remind {reviewer.name}</p>
+                                             </TooltipContent>
+                                           </Tooltip>
+                                         </TooltipProvider>
+                                       </div>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             ))}
                           </div>
                         </div>
                       </ResizablePanel>
