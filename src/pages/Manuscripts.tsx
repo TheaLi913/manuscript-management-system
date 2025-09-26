@@ -256,6 +256,11 @@ type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
 
 const Manuscripts = () => {
   const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   const { toast } = useToast();
   
   // State for "All" tab filters
@@ -296,11 +301,6 @@ const Manuscripts = () => {
     deadline: undefined
   }]);
   const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
-  
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
 
   const filteredManuscripts = mockManuscripts.filter(manuscript => {
     const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
