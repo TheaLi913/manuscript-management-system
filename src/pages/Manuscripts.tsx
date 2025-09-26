@@ -22,6 +22,7 @@ import { CalendarIcon, Plus, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck, Gavel } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { z } from 'zod';
 
 // Mock data for manuscripts
@@ -70,6 +71,141 @@ const mockManuscripts = [
     authors: 'Rachel Taylor*, Mohammad Ali, Jennifer Lee',
     submissionDate: '2024-03-05',
     status: 'Major Revision'
+  },
+  {
+    id: '234590',
+    username: 'Dr. Ahmed Hassan',
+    title: 'Blockchain Implementation in Healthcare Data Management',
+    keywords: ['Blockchain', 'Healthcare', 'Data Security', 'Privacy'],
+    authors: 'Ahmed Hassan*, Sarah Kim, Michael Chang',
+    submissionDate: '2024-03-20',
+    status: 'Submitted to Journal'
+  },
+  {
+    id: '234591',
+    username: 'Prof. Elena Rodriguez',
+    title: 'CRISPR Gene Editing: Ethical and Technical Considerations',
+    keywords: ['CRISPR', 'Gene Editing', 'Bioethics', 'Biotechnology'],
+    authors: 'Elena Rodriguez*, David Brown, Lisa Park*',
+    submissionDate: '2024-03-18',
+    status: 'Under Review'
+  },
+  {
+    id: '234592',
+    username: 'Dr. Thomas Mueller',
+    title: 'Artificial Intelligence in Autonomous Vehicle Navigation',
+    keywords: ['AI', 'Autonomous Vehicles', 'Navigation', 'Computer Vision'],
+    authors: 'Thomas Mueller*, Jennifer Smith, Robert Davis',
+    submissionDate: '2024-03-16',
+    status: 'With Editor'
+  },
+  {
+    id: '234593',
+    username: 'Prof. Linda Wang',
+    title: 'Renewable Energy Grid Integration: Challenges and Solutions',
+    keywords: ['Renewable Energy', 'Smart Grid', 'Energy Storage', 'Sustainability'],
+    authors: 'Linda Wang*, Mark Johnson, Anna Kowalski',
+    submissionDate: '2024-03-14',
+    status: 'Decision in Process'
+  },
+  {
+    id: '234594',
+    username: 'Dr. Carlos Hernandez',
+    title: 'Precision Medicine in Cancer Treatment: A Data-Driven Approach',
+    keywords: ['Precision Medicine', 'Cancer', 'Data Analysis', 'Personalized Treatment'],
+    authors: 'Carlos Hernandez*, Maria Santos, Kevin Liu*',
+    submissionDate: '2024-03-12',
+    status: 'Minor Revision'
+  },
+  {
+    id: '234595',
+    username: 'Prof. Anna Petrov',
+    title: 'Quantum Machine Learning for Drug Discovery',
+    keywords: ['Quantum Computing', 'Machine Learning', 'Drug Discovery', 'Molecular Modeling'],
+    authors: 'Anna Petrov*, James Wilson, Sophie Chen',
+    submissionDate: '2024-03-10',
+    status: 'Accept'
+  },
+  {
+    id: '234596',
+    username: 'Dr. Michael Brown',
+    title: 'Sustainable Agriculture Technologies for Climate Resilience',
+    keywords: ['Agriculture', 'Climate Change', 'Sustainability', 'Food Security'],
+    authors: 'Michael Brown*, Rachel Green, David Lee',
+    submissionDate: '2024-03-08',
+    status: 'Rejected'
+  },
+  {
+    id: '234597',
+    username: 'Prof. Sarah Johnson',
+    title: 'Deep Learning Applications in Medical Image Analysis',
+    keywords: ['Deep Learning', 'Medical Imaging', 'Computer Vision', 'Healthcare'],
+    authors: 'Sarah Johnson*, Alex Kumar, Lisa Anderson',
+    submissionDate: '2024-03-06',
+    status: 'Under Review'
+  },
+  {
+    id: '234598',
+    username: 'Dr. Robert Taylor',
+    title: 'Cybersecurity in IoT Networks: Threats and Countermeasures',
+    keywords: ['Cybersecurity', 'IoT', 'Network Security', 'Threat Detection'],
+    authors: 'Robert Taylor*, Emma Wilson, Mohammad Ali',
+    submissionDate: '2024-03-04',
+    status: 'With Editor'
+  },
+  {
+    id: '234599',
+    username: 'Prof. Jennifer Davis',
+    title: 'Nanotechnology Applications in Environmental Remediation',
+    keywords: ['Nanotechnology', 'Environmental Science', 'Pollution Control', 'Remediation'],
+    authors: 'Jennifer Davis*, Carlos Martinez, Nina Patel*',
+    submissionDate: '2024-03-02',
+    status: 'Major Revision'
+  },
+  {
+    id: '234600',
+    username: 'Dr. Kevin Liu',
+    title: 'Robotics in Surgery: Precision and Safety Considerations',
+    keywords: ['Robotics', 'Surgery', 'Medical Technology', 'Patient Safety'],
+    authors: 'Kevin Liu*, Helen Carter, Thomas Anderson',
+    submissionDate: '2024-02-28',
+    status: 'Accept'
+  },
+  {
+    id: '234601',
+    username: 'Prof. Maria Santos',
+    title: 'Virtual Reality in Education: Immersive Learning Experiences',
+    keywords: ['Virtual Reality', 'Education', 'Immersive Learning', 'Educational Technology'],
+    authors: 'Maria Santos*, John Thompson, Lisa Park',
+    submissionDate: '2024-02-26',
+    status: 'Rejected'
+  },
+  {
+    id: '234602',
+    username: 'Dr. David Chen',
+    title: 'Stem Cell Therapy in Regenerative Medicine: Current Progress',
+    keywords: ['Stem Cells', 'Regenerative Medicine', 'Cell Therapy', 'Tissue Engineering'],
+    authors: 'David Chen*, Sarah Connor, Mark Davis*',
+    submissionDate: '2024-02-24',
+    status: 'Decision in Process'
+  },
+  {
+    id: '234603',
+    username: 'Prof. Lisa Anderson',
+    title: 'Artificial Neural Networks for Financial Risk Assessment',
+    keywords: ['Neural Networks', 'Finance', 'Risk Assessment', 'Machine Learning'],
+    authors: 'Lisa Anderson*, Robert Garcia, Anna Kowalski',
+    submissionDate: '2024-02-22',
+    status: 'Under Review'
+  },
+  {
+    id: '234604',
+    username: 'Dr. Mark Thompson',
+    title: 'Gene Therapy Approaches for Inherited Diseases',
+    keywords: ['Gene Therapy', 'Genetic Diseases', 'Molecular Medicine', 'Treatment'],
+    authors: 'Mark Thompson*, Jennifer Lee, Alex Kumar*',
+    submissionDate: '2024-02-20',
+    status: 'Minor Revision'
   }
 ];
 
@@ -118,6 +254,94 @@ const mockWaitingReviewManuscripts = [
     submissionDate: '2024-03-14',
     manuscriptFile: 'manuscript_234575.pdf',
     filesZip: '234575_all_files.zip'
+  },
+  {
+    id: '234605',
+    username: 'Dr. Emma Thompson',
+    title: 'Machine Learning for Climate Change Prediction and Mitigation',
+    abstract: 'Climate change poses unprecedented challenges requiring innovative solutions. This research presents novel machine learning approaches for predicting climate patterns and evaluating mitigation strategies. Our models integrate satellite data, atmospheric measurements, and socioeconomic factors to provide comprehensive climate assessments for policy makers.',
+    keywords: ['Climate Change', 'Machine Learning', 'Environmental Science', 'Policy'],
+    authors: 'Emma Thompson*, Robert Garcia, Lisa Park*',
+    submissionDate: '2024-03-12',
+    manuscriptFile: 'manuscript_234605.pdf',
+    filesZip: '234605_all_files.zip'
+  },
+  {
+    id: '234606',
+    username: 'Prof. Michael Chang',
+    title: 'Quantum Cryptography for Next-Generation Security Systems',
+    abstract: 'As quantum computing advances, traditional cryptographic methods face new vulnerabilities. This paper explores quantum cryptography protocols that leverage quantum mechanical properties to ensure unbreakable security. We present practical implementations and performance evaluations of quantum key distribution systems.',
+    keywords: ['Quantum Cryptography', 'Security', 'Quantum Computing', 'Encryption'],
+    authors: 'Michael Chang*, Sarah Kim, David Brown',
+    submissionDate: '2024-03-10',
+    manuscriptFile: 'manuscript_234606.pdf',
+    filesZip: '234606_all_files.zip'
+  },
+  {
+    id: '234607',
+    username: 'Dr. Nina Patel',
+    title: 'Bioengineering Approaches to Tissue Regeneration',
+    abstract: 'Tissue engineering represents a promising frontier in regenerative medicine. This study investigates novel bioengineering approaches for tissue regeneration, including 3D bioprinting, scaffold design, and stem cell integration. Our findings demonstrate significant improvements in tissue viability and functional recovery.',
+    keywords: ['Bioengineering', 'Tissue Regeneration', '3D Bioprinting', 'Stem Cells'],
+    authors: 'Nina Patel*, Carlos Martinez, Jennifer Lee*',
+    submissionDate: '2024-03-08',
+    manuscriptFile: 'manuscript_234607.pdf',
+    filesZip: '234607_all_files.zip'
+  },
+  {
+    id: '234608',
+    username: 'Prof. David Lee',
+    title: 'Artificial Intelligence in Personalized Medicine',
+    abstract: 'Personalized medicine aims to tailor treatments to individual patients based on their genetic, environmental, and lifestyle factors. This research explores AI-driven approaches for personalized treatment recommendations, drug selection, and outcome prediction. Our platform demonstrates improved patient outcomes and reduced adverse effects.',
+    keywords: ['Personalized Medicine', 'AI', 'Genomics', 'Healthcare'],
+    authors: 'David Lee*, Anna Kowalski, Mark Thompson',
+    submissionDate: '2024-03-06',
+    manuscriptFile: 'manuscript_234608.pdf',
+    filesZip: '234608_all_files.zip'
+  },
+  {
+    id: '234609',
+    username: 'Dr. Rachel Green',
+    title: 'Sustainable Energy Storage Solutions for Renewable Systems',
+    abstract: 'Energy storage is crucial for the widespread adoption of renewable energy sources. This paper examines advanced battery technologies, including solid-state batteries, flow batteries, and hybrid storage systems. We evaluate their performance, cost-effectiveness, and environmental impact for large-scale deployment.',
+    keywords: ['Energy Storage', 'Battery Technology', 'Renewable Energy', 'Sustainability'],
+    authors: 'Rachel Green*, Thomas Anderson, Maria Santos',
+    submissionDate: '2024-03-04',
+    manuscriptFile: 'manuscript_234609.pdf',
+    filesZip: '234609_all_files.zip'
+  },
+  {
+    id: '234610',
+    username: 'Prof. James Wilson',
+    title: 'Nanotechnology Applications in Cancer Therapy',
+    abstract: 'Nanotechnology offers promising solutions for targeted cancer therapy with reduced side effects. This research investigates nanoparticle-based drug delivery systems, including liposomes, polymeric nanoparticles, and gold nanoparticles. Our studies demonstrate enhanced tumor targeting and improved therapeutic efficacy.',
+    keywords: ['Nanotechnology', 'Cancer Therapy', 'Drug Delivery', 'Targeted Treatment'],
+    authors: 'James Wilson*, Helen Carter, Kevin Liu*',
+    submissionDate: '2024-03-02',
+    manuscriptFile: 'manuscript_234610.pdf',
+    filesZip: '234610_all_files.zip'
+  },
+  {
+    id: '234611',
+    username: 'Dr. Sophie Chen',
+    title: 'Robotics and Automation in Modern Manufacturing',
+    abstract: 'The manufacturing industry is undergoing a digital transformation driven by robotics and automation technologies. This study examines the integration of collaborative robots, AI-driven quality control, and predictive maintenance systems. Our analysis shows significant improvements in productivity, quality, and worker safety.',
+    keywords: ['Robotics', 'Manufacturing', 'Automation', 'Industry 4.0'],
+    authors: 'Sophie Chen*, Mohammad Ali, Jennifer Davis',
+    submissionDate: '2024-02-28',
+    manuscriptFile: 'manuscript_234611.pdf',
+    filesZip: '234611_all_files.zip'
+  },
+  {
+    id: '234612',
+    username: 'Prof. Robert Davis',
+    title: 'Virtual and Augmented Reality in Medical Training',
+    abstract: 'Medical education is being revolutionized by virtual and augmented reality technologies. This paper explores immersive training platforms for surgical procedures, anatomy education, and patient diagnosis. Our evaluation demonstrates enhanced learning outcomes and skill retention among medical students and professionals.',
+    keywords: ['Virtual Reality', 'Medical Education', 'Training', 'Healthcare Technology'],
+    authors: 'Robert Davis*, Lisa Anderson, Alex Kumar',
+    submissionDate: '2024-02-26',
+    manuscriptFile: 'manuscript_234612.pdf',
+    filesZip: '234612_all_files.zip'
   }
 ];
 
@@ -177,6 +401,86 @@ const mockPendingReviewManuscripts = [
       { name: 'Dr. Rachel Green', status: 'accepted' }
     ],
     reviewDeadlines: ['2024-04-05', '2024-04-08']
+  },
+  {
+    id: '234613',
+    username: 'Dr. Alan Foster',
+    title: 'Machine Learning for Autonomous Systems',
+    abstract: 'Autonomous systems require sophisticated decision-making capabilities to operate safely in complex environments. This research develops machine learning algorithms for autonomous navigation, obstacle avoidance, and task planning. Our approach combines reinforcement learning with computer vision to create robust autonomous behaviors.',
+    keywords: ['Machine Learning', 'Autonomous Systems', 'Robotics', 'Computer Vision'],
+    authors: 'Alan Foster*, Catherine Smith, Daniel Kim',
+    submissionDate: '2024-02-18',
+    reviewers: [
+      { name: 'Dr. Emma Wilson', status: 'pending' },
+      { name: 'Prof. Mark Thompson', status: 'accepted' }
+    ],
+    reviewDeadlines: ['2024-04-03', '2024-04-06']
+  },
+  {
+    id: '234614',
+    username: 'Prof. Maria Rodriguez',
+    title: 'Precision Medicine in Oncology: Genomic Approaches',
+    abstract: 'Cancer treatment is increasingly personalized based on tumor genomics and patient characteristics. This study investigates genomic biomarkers for treatment selection and outcome prediction in various cancer types. Our analysis of large-scale genomic datasets reveals novel therapeutic targets and resistance mechanisms.',
+    keywords: ['Precision Medicine', 'Oncology', 'Genomics', 'Cancer Treatment'],
+    authors: 'Maria Rodriguez*, Kevin Zhang, Lisa Chen*',
+    submissionDate: '2024-02-16',
+    reviewers: [],
+    reviewDeadlines: []
+  },
+  {
+    id: '234615',
+    username: 'Dr. Thomas Anderson',
+    title: 'Sustainable Manufacturing Processes in the Circular Economy',
+    abstract: 'The circular economy paradigm requires manufacturing processes that minimize waste and maximize resource efficiency. This research examines sustainable manufacturing technologies, including additive manufacturing, bio-based materials, and closed-loop recycling systems. Our framework demonstrates significant environmental and economic benefits.',
+    keywords: ['Sustainable Manufacturing', 'Circular Economy', 'Resource Efficiency', 'Environmental Impact'],
+    authors: 'Thomas Anderson*, Sophie Brown, Mark Wilson',
+    submissionDate: '2024-02-14',
+    reviewers: [
+      { name: 'Dr. Rachel Green', status: 'accepted' },
+      { name: 'Prof. James Wilson', status: 'pending' },
+      { name: 'Dr. Kevin Liu', status: 'accepted' }
+    ],
+    reviewDeadlines: ['2024-04-01', '2024-04-04', '2024-04-07']
+  },
+  {
+    id: '234616',
+    username: 'Prof. Helen Carter',
+    title: 'Biomaterials for Neural Interface Applications',
+    abstract: 'Neural interfaces require biocompatible materials that can maintain stable connections with neural tissue. This study develops novel biomaterials for brain-computer interfaces, focusing on conductivity, biocompatibility, and long-term stability. Our materials show promising results in both in vitro and in vivo studies.',
+    keywords: ['Biomaterials', 'Neural Interfaces', 'Brain-Computer Interface', 'Biocompatibility'],
+    authors: 'Helen Carter*, Mohammad Ali, Jennifer Park*',
+    submissionDate: '2024-02-12',
+    reviewers: [
+      { name: 'Prof. David Chen', status: 'declined' },
+      { name: 'Dr. Lisa Park', status: 'pending' }
+    ],
+    reviewDeadlines: ['2024-03-30', '2024-04-02']
+  },
+  {
+    id: '234617',
+    username: 'Dr. Carlos Martinez',
+    title: 'Smart Cities: IoT Infrastructure and Data Analytics',
+    abstract: 'Smart cities leverage IoT technologies and data analytics to improve urban services and quality of life. This research presents a comprehensive IoT infrastructure for smart city applications, including traffic management, energy optimization, and environmental monitoring. Our platform demonstrates scalability and cost-effectiveness.',
+    keywords: ['Smart Cities', 'IoT', 'Data Analytics', 'Urban Technology'],
+    authors: 'Carlos Martinez*, Nina Patel, David Lee',
+    submissionDate: '2024-02-10',
+    reviewers: [],
+    reviewDeadlines: []
+  },
+  {
+    id: '234618',
+    username: 'Prof. Jennifer Lee',
+    title: 'Artificial Intelligence in Financial Risk Management',
+    abstract: 'Financial institutions face increasing complexity in risk assessment and management. This study develops AI-driven approaches for credit risk evaluation, market risk prediction, and fraud detection. Our machine learning models demonstrate superior performance compared to traditional statistical methods.',
+    keywords: ['AI', 'Financial Risk', 'Machine Learning', 'Risk Management'],
+    authors: 'Jennifer Lee*, Robert Taylor, Anna Kowalski',
+    submissionDate: '2024-02-08',
+    reviewers: [
+      { name: 'Dr. Emma Wilson', status: 'accepted' },
+      { name: 'Prof. Alan Smith', status: 'pending' },
+      { name: 'Dr. Sarah Connor', status: 'accepted' }
+    ],
+    reviewDeadlines: ['2024-03-28', '2024-03-31', '2024-04-03']
   }
 ];
 
@@ -287,6 +591,16 @@ const Manuscripts = () => {
   const [completedAuthorFilter, setCompletedAuthorFilter] = useState('');
   const [completedStatusFilter, setCompletedStatusFilter] = useState('all');
 
+  // Pagination states for each tab
+  const [allCurrentPage, setAllCurrentPage] = useState(1);
+  const [waitingCurrentPage, setWaitingCurrentPage] = useState(1);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
+  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
+  const [decisionCurrentPage, setDecisionCurrentPage] = useState(1);
+  const [completedCurrentPage, setCompletedCurrentPage] = useState(1);
+  
+  const itemsPerPage = 10;
+
   // State for managing manuscript data
   const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
   const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
@@ -334,6 +648,70 @@ const Manuscripts = () => {
     return matchesTitle && matchesAuthor;
   });
 
+  // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
+  const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
+    const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
+    return acceptedCount < 3;
+  });
+
+  // Apply search filters to pending manuscripts
+  const filteredPendingReviewManuscripts = pendingManuscriptsFiltered.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
+    const matchesReviewer = pendingReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
+  // Apply search filters to waiting for decision manuscripts
+  const filteredWaitingDecisionManuscripts = mockWaitingDecisionManuscripts.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(decisionIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(decisionTitleFilter.toLowerCase());
+    const matchesReviewer = decisionReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name === decisionReviewerFilter);
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
+  // Assigned reviewer filters
+  const filteredAssignedManuscripts = mockAssignedManuscripts.filter(manuscript => {
+    const matchesId = manuscript.id.toLowerCase().includes(assignedIdFilter.toLowerCase());
+    const matchesTitle = manuscript.title.toLowerCase().includes(assignedTitleFilter.toLowerCase());
+    const matchesReviewer = assignedReviewerFilter === 'all' || 
+      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(assignedReviewerFilter.toLowerCase()));
+    return matchesId && matchesTitle && matchesReviewer;
+  });
+
+  // Filter completed manuscripts (Accept or Reject status)
+  const filteredCompletedManuscripts = mockManuscripts.filter(manuscript => {
+    const isCompleted = manuscript.status === 'Accept' || manuscript.status === 'Rejected';
+    const matchesTitle = manuscript.title.toLowerCase().includes(completedTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(completedAuthorFilter.toLowerCase());
+    const matchesStatus = completedStatusFilter === 'all' || manuscript.status === completedStatusFilter;
+    return isCompleted && matchesTitle && matchesAuthor && matchesStatus;
+  });
+
+  // Pagination logic for all tabs
+  const paginateData = (data: any[], currentPage: number) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return data.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (dataLength: number) => Math.ceil(dataLength / itemsPerPage);
+
+  const paginatedAllManuscripts = paginateData(filteredManuscripts, allCurrentPage);
+  const paginatedWaitingManuscripts = paginateData(filteredWaitingReviewManuscripts, waitingCurrentPage);
+  const paginatedPendingManuscripts = paginateData(filteredPendingReviewManuscripts, pendingCurrentPage);
+  const paginatedAssignedManuscripts = paginateData(filteredAssignedManuscripts, assignedCurrentPage);
+  const paginatedDecisionManuscripts = paginateData(filteredWaitingDecisionManuscripts, decisionCurrentPage);
+  const paginatedCompletedManuscripts = paginateData(filteredCompletedManuscripts, completedCurrentPage);
+
+  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
+    return matchesTitle && matchesAuthor;
+  });
+
   // Mock data for Assigned Reviewer tab (manuscripts with 3+ accepted reviewers)
   const mockAssignedManuscripts = [
     {
@@ -364,6 +742,90 @@ const Manuscripts = () => {
         { name: 'Dr. Computing Guru', status: 'accepted' }
       ],
       reviewDeadlines: ['2024-03-28', '2024-03-30', '2024-04-02']
+    },
+    {
+      id: '234619',
+      title: 'Advanced Robotics in Healthcare Applications',
+      abstract: 'Healthcare robotics is transforming patient care and medical procedures. This research investigates advanced robotic systems for surgery, rehabilitation, and patient assistance.',
+      keywords: ['Robotics', 'Healthcare', 'Surgery', 'Medical Technology'],
+      authors: 'Dr. Robot Master*, Prof. Medical Tech, Dr. Healthcare Innovation',
+      submissionDate: '2024-02-10',
+      reviewers: [
+        { name: 'Dr. Robotics Expert', status: 'accepted' },
+        { name: 'Prof. Medical Engineering', status: 'accepted' },
+        { name: 'Dr. Surgery Specialist', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-26', '2024-03-28', '2024-03-30']
+    },
+    {
+      id: '234620',
+      title: 'Sustainable Energy Systems for Smart Cities',
+      abstract: 'Smart cities require sustainable energy solutions to support growing urban populations. This study examines integrated energy systems combining solar, wind, and storage technologies.',
+      keywords: ['Smart Cities', 'Sustainable Energy', 'Urban Planning', 'Energy Storage'],
+      authors: 'Prof. Energy Guru*, Dr. City Planner, Dr. Sustainability Expert',
+      submissionDate: '2024-02-08',
+      reviewers: [
+        { name: 'Dr. Energy Systems', status: 'accepted' },
+        { name: 'Prof. Urban Technology', status: 'accepted' },
+        { name: 'Dr. Renewable Expert', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-24', '2024-03-26', '2024-03-28']
+    },
+    {
+      id: '234621',
+      title: 'Artificial Intelligence in Financial Trading Systems',
+      abstract: 'Financial markets are increasingly automated through AI trading systems. This research develops sophisticated algorithms for market prediction and automated trading.',
+      keywords: ['AI', 'Financial Trading', 'Market Prediction', 'Automated Systems'],
+      authors: 'Dr. Finance AI*, Prof. Trading Systems, Dr. Market Analysis',
+      submissionDate: '2024-02-06',
+      reviewers: [
+        { name: 'Prof. Financial AI', status: 'accepted' },
+        { name: 'Dr. Market Expert', status: 'accepted' },
+        { name: 'Dr. Trading Specialist', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-22', '2024-03-24', '2024-03-26']
+    },
+    {
+      id: '234622',
+      title: 'Biotechnology Applications in Environmental Restoration',
+      abstract: 'Environmental restoration increasingly relies on biotechnology solutions. This study explores bioremediation techniques using engineered microorganisms for pollution cleanup.',
+      keywords: ['Biotechnology', 'Environmental Restoration', 'Bioremediation', 'Pollution Control'],
+      authors: 'Prof. Bio Expert*, Dr. Environmental Science, Dr. Microbiology',
+      submissionDate: '2024-02-04',
+      reviewers: [
+        { name: 'Dr. Biotechnology', status: 'accepted' },
+        { name: 'Prof. Environmental Engineering', status: 'accepted' },
+        { name: 'Dr. Remediation Expert', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-20', '2024-03-22', '2024-03-24']
+    },
+    {
+      id: '234623',
+      title: 'Neural Interface Technologies for Paralysis Treatment',
+      abstract: 'Neural interfaces offer hope for paralysis patients by restoring communication between brain and muscles. This research develops advanced brain-computer interfaces.',
+      keywords: ['Neural Interfaces', 'Brain-Computer Interface', 'Paralysis Treatment', 'Neurotechnology'],
+      authors: 'Dr. Neural Tech*, Prof. Neuroscience, Dr. Medical Devices',
+      submissionDate: '2024-02-02',
+      reviewers: [
+        { name: 'Prof. Neurotechnology', status: 'accepted' },
+        { name: 'Dr. Brain Interface', status: 'accepted' },
+        { name: 'Dr. Neural Engineering', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-18', '2024-03-20', '2024-03-22']
+    },
+    {
+      id: '234624',
+      title: 'Quantum Sensors for Medical Diagnostics',
+      abstract: 'Quantum sensors provide unprecedented sensitivity for medical diagnostics. This study develops quantum-enhanced imaging and detection systems for early disease diagnosis.',
+      keywords: ['Quantum Sensors', 'Medical Diagnostics', 'Quantum Imaging', 'Early Detection'],
+      authors: 'Prof. Quantum Medicine*, Dr. Sensor Technology, Dr. Medical Physics',
+      submissionDate: '2024-01-30',
+      reviewers: [
+        { name: 'Dr. Quantum Physics', status: 'accepted' },
+        { name: 'Prof. Medical Imaging', status: 'accepted' },
+        { name: 'Dr. Diagnostic Systems', status: 'accepted' }
+      ],
+      reviewDeadlines: ['2024-03-16', '2024-03-18', '2024-03-20']
     }
   ];
 
@@ -430,6 +892,198 @@ const Manuscripts = () => {
           confidentialComments: 'Good practical insights but needs better integration with existing financial security frameworks.',
           publicComments: 'Please strengthen the literature review and provide more detailed analysis of real-world applicability.',
           submissionDate: '2024-03-24'
+        }
+      ]
+    },
+    {
+      id: '234625',
+      title: 'Sustainable Agriculture Through Precision Farming',
+      authors: 'Prof. Farm Tech*, Dr. Crop Science, Dr. Environmental Systems',
+      submissionDate: '2024-01-12',
+      reviewers: [
+        { 
+          name: 'Dr. Agriculture Expert', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Comprehensive study on precision farming with strong practical implications. Methodology is robust and results are significant.',
+          publicComments: 'Excellent work that will advance sustainable agriculture practices. Minor formatting issues in references section.',
+          submissionDate: '2024-03-15'
+        },
+        { 
+          name: 'Prof. Environmental Science', 
+          score: 9, 
+          decision: 'Accept',
+          confidentialComments: 'Outstanding contribution to sustainable agriculture. Clear environmental benefits demonstrated.',
+          publicComments: 'Highly recommend acceptance. This work provides valuable insights for sustainable farming practices.',
+          submissionDate: '2024-03-12'
+        },
+        { 
+          name: 'Dr. Technology Integration', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good integration of technology solutions. Some concerns about scalability need addressing.',
+          publicComments: 'Please provide more analysis on scalability and cost-effectiveness for small-scale farmers.',
+          submissionDate: '2024-03-18'
+        }
+      ]
+    },
+    {
+      id: '234626',
+      title: 'Advanced Materials for Energy Storage Systems',
+      authors: 'Dr. Materials Engineer*, Prof. Energy Systems, Dr. Battery Technology',
+      submissionDate: '2024-01-10',
+      reviewers: [
+        { 
+          name: 'Prof. Materials Science', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Novel materials approach with strong experimental validation. Results show promising improvements in energy density.',
+          publicComments: 'Well-executed research with clear applications. Suggest minor revisions to improve clarity in methodology section.',
+          submissionDate: '2024-03-10'
+        },
+        { 
+          name: 'Dr. Energy Storage', 
+          score: 6, 
+          decision: 'Major Revision',
+          confidentialComments: 'Interesting materials but concerns about long-term stability and manufacturing scalability.',
+          publicComments: 'Significant improvements needed in durability testing and cost analysis.',
+          submissionDate: '2024-03-08'
+        },
+        { 
+          name: 'Prof. Chemical Engineering', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good chemical analysis but needs better integration with existing battery technologies.',
+          publicComments: 'Please provide more detailed comparison with current commercial technologies.',
+          submissionDate: '2024-03-14'
+        }
+      ]
+    },
+    {
+      id: '234627',
+      title: 'Artificial Intelligence in Autonomous Vehicle Safety',
+      authors: 'Dr. AI Safety*, Prof. Vehicle Systems, Dr. Transportation Tech',
+      submissionDate: '2024-01-08',
+      reviewers: [
+        { 
+          name: 'Prof. AI Systems', 
+          score: 9, 
+          decision: 'Accept',
+          confidentialComments: 'Groundbreaking work in AI safety for autonomous vehicles. Methodology is sound and results are impressive.',
+          publicComments: 'Excellent contribution to autonomous vehicle safety. Highly recommend for publication.',
+          submissionDate: '2024-03-05'
+        },
+        { 
+          name: 'Dr. Vehicle Safety', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Strong safety analysis with practical implications for industry implementation.',
+          publicComments: 'Well-researched paper with clear safety improvements demonstrated.',
+          submissionDate: '2024-03-02'
+        },
+        { 
+          name: 'Prof. Transportation Engineering', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Comprehensive analysis of safety systems with good real-world validation.',
+          publicComments: 'Strong technical contribution to autonomous vehicle safety systems.',
+          submissionDate: '2024-03-07'
+        }
+      ]
+    },
+    {
+      id: '234628',
+      title: 'Quantum Computing Applications in Drug Discovery',
+      authors: 'Prof. Quantum Pharma*, Dr. Molecular Simulation, Dr. Drug Design',
+      submissionDate: '2024-01-05',
+      reviewers: [
+        { 
+          name: 'Dr. Quantum Computing', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Interesting application of quantum computing but needs more rigorous comparison with classical methods.',
+          publicComments: 'Please provide detailed performance comparison with existing classical drug discovery methods.',
+          submissionDate: '2024-02-28'
+        },
+        { 
+          name: 'Prof. Drug Discovery', 
+          score: 6, 
+          decision: 'Major Revision',
+          confidentialComments: 'Novel approach but concerns about practical feasibility with current quantum hardware limitations.',
+          publicComments: 'Significant improvements needed in addressing hardware limitations and practical implementation challenges.',
+          submissionDate: '2024-02-25'
+        },
+        { 
+          name: 'Dr. Computational Chemistry', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Strong computational chemistry foundation with promising quantum advantage demonstrated.',
+          publicComments: 'Well-executed computational work with clear quantum computing benefits shown.',
+          submissionDate: '2024-03-01'
+        }
+      ]
+    },
+    {
+      id: '234629',
+      title: 'Sustainable Urban Planning with Smart Technology',
+      authors: 'Dr. Urban Tech*, Prof. City Planning, Dr. Sustainability Systems',
+      submissionDate: '2024-01-03',
+      reviewers: [
+        { 
+          name: 'Prof. Urban Planning', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Comprehensive approach to smart city planning with strong sustainability focus.',
+          publicComments: 'Excellent integration of smart technology with sustainable urban development principles.',
+          submissionDate: '2024-02-22'
+        },
+        { 
+          name: 'Dr. Smart Cities', 
+          score: 9, 
+          decision: 'Accept',
+          confidentialComments: 'Outstanding contribution to smart city technology with clear practical applications.',
+          publicComments: 'Highly recommend acceptance. This work provides valuable framework for smart city development.',
+          submissionDate: '2024-02-20'
+        },
+        { 
+          name: 'Prof. Environmental Planning', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good environmental considerations but needs more detailed analysis of long-term impacts.',
+          publicComments: 'Please expand the section on long-term environmental impact assessment.',
+          submissionDate: '2024-02-24'
+        }
+      ]
+    },
+    {
+      id: '234630',
+      title: 'Biotechnology Solutions for Environmental Remediation',
+      authors: 'Prof. Environmental Biotech*, Dr. Microbiology, Dr. Pollution Control',
+      submissionDate: '2024-01-01',
+      reviewers: [
+        { 
+          name: 'Dr. Environmental Engineering', 
+          score: 8, 
+          decision: 'Accept',
+          confidentialComments: 'Innovative biotechnology approach with strong experimental validation and environmental benefits.',
+          publicComments: 'Well-designed experiments demonstrating effective pollution remediation using biotechnology.',
+          submissionDate: '2024-02-18'
+        },
+        { 
+          name: 'Prof. Microbiology', 
+          score: 7, 
+          decision: 'Minor Revision',
+          confidentialComments: 'Good microbiological foundation but needs more detailed analysis of microbial community dynamics.',
+          publicComments: 'Please provide more comprehensive analysis of microbial interactions and long-term stability.',
+          submissionDate: '2024-02-15'
+        },
+        { 
+          name: 'Dr. Bioremediation', 
+          score: 9, 
+          decision: 'Accept',
+          confidentialComments: 'Excellent bioremediation study with clear practical applications and environmental benefits.',
+          publicComments: 'Outstanding contribution to environmental biotechnology. Highly recommend for publication.',
+          submissionDate: '2024-02-20'
         }
       ]
     }
