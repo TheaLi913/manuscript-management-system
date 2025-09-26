@@ -1092,7 +1092,7 @@ const Manuscripts = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col gap-2">
                               {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
                                 <TooltipProvider key={index}>
                                   <Tooltip>
