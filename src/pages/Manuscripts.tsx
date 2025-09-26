@@ -1288,7 +1288,7 @@ const Manuscripts = () => {
                             <TableCell>
                               <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[70px] flex items-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex items-center">
                                     {reviewer.name}
                                   </div>
                                 ))}
@@ -1297,7 +1297,7 @@ const Manuscripts = () => {
                             <TableCell>
                               <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[70px] flex flex-col justify-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex flex-col justify-center">
                                     <div className="font-medium">{reviewer.score}/10</div>
                                     <div className={`text-xs ${
                                       reviewer.decision === 'Accept' ? 'text-green-700' :
@@ -1335,7 +1335,7 @@ const Manuscripts = () => {
                             <TableCell>
                               <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[70px] flex items-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex items-center">
                                     {reviewer.submissionDate}
                                   </div>
                                 ))}
