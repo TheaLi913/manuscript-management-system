@@ -1070,7 +1070,7 @@ const Manuscripts = () => {
                           <TableCell>
                             <div className="space-y-1">
                               {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
-                                <div key={index} className="flex items-center justify-between py-1">
+                                <div key={index} className="flex items-center justify-between py-2">
                                   <div className="flex items-center gap-2 text-sm">
                                     <span className="text-blue-700 font-medium">
                                       {reviewer.name}
@@ -1118,7 +1118,7 @@ const Manuscripts = () => {
                               {manuscript.reviewDeadlines
                                 .slice(0, manuscript.reviewers.filter(r => r.status === 'accepted').length)
                                 .map((deadline, index) => (
-                                <div key={index} className="text-sm py-1">
+                                <div key={index} className="text-sm py-2 h-10 flex items-center">
                                   {deadline}
                                 </div>
                               ))}
