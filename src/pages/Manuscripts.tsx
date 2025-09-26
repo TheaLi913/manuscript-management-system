@@ -1286,18 +1286,18 @@ const Manuscripts = () => {
                               <div className="font-medium">{manuscript.title}</div>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[60px] flex items-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex items-start">
                                     {reviewer.name}
                                   </div>
                                 ))}
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[60px] flex flex-col justify-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex flex-col justify-start">
                                     <div className="font-medium">{reviewer.score}/10</div>
                                     <div className={`text-xs ${
                                       reviewer.decision === 'Accept' ? 'text-green-700' :
@@ -1313,9 +1313,9 @@ const Manuscripts = () => {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-3 max-w-md">
+                              <div className="space-y-4 max-w-md">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[60px]">
+                                  <div key={index} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[70px]">
                                     <div className="text-blue-700 font-medium mb-1">
                                       Confidential (Editor):
                                     </div>
@@ -1333,9 +1333,9 @@ const Manuscripts = () => {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 {manuscript.reviewers.map((reviewer, index) => (
-                                  <div key={index} className="text-sm min-h-[60px] flex items-start">
+                                  <div key={index} className="text-sm min-h-[70px] flex items-start">
                                     {reviewer.submissionDate}
                                   </div>
                                 ))}
