@@ -1047,7 +1047,6 @@ const Manuscripts = () => {
                         <TableHead>Submission Date</TableHead>
                         <TableHead>Reviewers</TableHead>
                         <TableHead>Review DDL</TableHead>
-                        <TableHead>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1124,9 +1123,6 @@ const Manuscripts = () => {
                                 </div>
                               ))}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {/* Empty cell since actions are now inline with reviewers */}
                           </TableCell>
                         </TableRow>
                       ))}
