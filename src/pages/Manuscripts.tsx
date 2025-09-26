@@ -484,236 +484,8 @@ const mockPendingReviewManuscripts = [
   }
 ];
 
-// Mock reviewer data
-const mockReviewers = [
-  { id: '1', name: 'Dr. Emma Wilson', expertise: 'Machine Learning' },
-  { id: '2', name: 'Prof. David Chen', expertise: 'Computer Science' },
-  { id: '3', name: 'Prof. Alan Smith', expertise: 'Cryptography' },
-  { id: '4', name: 'Dr. Sarah Connor', expertise: 'Cybersecurity' },
-  { id: '5', name: 'Dr. Kevin Liu', expertise: 'Quantum Computing' },
-  { id: '6', name: 'Prof. Helen Carter', expertise: 'Biomedical Engineering' },
-  { id: '7', name: 'Dr. Rachel Green', expertise: 'Environmental Science' },
-  { id: '8', name: 'Prof. James Wilson', expertise: 'Materials Science' },
-  { id: '9', name: 'Dr. Lisa Park', expertise: 'Neuroscience' },
-  { id: '10', name: 'Prof. Mark Thompson', expertise: 'Physics' }
-];
-
-const statusOptions = [
-  'Submitted to Journal',
-  'With Editor',
-  'Send Back to Author',
-  'Under Review',
-  'Required Reviews Complete',
-  'Decision in Process',
-  'Major Revision',
-  'Minor Revision',
-  'Accept',
-  'Rejected',
-  'Revision Submitted'
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Accept':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'Rejected':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'Under Review':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'Major Revision':
-    case 'Minor Revision':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'Decision in Process':
-      return 'bg-purple-100 text-purple-800 border-purple-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-};
-
-// Schema for send back form validation
-const sendBackSchema = z.object({
-  category: z.enum(['content-quality', 'form-formatting', 'ethics-compliance'], {
-    required_error: "Please select a rejection reason category"
-  }),
-  reason: z.string().trim().min(10, "Detailed reason must be at least 10 characters").max(500, "Detailed reason must be less than 500 characters")
-});
-
-type SendBackFormData = z.infer<typeof sendBackSchema>;
-
-// Type for reviewer assignment
-type ReviewerAssignment = {
-  reviewerId: string;
-  reviewerName: string;
-  deadline: Date | undefined;
-};
-
-// Schema for assign reviewer form validation
-const assignReviewerSchema = z.object({
-  reviewers: z.array(z.object({
-    reviewerId: z.string().min(1, "Please select a reviewer"),
-    reviewerName: z.string(),
-    deadline: z.date({ required_error: "Please select a deadline" })
-  })).min(1, "At least one reviewer must be assigned")
-});
-
-type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
-
-const Manuscripts = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  const { toast } = useToast();
-  
-  // State for "All" tab filters
-  const [titleFilter, setTitleFilter] = useState('');
-  const [authorFilter, setAuthorFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  
-  // State for "Waiting for Review" tab filters
-  const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
-  const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
-
-  // State for "Pending Review" tab filters
-  const [pendingIdFilter, setPendingIdFilter] = useState('');
-  const [pendingTitleFilter, setPendingTitleFilter] = useState('');
-  const [pendingReviewerFilter, setPendingReviewerFilter] = useState('all');
-
-  // State for "Waiting for Decision" tab filters
-  const [decisionIdFilter, setDecisionIdFilter] = useState('');
-  const [decisionTitleFilter, setDecisionTitleFilter] = useState('');
-  const [decisionReviewerFilter, setDecisionReviewerFilter] = useState('all');
-
-  // State for "Completed" tab filters
-  const [completedTitleFilter, setCompletedTitleFilter] = useState('');
-  const [completedAuthorFilter, setCompletedAuthorFilter] = useState('');
-  const [completedStatusFilter, setCompletedStatusFilter] = useState('all');
-
-  // Pagination states for each tab
-  const [allCurrentPage, setAllCurrentPage] = useState(1);
-  const [waitingCurrentPage, setWaitingCurrentPage] = useState(1);
-  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
-  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
-  const [decisionCurrentPage, setDecisionCurrentPage] = useState(1);
-  const [completedCurrentPage, setCompletedCurrentPage] = useState(1);
-  
-  const itemsPerPage = 10;
-
-  // State for managing manuscript data
-  const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
-  const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
-
-  // Dialog states
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
-  const [assignReviewerDialogOpen, setAssignReviewerDialogOpen] = useState(false);
-  const [decideDialogOpen, setDecideDialogOpen] = useState(false);
-  const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>('');
-  
-  // Send back form state
-  const [sendBackForm, setSendBackForm] = useState<SendBackFormData>({
-    category: 'content-quality' as const,
-    reason: ''
-  });
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof SendBackFormData, string>>>({});
-
-  // Assign reviewer form state
-  const [reviewerAssignments, setReviewerAssignments] = useState<ReviewerAssignment[]>([{
-    reviewerId: '',
-    reviewerName: '',
-    deadline: undefined
-  }]);
-  const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
-
-  // Decide form state
-  const [decideForm, setDecideForm] = useState({
-    decision: '' as 'Major Revision' | 'Minor Revision' | 'Accept' | 'Reject' | '',
-    reason: '',
-    comments: ''
-  });
-  const [decideFormErrors, setDecideFormErrors] = useState<Partial<Record<keyof typeof decideForm, string>>>({});
-
-  const filteredManuscripts = mockManuscripts.filter(manuscript => {
-    const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(authorFilter.toLowerCase());
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || manuscript.status === statusFilter;
-    return matchesTitle && matchesAuthor && matchesStatus;
-  });
-
-  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
-    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
-    return matchesTitle && matchesAuthor;
-  });
-
-  // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
-  const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
-    const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
-    return acceptedCount < 3;
-  });
-
-  // Apply search filters to pending manuscripts
-  const filteredPendingReviewManuscripts = pendingManuscriptsFiltered.filter(manuscript => {
-    const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
-    const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
-    const matchesReviewer = pendingReviewerFilter === 'all' || 
-      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
-    return matchesId && matchesTitle && matchesReviewer;
-  });
-
-  // Apply search filters to waiting for decision manuscripts
-  const filteredWaitingDecisionManuscripts = mockWaitingDecisionManuscripts.filter(manuscript => {
-    const matchesId = manuscript.id.toLowerCase().includes(decisionIdFilter.toLowerCase());
-    const matchesTitle = manuscript.title.toLowerCase().includes(decisionTitleFilter.toLowerCase());
-    const matchesReviewer = decisionReviewerFilter === 'all' || 
-      manuscript.reviewers.some(reviewer => reviewer.name === decisionReviewerFilter);
-    return matchesId && matchesTitle && matchesReviewer;
-  });
-
-  // Assigned reviewer filters
-  const filteredAssignedManuscripts = mockAssignedManuscripts.filter(manuscript => {
-    const matchesId = manuscript.id.toLowerCase().includes(assignedIdFilter.toLowerCase());
-    const matchesTitle = manuscript.title.toLowerCase().includes(assignedTitleFilter.toLowerCase());
-    const matchesReviewer = assignedReviewerFilter === 'all' || 
-      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(assignedReviewerFilter.toLowerCase()));
-    return matchesId && matchesTitle && matchesReviewer;
-  });
-
-  // Filter completed manuscripts (Accept or Reject status)
-  const filteredCompletedManuscripts = mockManuscripts.filter(manuscript => {
-    const isCompleted = manuscript.status === 'Accept' || manuscript.status === 'Rejected';
-    const matchesTitle = manuscript.title.toLowerCase().includes(completedTitleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(completedAuthorFilter.toLowerCase());
-    const matchesStatus = completedStatusFilter === 'all' || manuscript.status === completedStatusFilter;
-    return isCompleted && matchesTitle && matchesAuthor && matchesStatus;
-  });
-
-  // Pagination logic for all tabs
-  const paginateData = (data: any[], currentPage: number) => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return data.slice(startIndex, endIndex);
-  };
-
-  const getTotalPages = (dataLength: number) => Math.ceil(dataLength / itemsPerPage);
-
-  const paginatedAllManuscripts = paginateData(filteredManuscripts, allCurrentPage);
-  const paginatedWaitingManuscripts = paginateData(filteredWaitingReviewManuscripts, waitingCurrentPage);
-  const paginatedPendingManuscripts = paginateData(filteredPendingReviewManuscripts, pendingCurrentPage);
-  const paginatedAssignedManuscripts = paginateData(filteredAssignedManuscripts, assignedCurrentPage);
-  const paginatedDecisionManuscripts = paginateData(filteredWaitingDecisionManuscripts, decisionCurrentPage);
-  const paginatedCompletedManuscripts = paginateData(filteredCompletedManuscripts, completedCurrentPage);
-
-  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
-    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
-    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
-    return matchesTitle && matchesAuthor;
-  });
-
-  // Mock data for Assigned Reviewer tab (manuscripts with 3+ accepted reviewers)
-  const mockAssignedManuscripts = [
+// Mock data for Assigned Reviewer tab (manuscripts with 3+ accepted reviewers)
+const mockAssignedManuscripts = [
     {
       id: '234580',
       title: 'Machine Learning Approaches for Climate Change Prediction',
@@ -829,265 +601,274 @@ const Manuscripts = () => {
     }
   ];
 
-  // Mock data for Waiting for Decision tab (manuscripts with completed reviews)
-  const mockWaitingDecisionManuscripts = [
-    {
-      id: '234582',
-      title: 'Deep Learning Applications in Medical Image Analysis',
-      authors: 'Dr. Medical Smith*, Prof. AI Jones, Dr. Vision Brown',
-      submissionDate: '2024-01-20',
-      reviewers: [
-        { 
-          name: 'Dr. Expert One', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'This manuscript presents novel and significant contributions to medical image analysis. The methodology is sound and the results are impressive.',
-          publicComments: 'The authors have provided comprehensive analysis and validation. Minor revisions suggested for clarity in section 3.2.',
-          submissionDate: '2024-03-25'
-        },
-        { 
-          name: 'Prof. Expert Two', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good work overall, but some concerns about the dataset size and generalizability need to be addressed.',
-          publicComments: 'Please expand the discussion on limitations and provide more details on the validation methodology.',
-          submissionDate: '2024-03-22'
-        },
-        { 
-          name: 'Dr. Expert Three', 
-          score: 9, 
-          decision: 'Accept',
-          confidentialComments: 'Excellent research with clear clinical relevance. Recommend acceptance with minor formatting adjustments.',
-          publicComments: 'Outstanding contribution to the field. Please address the minor formatting issues noted in the attached comments.',
-          submissionDate: '2024-03-28'
-        }
-      ]
-    },
-    {
-      id: '234583',
-      title: 'Blockchain Security in Financial Systems',
-      authors: 'Prof. Crypto Lee*, Dr. Security Wang, Dr. Finance Chen',
-      submissionDate: '2024-01-15',
-      reviewers: [
-        { 
-          name: 'Dr. Blockchain Expert', 
-          score: 6, 
-          decision: 'Major Revision',
-          confidentialComments: 'The core idea is interesting but the paper lacks sufficient technical depth and proper evaluation against existing methods.',
-          publicComments: 'Significant improvements needed in the technical implementation section. Please provide comprehensive comparison with state-of-the-art methods.',
-          submissionDate: '2024-03-20'
-        },
-        { 
-          name: 'Prof. Security Master', 
-          score: 5, 
-          decision: 'Reject',
-          confidentialComments: 'While the topic is relevant, the execution falls short of publication standards. Major methodological flaws identified.',
-          publicComments: 'The paper requires substantial revision of the methodology and additional experimental validation.',
-          submissionDate: '2024-03-18'
-        },
-        { 
-          name: 'Dr. Finance Specialist', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good practical insights but needs better integration with existing financial security frameworks.',
-          publicComments: 'Please strengthen the literature review and provide more detailed analysis of real-world applicability.',
-          submissionDate: '2024-03-24'
-        }
-      ]
-    },
-    {
-      id: '234625',
-      title: 'Sustainable Agriculture Through Precision Farming',
-      authors: 'Prof. Farm Tech*, Dr. Crop Science, Dr. Environmental Systems',
-      submissionDate: '2024-01-12',
-      reviewers: [
-        { 
-          name: 'Dr. Agriculture Expert', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Comprehensive study on precision farming with strong practical implications. Methodology is robust and results are significant.',
-          publicComments: 'Excellent work that will advance sustainable agriculture practices. Minor formatting issues in references section.',
-          submissionDate: '2024-03-15'
-        },
-        { 
-          name: 'Prof. Environmental Science', 
-          score: 9, 
-          decision: 'Accept',
-          confidentialComments: 'Outstanding contribution to sustainable agriculture. Clear environmental benefits demonstrated.',
-          publicComments: 'Highly recommend acceptance. This work provides valuable insights for sustainable farming practices.',
-          submissionDate: '2024-03-12'
-        },
-        { 
-          name: 'Dr. Technology Integration', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good integration of technology solutions. Some concerns about scalability need addressing.',
-          publicComments: 'Please provide more analysis on scalability and cost-effectiveness for small-scale farmers.',
-          submissionDate: '2024-03-18'
-        }
-      ]
-    },
-    {
-      id: '234626',
-      title: 'Advanced Materials for Energy Storage Systems',
-      authors: 'Dr. Materials Engineer*, Prof. Energy Systems, Dr. Battery Technology',
-      submissionDate: '2024-01-10',
-      reviewers: [
-        { 
-          name: 'Prof. Materials Science', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Novel materials approach with strong experimental validation. Results show promising improvements in energy density.',
-          publicComments: 'Well-executed research with clear applications. Suggest minor revisions to improve clarity in methodology section.',
-          submissionDate: '2024-03-10'
-        },
-        { 
-          name: 'Dr. Energy Storage', 
-          score: 6, 
-          decision: 'Major Revision',
-          confidentialComments: 'Interesting materials but concerns about long-term stability and manufacturing scalability.',
-          publicComments: 'Significant improvements needed in durability testing and cost analysis.',
-          submissionDate: '2024-03-08'
-        },
-        { 
-          name: 'Prof. Chemical Engineering', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good chemical analysis but needs better integration with existing battery technologies.',
-          publicComments: 'Please provide more detailed comparison with current commercial technologies.',
-          submissionDate: '2024-03-14'
-        }
-      ]
-    },
-    {
-      id: '234627',
-      title: 'Artificial Intelligence in Autonomous Vehicle Safety',
-      authors: 'Dr. AI Safety*, Prof. Vehicle Systems, Dr. Transportation Tech',
-      submissionDate: '2024-01-08',
-      reviewers: [
-        { 
-          name: 'Prof. AI Systems', 
-          score: 9, 
-          decision: 'Accept',
-          confidentialComments: 'Groundbreaking work in AI safety for autonomous vehicles. Methodology is sound and results are impressive.',
-          publicComments: 'Excellent contribution to autonomous vehicle safety. Highly recommend for publication.',
-          submissionDate: '2024-03-05'
-        },
-        { 
-          name: 'Dr. Vehicle Safety', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Strong safety analysis with practical implications for industry implementation.',
-          publicComments: 'Well-researched paper with clear safety improvements demonstrated.',
-          submissionDate: '2024-03-02'
-        },
-        { 
-          name: 'Prof. Transportation Engineering', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Comprehensive analysis of safety systems with good real-world validation.',
-          publicComments: 'Strong technical contribution to autonomous vehicle safety systems.',
-          submissionDate: '2024-03-07'
-        }
-      ]
-    },
-    {
-      id: '234628',
-      title: 'Quantum Computing Applications in Drug Discovery',
-      authors: 'Prof. Quantum Pharma*, Dr. Molecular Simulation, Dr. Drug Design',
-      submissionDate: '2024-01-05',
-      reviewers: [
-        { 
-          name: 'Dr. Quantum Computing', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Interesting application of quantum computing but needs more rigorous comparison with classical methods.',
-          publicComments: 'Please provide detailed performance comparison with existing classical drug discovery methods.',
-          submissionDate: '2024-02-28'
-        },
-        { 
-          name: 'Prof. Drug Discovery', 
-          score: 6, 
-          decision: 'Major Revision',
-          confidentialComments: 'Novel approach but concerns about practical feasibility with current quantum hardware limitations.',
-          publicComments: 'Significant improvements needed in addressing hardware limitations and practical implementation challenges.',
-          submissionDate: '2024-02-25'
-        },
-        { 
-          name: 'Dr. Computational Chemistry', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Strong computational chemistry foundation with promising quantum advantage demonstrated.',
-          publicComments: 'Well-executed computational work with clear quantum computing benefits shown.',
-          submissionDate: '2024-03-01'
-        }
-      ]
-    },
-    {
-      id: '234629',
-      title: 'Sustainable Urban Planning with Smart Technology',
-      authors: 'Dr. Urban Tech*, Prof. City Planning, Dr. Sustainability Systems',
-      submissionDate: '2024-01-03',
-      reviewers: [
-        { 
-          name: 'Prof. Urban Planning', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Comprehensive approach to smart city planning with strong sustainability focus.',
-          publicComments: 'Excellent integration of smart technology with sustainable urban development principles.',
-          submissionDate: '2024-02-22'
-        },
-        { 
-          name: 'Dr. Smart Cities', 
-          score: 9, 
-          decision: 'Accept',
-          confidentialComments: 'Outstanding contribution to smart city technology with clear practical applications.',
-          publicComments: 'Highly recommend acceptance. This work provides valuable framework for smart city development.',
-          submissionDate: '2024-02-20'
-        },
-        { 
-          name: 'Prof. Environmental Planning', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good environmental considerations but needs more detailed analysis of long-term impacts.',
-          publicComments: 'Please expand the section on long-term environmental impact assessment.',
-          submissionDate: '2024-02-24'
-        }
-      ]
-    },
-    {
-      id: '234630',
-      title: 'Biotechnology Solutions for Environmental Remediation',
-      authors: 'Prof. Environmental Biotech*, Dr. Microbiology, Dr. Pollution Control',
-      submissionDate: '2024-01-01',
-      reviewers: [
-        { 
-          name: 'Dr. Environmental Engineering', 
-          score: 8, 
-          decision: 'Accept',
-          confidentialComments: 'Innovative biotechnology approach with strong experimental validation and environmental benefits.',
-          publicComments: 'Well-designed experiments demonstrating effective pollution remediation using biotechnology.',
-          submissionDate: '2024-02-18'
-        },
-        { 
-          name: 'Prof. Microbiology', 
-          score: 7, 
-          decision: 'Minor Revision',
-          confidentialComments: 'Good microbiological foundation but needs more detailed analysis of microbial community dynamics.',
-          publicComments: 'Please provide more comprehensive analysis of microbial interactions and long-term stability.',
-          submissionDate: '2024-02-15'
-        },
-        { 
-          name: 'Dr. Bioremediation', 
-          score: 9, 
-          decision: 'Accept',
-          confidentialComments: 'Excellent bioremediation study with clear practical applications and environmental benefits.',
-          publicComments: 'Outstanding contribution to environmental biotechnology. Highly recommend for publication.',
-          submissionDate: '2024-02-20'
-        }
-      ]
-    }
-  ];
+// Mock data for Waiting for Decision tab (manuscripts with completed reviews)
+const mockWaitingDecisionManuscripts = [
+  {
+    id: '234582',
+    title: 'Deep Learning Applications in Medical Image Analysis',
+    authors: 'Dr. Medical Smith*, Prof. AI Jones, Dr. Vision Brown',
+    submissionDate: '2024-01-20',
+    reviewers: [
+      { 
+        name: 'Dr. Expert One', 
+        score: 8, 
+        decision: 'Accept',
+        confidentialComments: 'This manuscript presents novel and significant contributions to medical image analysis. The methodology is sound and the results are impressive.',
+        publicComments: 'The authors have provided comprehensive analysis and validation. Minor revisions suggested for clarity in section 3.2.',
+        submissionDate: '2024-03-25'
+      },
+      { 
+        name: 'Prof. Expert Two', 
+        score: 7, 
+        decision: 'Minor Revision',
+        confidentialComments: 'Good work overall, but some concerns about the dataset size and generalizability need to be addressed.',
+        publicComments: 'Please expand the discussion on limitations and provide more details on the validation methodology.',
+        submissionDate: '2024-03-22'
+      },
+      { 
+        name: 'Dr. Expert Three', 
+        score: 9, 
+        decision: 'Accept',
+        confidentialComments: 'Excellent research with clear clinical relevance. Recommend acceptance with minor formatting adjustments.',
+        publicComments: 'Outstanding contribution to the field. Please address the minor formatting issues noted in the attached comments.',
+        submissionDate: '2024-03-28'
+      }
+    ]
+  },
+  {
+    id: '234583',
+    title: 'Blockchain Security in Financial Systems',
+    authors: 'Prof. Crypto Lee*, Dr. Security Wang, Dr. Finance Chen',
+    submissionDate: '2024-01-15',
+    reviewers: [
+      { 
+        name: 'Dr. Blockchain Expert', 
+        score: 6, 
+        decision: 'Major Revision',
+        confidentialComments: 'The core idea is interesting but the paper lacks sufficient technical depth and proper evaluation against existing methods.',
+        publicComments: 'Significant improvements needed in the technical implementation section. Please provide comprehensive comparison with state-of-the-art methods.',
+        submissionDate: '2024-03-20'
+      },
+      { 
+        name: 'Prof. Security Master', 
+        score: 5, 
+        decision: 'Reject',
+        confidentialComments: 'While the topic is relevant, the execution falls short of publication standards. Major methodological flaws identified.',
+        publicComments: 'The paper requires substantial revision of the methodology and additional experimental validation.',
+        submissionDate: '2024-03-18'
+      },
+      { 
+        name: 'Dr. Finance Specialist', 
+        score: 7, 
+        decision: 'Minor Revision',
+        confidentialComments: 'Good practical insights but needs better integration with existing financial security frameworks.',
+        publicComments: 'Please strengthen the literature review and provide more detailed analysis of real-world applicability.',
+        submissionDate: '2024-03-24'
+      }
+    ]
+  },
+  {
+    id: '234625',
+    title: 'Sustainable Agriculture Through Precision Farming',
+    authors: 'Prof. Farm Tech*, Dr. Crop Science, Dr. Environmental Systems',
+    submissionDate: '2024-01-12',
+    reviewers: [
+      { 
+        name: 'Dr. Agriculture Expert', 
+        score: 8, 
+        decision: 'Accept',
+        confidentialComments: 'Comprehensive study on precision farming with strong practical implications. Methodology is robust and results are significant.',
+        publicComments: 'Excellent work that will advance sustainable agriculture practices. Minor formatting issues in references section.',
+        submissionDate: '2024-03-15'
+      },
+      { 
+        name: 'Prof. Environmental Science', 
+        score: 9, 
+        decision: 'Accept',
+        confidentialComments: 'Outstanding contribution to sustainable agriculture. Clear environmental benefits demonstrated.',
+        publicComments: 'Highly recommend acceptance. This work provides valuable insights for sustainable farming practices.',
+        submissionDate: '2024-03-12'
+      },
+      { 
+        name: 'Dr. Technology Integration', 
+        score: 7, 
+        decision: 'Minor Revision',
+        confidentialComments: 'Good integration of technology solutions. Some concerns about scalability need addressing.',
+        publicComments: 'Please provide more analysis on scalability and cost-effectiveness for small-scale farmers.',
+        submissionDate: '2024-03-18'
+      }
+    ]
+  }
+];
+
+// Mock reviewer data
+const mockReviewers = [
+  { id: '1', name: 'Dr. Emma Wilson', expertise: 'Machine Learning' },
+  { id: '2', name: 'Prof. David Chen', expertise: 'Computer Science' },
+  { id: '3', name: 'Prof. Alan Smith', expertise: 'Cryptography' },
+  { id: '4', name: 'Dr. Sarah Connor', expertise: 'Cybersecurity' },
+  { id: '5', name: 'Dr. Kevin Liu', expertise: 'Quantum Computing' },
+  { id: '6', name: 'Prof. Helen Carter', expertise: 'Biomedical Engineering' },
+  { id: '7', name: 'Dr. Rachel Green', expertise: 'Environmental Science' },
+  { id: '8', name: 'Prof. James Wilson', expertise: 'Materials Science' },
+  { id: '9', name: 'Dr. Lisa Park', expertise: 'Neuroscience' },
+  { id: '10', name: 'Prof. Mark Thompson', expertise: 'Physics' }
+];
+
+const statusOptions = [
+  'Submitted to Journal',
+  'With Editor',
+  'Send Back to Author',
+  'Under Review',
+  'Required Reviews Complete',
+  'Decision in Process',
+  'Major Revision',
+  'Minor Revision',
+  'Accept',
+  'Rejected',
+  'Revision Submitted'
+];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Accept':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'Rejected':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'Under Review':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'Major Revision':
+    case 'Minor Revision':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'Decision in Process':
+      return 'bg-purple-100 text-purple-800 border-purple-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+// Schema for send back form validation
+const sendBackSchema = z.object({
+  category: z.enum(['content-quality', 'form-formatting', 'ethics-compliance'], {
+    required_error: "Please select a rejection reason category"
+  }),
+  reason: z.string().trim().min(10, "Detailed reason must be at least 10 characters").max(500, "Detailed reason must be less than 500 characters")
+});
+
+type SendBackFormData = z.infer<typeof sendBackSchema>;
+
+// Type for reviewer assignment
+type ReviewerAssignment = {
+  reviewerId: string;
+  reviewerName: string;
+  deadline: Date | undefined;
+};
+
+// Schema for assign reviewer form validation
+const assignReviewerSchema = z.object({
+  reviewers: z.array(z.object({
+    reviewerId: z.string().min(1, "Please select a reviewer"),
+    reviewerName: z.string(),
+    deadline: z.date({ required_error: "Please select a deadline" })
+  })).min(1, "At least one reviewer must be assigned")
+});
+
+type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
+
+const Manuscripts = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const { toast } = useToast();
+  
+  // State for "All" tab filters
+  const [titleFilter, setTitleFilter] = useState('');
+  const [authorFilter, setAuthorFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  
+  // State for "Waiting for Review" tab filters
+  const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
+  const [waitingAuthorFilter, setWaitingAuthorFilter] = useState('');
+
+  // State for "Pending Review" tab filters
+  const [pendingIdFilter, setPendingIdFilter] = useState('');
+  const [pendingTitleFilter, setPendingTitleFilter] = useState('');
+  const [pendingReviewerFilter, setPendingReviewerFilter] = useState('all');
+
+  // State for "Waiting for Decision" tab filters
+  const [decisionIdFilter, setDecisionIdFilter] = useState('');
+  const [decisionTitleFilter, setDecisionTitleFilter] = useState('');
+  const [decisionReviewerFilter, setDecisionReviewerFilter] = useState('all');
+
+  // State for "Completed" tab filters
+  const [completedTitleFilter, setCompletedTitleFilter] = useState('');
+  const [completedAuthorFilter, setCompletedAuthorFilter] = useState('');
+  const [completedStatusFilter, setCompletedStatusFilter] = useState('all');
+
+  // Assigned reviewer filters
+  const [assignedIdFilter, setAssignedIdFilter] = useState('');
+  const [assignedTitleFilter, setAssignedTitleFilter] = useState('');
+  const [assignedReviewerFilter, setAssignedReviewerFilter] = useState('all');
+
+  // Pagination states for each tab
+  const [allCurrentPage, setAllCurrentPage] = useState(1);
+  const [waitingCurrentPage, setWaitingCurrentPage] = useState(1);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
+  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
+  const [decisionCurrentPage, setDecisionCurrentPage] = useState(1);
+  const [completedCurrentPage, setCompletedCurrentPage] = useState(1);
+  
+  const itemsPerPage = 10;
+
+  // State for managing manuscript data
+  const [waitingReviewManuscripts, setWaitingReviewManuscripts] = useState(mockWaitingReviewManuscripts);
+  const [pendingReviewManuscripts, setPendingReviewManuscripts] = useState(mockPendingReviewManuscripts);
+
+  // Dialog states
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
+  const [assignReviewerDialogOpen, setAssignReviewerDialogOpen] = useState(false);
+  const [decideDialogOpen, setDecideDialogOpen] = useState(false);
+  const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>('');
+  
+  // Send back form state
+  const [sendBackForm, setSendBackForm] = useState<SendBackFormData>({
+    category: 'content-quality' as const,
+    reason: ''
+  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof SendBackFormData, string>>>({});
+
+  // Assign reviewer form state
+  const [reviewerAssignments, setReviewerAssignments] = useState<ReviewerAssignment[]>([{
+    reviewerId: '',
+    reviewerName: '',
+    deadline: undefined
+  }]);
+  const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
+
+  // Decide form state
+  const [decideForm, setDecideForm] = useState({
+    decision: '' as 'Major Revision' | 'Minor Revision' | 'Accept' | 'Reject' | '',
+    reason: '',
+    comments: ''
+  });
+  const [decideFormErrors, setDecideFormErrors] = useState<Partial<Record<keyof typeof decideForm, string>>>({});
+
+  const filteredManuscripts = mockManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(authorFilter.toLowerCase());
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || manuscript.status === statusFilter;
+    return matchesTitle && matchesAuthor && matchesStatus;
+  });
+
+  const filteredWaitingReviewManuscripts = waitingReviewManuscripts.filter(manuscript => {
+    const matchesTitle = manuscript.title.toLowerCase().includes(waitingTitleFilter.toLowerCase());
+    const matchesAuthor = manuscript.authors.toLowerCase().includes(waitingAuthorFilter.toLowerCase());
+    return matchesTitle && matchesAuthor;
+  });
 
   // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
   const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
@@ -1114,10 +895,6 @@ const Manuscripts = () => {
   });
 
   // Assigned reviewer filters
-  const [assignedIdFilter, setAssignedIdFilter] = useState('');
-  const [assignedTitleFilter, setAssignedTitleFilter] = useState('');
-  const [assignedReviewerFilter, setAssignedReviewerFilter] = useState('all');
-
   const filteredAssignedManuscripts = mockAssignedManuscripts.filter(manuscript => {
     const matchesId = manuscript.id.toLowerCase().includes(assignedIdFilter.toLowerCase());
     const matchesTitle = manuscript.title.toLowerCase().includes(assignedTitleFilter.toLowerCase());
@@ -1135,6 +912,21 @@ const Manuscripts = () => {
     return isCompleted && matchesTitle && matchesAuthor && matchesStatus;
   });
 
+  // Pagination logic for all tabs
+  const paginateData = (data: any[], currentPage: number) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return data.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (dataLength: number) => Math.ceil(dataLength / itemsPerPage);
+
+  const paginatedAllManuscripts = paginateData(filteredManuscripts, allCurrentPage);
+  const paginatedWaitingManuscripts = paginateData(filteredWaitingReviewManuscripts, waitingCurrentPage);
+  const paginatedPendingManuscripts = paginateData(filteredPendingReviewManuscripts, pendingCurrentPage);
+  const paginatedAssignedManuscripts = paginateData(filteredAssignedManuscripts, assignedCurrentPage);
+  const paginatedDecisionManuscripts = paginateData(filteredWaitingDecisionManuscripts, decisionCurrentPage);
+  const paginatedCompletedManuscripts = paginateData(filteredCompletedManuscripts, completedCurrentPage);
 
   const handleSearch = () => {
     // Search functionality is already implemented through the filter state
@@ -1436,7 +1228,7 @@ const Manuscripts = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredManuscripts.map((manuscript) => (
+                        {paginatedAllManuscripts.map((manuscript) => (
                           <TableRow key={manuscript.id} className="hover:bg-muted/50">
                             <TableCell>
                               <button className="text-primary hover:underline font-medium">
@@ -1485,6 +1277,41 @@ const Manuscripts = () => {
                       </TableBody>
                     </Table>
                   </div>
+
+                  {/* Pagination for All tab */}
+                  {getTotalPages(filteredManuscripts.length) > 1 && (
+                    <div className="flex justify-center mt-4">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => setAllCurrentPage(Math.max(1, allCurrentPage - 1))}
+                              className={allCurrentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: getTotalPages(filteredManuscripts.length) }, (_, i) => i + 1).map((page) => (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={() => setAllCurrentPage(page)}
+                                isActive={page === allCurrentPage}
+                                className="cursor-pointer"
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => setAllCurrentPage(Math.min(getTotalPages(filteredManuscripts.length), allCurrentPage + 1))}
+                              className={allCurrentPage === getTotalPages(filteredManuscripts.length) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="waiting-review" className="p-6">
