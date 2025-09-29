@@ -775,11 +775,207 @@ const assignReviewerSchema = z.object({
 
 type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
 
+// Reviewer Manuscripts Component
+const ReviewerManuscripts = () => {
+  const [activeTab, setActiveTab] = useState('review-invitation');
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <main className="flex-1 p-6">
+          <h1 className="text-2xl font-bold mb-6">Manuscripts</h1>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="review-invitation">Review Invitation</TabsTrigger>
+              <TabsTrigger value="pending-review">Pending Review</TabsTrigger>
+              <TabsTrigger value="completed-review">Completed Review</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="review-invitation" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex gap-4 items-center">
+                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
+                  <Select>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Fields</SelectItem>
+                      <SelectItem value="medical">Medical Sciences</SelectItem>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="computer-science">Computer Science</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Manuscript ID</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Authors</TableHead>
+                        <TableHead>Invited Date</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No review invitations found
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pending-review" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex gap-4 items-center">
+                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
+                  <Select>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Manuscript ID</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Authors</TableHead>
+                        <TableHead>Accepted Date</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead>Progress</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          No pending reviews found
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="completed-review" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex gap-4 items-center">
+                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
+                  <Select>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by decision" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Decisions</SelectItem>
+                      <SelectItem value="accept">Accept</SelectItem>
+                      <SelectItem value="minor-revision">Minor Revision</SelectItem>
+                      <SelectItem value="major-revision">Major Revision</SelectItem>
+                      <SelectItem value="reject">Reject</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Manuscript ID</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Authors</TableHead>
+                        <TableHead>Completed Date</TableHead>
+                        <TableHead>Decision</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No completed reviews found
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rejected" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex gap-4 items-center">
+                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
+                  <Select>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Reasons</SelectItem>
+                      <SelectItem value="conflict-of-interest">Conflict of Interest</SelectItem>
+                      <SelectItem value="not-expertise">Not My Expertise</SelectItem>
+                      <SelectItem value="time-constraints">Time Constraints</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Manuscript ID</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Authors</TableHead>
+                        <TableHead>Invited Date</TableHead>
+                        <TableHead>Rejected Date</TableHead>
+                        <TableHead>Reason</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                          No rejected invitations found
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+};
+
 const Manuscripts = () => {
   const { user } = useAuth();
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Render different content based on user role
+  if (user.role === 'Reviewer') {
+    return <ReviewerManuscripts />;
   }
 
   const { toast } = useToast();
