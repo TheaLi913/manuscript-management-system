@@ -3,12 +3,14 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { StatCard } from '@/components/StatCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Clock, Search, CheckCircle, XCircle, AlertCircle, FileCheck } from 'lucide-react';
+import { Clock, Search, CheckCircle, XCircle, AlertCircle, FileCheck, UserCheck, Users } from 'lucide-react';
 
 // Mock data for demonstration
 const editorStats = {
   waitingForReview: 12,
-  waitingForDecision: 8,
+  pendingReviewer: 8,
+  assignedReviewer: 15,
+  waitingForDecision: 6,
   completed: 45,
 };
 
@@ -32,13 +34,27 @@ const Dashboard = () => {
   };
 
   const renderEditorStats = () => (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <StatCard
         title="Waiting for Review"
         count={editorStats.waitingForReview}
         icon={Clock}
         variant="pending"
         onClick={() => handleStatClick('waiting-review')}
+      />
+      <StatCard
+        title="Pending Reviewer"
+        count={editorStats.pendingReviewer}
+        icon={UserCheck}
+        variant="pending"
+        onClick={() => handleStatClick('pending-reviewer')}
+      />
+      <StatCard
+        title="Assigned Reviewer"
+        count={editorStats.assignedReviewer}
+        icon={Users}
+        variant="review"
+        onClick={() => handleStatClick('assigned-reviewer')}
       />
       <StatCard
         title="Waiting for Decision"
