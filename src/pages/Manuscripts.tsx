@@ -218,7 +218,8 @@ const mockReviewInvitations = [
     keywords: ['Machine Learning', 'Medical AI', 'Diagnosis', 'Healthcare'],
     editor: 'Dr. John Smith',
     invitedDate: '2024-03-15',
-    dueDate: '2024-04-15'
+    dueDate: '2024-04-15',
+    manuscriptFile: 'manuscript_234567.pdf'
   },
   {
     id: '234568',
@@ -227,7 +228,8 @@ const mockReviewInvitations = [
     keywords: ['Climate Change', 'Marine Biology', 'Ecosystem', 'Environmental Science'],
     editor: 'Prof. Emily Chen',
     invitedDate: '2024-03-12',
-    dueDate: '2024-04-12'
+    dueDate: '2024-04-12',
+    manuscriptFile: 'manuscript_234568.pdf'
   },
   {
     id: '234569',
@@ -236,7 +238,8 @@ const mockReviewInvitations = [
     keywords: ['Quantum Computing', 'Cryptography', 'Security', 'Algorithms'],
     editor: 'Dr. Michael Rodriguez',
     invitedDate: '2024-03-10',
-    dueDate: '2024-04-10'
+    dueDate: '2024-04-10',
+    manuscriptFile: 'manuscript_234569.pdf'
   },
   {
     id: '234570',
@@ -245,7 +248,8 @@ const mockReviewInvitations = [
     keywords: ['Renewable Energy', 'Urban Planning', 'Sustainability', 'Smart Cities'],
     editor: 'Prof. Sarah Johnson',
     invitedDate: '2024-03-08',
-    dueDate: '2024-04-08'
+    dueDate: '2024-04-08',
+    manuscriptFile: 'manuscript_234570.pdf'
   },
   {
     id: '234571',
@@ -254,7 +258,8 @@ const mockReviewInvitations = [
     keywords: ['Neuroscience', 'Aging', 'Cognitive Science', 'Brain Plasticity'],
     editor: 'Dr. Lisa Wang',
     invitedDate: '2024-03-05',
-    dueDate: '2024-04-05'
+    dueDate: '2024-04-05',
+    manuscriptFile: 'manuscript_234571.pdf'
   }
 ];
 
@@ -871,6 +876,7 @@ const ReviewerManuscripts = () => {
                         <TableHead>Manuscript ID</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Abstract</TableHead>
+                        <TableHead>File</TableHead>
                         <TableHead>Editor</TableHead>
                         <TableHead>Invited Date</TableHead>
                         <TableHead>Due Date</TableHead>
@@ -902,6 +908,29 @@ const ReviewerManuscripts = () => {
                             <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
                               {invitation.abstract}
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => {
+                                      toast({
+                                        title: "Downloading File",
+                                        description: `Downloading ${invitation.manuscriptFile}`,
+                                      });
+                                    }}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Download {invitation.manuscriptFile}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </TableCell>
                           <TableCell>{invitation.editor}</TableCell>
                           <TableCell>{invitation.invitedDate}</TableCell>
