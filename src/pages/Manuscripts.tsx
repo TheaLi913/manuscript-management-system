@@ -209,6 +209,55 @@ const mockManuscripts = [
   }
 ];
 
+// Mock data for review invitations (Reviewer role)
+const mockReviewInvitations = [
+  {
+    id: '234567',
+    title: 'Advanced Machine Learning Applications in Medical Diagnosis',
+    abstract: 'This study explores the integration of machine learning techniques in clinical decision-making processes. We present novel algorithms that can assist healthcare professionals in diagnosing complex medical conditions with improved accuracy.',
+    keywords: ['Machine Learning', 'Medical AI', 'Diagnosis', 'Healthcare'],
+    editor: 'Dr. John Smith',
+    invitedDate: '2024-03-15',
+    dueDate: '2024-04-15'
+  },
+  {
+    id: '234568',
+    title: 'Climate Change Impact on Marine Ecosystems: A Comprehensive Analysis',
+    abstract: 'This research examines the effects of rising ocean temperatures and acidification on marine biodiversity. Through extensive field studies and data analysis, we demonstrate significant shifts in species distribution and ecosystem dynamics.',
+    keywords: ['Climate Change', 'Marine Biology', 'Ecosystem', 'Environmental Science'],
+    editor: 'Prof. Emily Chen',
+    invitedDate: '2024-03-12',
+    dueDate: '2024-04-12'
+  },
+  {
+    id: '234569',
+    title: 'Quantum Computing Algorithms for Cryptographic Security',
+    abstract: 'We present novel quantum algorithms designed to enhance cryptographic protocols against emerging threats. Our approach leverages quantum entanglement and superposition to create unbreakable encryption systems.',
+    keywords: ['Quantum Computing', 'Cryptography', 'Security', 'Algorithms'],
+    editor: 'Dr. Michael Rodriguez',
+    invitedDate: '2024-03-10',
+    dueDate: '2024-04-10'
+  },
+  {
+    id: '234570',
+    title: 'Sustainable Energy Solutions for Urban Development',
+    abstract: 'This paper investigates innovative renewable energy integration strategies for smart cities. We analyze the economic feasibility and environmental impact of solar, wind, and geothermal energy systems in urban settings.',
+    keywords: ['Renewable Energy', 'Urban Planning', 'Sustainability', 'Smart Cities'],
+    editor: 'Prof. Sarah Johnson',
+    invitedDate: '2024-03-08',
+    dueDate: '2024-04-08'
+  },
+  {
+    id: '234571',
+    title: 'Neuroplasticity and Cognitive Enhancement in Aging Populations',
+    abstract: 'Our longitudinal study explores brain plasticity mechanisms in elderly individuals. We present evidence of cognitive improvement through targeted intervention strategies and lifestyle modifications.',
+    keywords: ['Neuroscience', 'Aging', 'Cognitive Science', 'Brain Plasticity'],
+    editor: 'Dr. Lisa Wang',
+    invitedDate: '2024-03-05',
+    dueDate: '2024-04-05'
+  }
+];
+
 // Mock data for waiting for review manuscripts
 const mockWaitingReviewManuscripts = [
   {
@@ -777,7 +826,11 @@ type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
 
 // Reviewer Manuscripts Component
 const ReviewerManuscripts = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('review-invitation');
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
 
   return (
     <SidebarProvider>
@@ -817,18 +870,104 @@ const ReviewerManuscripts = () => {
                       <TableRow>
                         <TableHead>Manuscript ID</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>Authors</TableHead>
+                        <TableHead>Abstract</TableHead>
+                        <TableHead>Editor</TableHead>
                         <TableHead>Invited Date</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          No review invitations found
-                        </TableCell>
-                      </TableRow>
+                      {mockReviewInvitations.map((invitation) => (
+                        <TableRow key={invitation.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <button className="text-primary hover:underline font-medium">
+                              {invitation.id}
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium max-w-xs">{invitation.title}</div>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {invitation.keywords.map((keyword, index) => (
+                                <span
+                                  key={index}
+                                  className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                >
+                                  {keyword}
+                                </span>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
+                              {invitation.abstract}
+                            </div>
+                          </TableCell>
+                          <TableCell>{invitation.editor}</TableCell>
+                          <TableCell>{invitation.invitedDate}</TableCell>
+                          <TableCell>{invitation.dueDate}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
+                                          <Check className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Accept Review Invitation</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to accept the review invitation for manuscript {invitation.id}?
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => {
+                                            toast({
+                                              title: "Invitation Accepted",
+                                              description: `You have accepted the review invitation for manuscript ${invitation.id}.`,
+                                            });
+                                          }}>
+                                            Accept
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Accept Invitation</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="text-red-600 hover:text-red-700"
+                                      onClick={() => {
+                                        setSelectedInvitationId(invitation.id);
+                                        setRejectDialogOpen(true);
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Reject Invitation</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
@@ -960,6 +1099,55 @@ const ReviewerManuscripts = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          {/* Dialog for Reject Review Invitation */}
+          <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Reject Review Invitation</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reject-reason">Reason for Rejection (Required)</Label>
+                  <Textarea
+                    id="reject-reason"
+                    placeholder="Please provide a reason for rejecting this review invitation..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => {
+                  setRejectDialogOpen(false);
+                  setRejectReason('');
+                  setSelectedInvitationId(null);
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  if (!rejectReason.trim()) {
+                    toast({
+                      title: "Reason Required",
+                      description: "Please provide a reason for rejecting the invitation.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  toast({
+                    title: "Invitation Rejected",
+                    description: `You have rejected the review invitation for manuscript ${selectedInvitationId}.`,
+                  });
+                  setRejectDialogOpen(false);
+                  setRejectReason('');
+                  setSelectedInvitationId(null);
+                }}>
+                  Reject
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </SidebarProvider>
