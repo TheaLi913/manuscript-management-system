@@ -910,27 +910,19 @@ const ReviewerManuscripts = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => {
-                                      toast({
-                                        title: "Downloading File",
-                                        description: `Downloading ${invitation.manuscriptFile}`,
-                                      });
-                                    }}
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Download {invitation.manuscriptFile}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <button 
+                              className="text-primary hover:underline font-medium text-sm"
+                              onClick={() => {
+                                // In a real app, this would open the actual PDF URL
+                                window.open(`/manuscripts/${invitation.manuscriptFile}`, '_blank');
+                                toast({
+                                  title: "Opening PDF",
+                                  description: `Opening ${invitation.manuscriptFile} in new tab`,
+                                });
+                              }}
+                            >
+                              {invitation.manuscriptFile}
+                            </button>
                           </TableCell>
                           <TableCell>{invitation.editor}</TableCell>
                           <TableCell>{invitation.invitedDate}</TableCell>
