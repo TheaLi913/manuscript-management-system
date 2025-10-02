@@ -403,58 +403,83 @@ const mockWaitingReviewManuscripts = [
 const mockPendingReviewManuscripts = [
   {
     id: '234576',
-    username: 'Dr. Michael Brown',
     title: 'Advanced Neural Networks for Natural Language Processing',
-    abstract: 'Natural language processing has seen significant advancements with the introduction of transformer architectures. This research presents novel neural network designs that improve upon existing models in terms of efficiency and accuracy. We demonstrate state-of-the-art performance on various NLP benchmarks while reducing computational requirements.',
+    abstract: 'Natural language processing has seen significant advancements with the introduction of transformer architectures. This research presents novel neural network designs that improve upon existing models in terms of efficiency and accuracy.',
     keywords: ['Neural Networks', 'NLP', 'Transformers', 'Deep Learning'],
-    authors: 'Michael Brown*, Jessica Lee, Robert Taylor, Amanda White',
-    submissionDate: '2024-02-28',
-    reviewers: [
-      { name: 'Dr. Emma Wilson', status: 'accepted' },
-      { name: 'Prof. David Chen', status: 'declined' },
-      { name: 'Dr. Lisa Park', status: 'accepted' }
-    ],
-    reviewDeadlines: ['2024-04-15', '2024-04-18', '2024-04-22']
+    acceptedDate: '2024-03-20',
+    dueDate: '2024-04-20',
+    editor: 'Dr. John Smith',
+    manuscriptFile: 'manuscript_234576.pdf'
   },
   {
     id: '234577',
-    username: 'Prof. Jennifer Davis',
     title: 'Quantum Cryptography: Security in the Post-Quantum Era',
-    abstract: 'As quantum computers become more powerful, traditional cryptographic methods face unprecedented threats. This study investigates quantum-resistant cryptographic protocols and their practical implementation. We present a comprehensive analysis of post-quantum cryptography and propose novel security frameworks for future digital communications.',
+    abstract: 'As quantum computers become more powerful, traditional cryptographic methods face unprecedented threats. This study investigates quantum-resistant cryptographic protocols and their practical implementation.',
     keywords: ['Quantum Cryptography', 'Post-Quantum Security', 'Encryption', 'Cybersecurity'],
-    authors: 'Jennifer Davis*, Mark Johnson, Lisa Anderson',
-    submissionDate: '2024-02-25',
-    reviewers: [
-      { name: 'Prof. Alan Smith', status: 'accepted' },
-      { name: 'Dr. Sarah Connor', status: 'pending' },
-      { name: 'Dr. Kevin Liu', status: 'declined' }
-    ],
-    reviewDeadlines: ['2024-04-10', '2024-04-12', '2024-04-20']
+    acceptedDate: '2024-03-18',
+    dueDate: '2024-04-18',
+    editor: 'Prof. Emily Chen',
+    manuscriptFile: 'manuscript_234577.pdf'
   },
   {
     id: '234578',
-    username: 'Dr. Robert Garcia',
     title: 'Sustainable Agriculture Technologies for Climate Adaptation',
-    abstract: 'Climate change poses significant challenges to global food security. This research explores innovative agricultural technologies that can help farmers adapt to changing climate conditions. We present precision farming techniques, drought-resistant crop varieties, and smart irrigation systems that optimize resource usage while maintaining productivity.',
+    abstract: 'Climate change poses significant challenges to global food security. This research explores innovative agricultural technologies that can help farmers adapt to changing climate conditions.',
     keywords: ['Sustainable Agriculture', 'Climate Adaptation', 'Precision Farming', 'Food Security'],
-    authors: 'Robert Garcia*, Maria Santos, Carlos Hernandez',
-    submissionDate: '2024-02-22',
-    reviewers: [],
-    reviewDeadlines: []
+    acceptedDate: '2024-03-15',
+    dueDate: '2024-04-15',
+    editor: 'Dr. Michael Rodriguez',
+    manuscriptFile: 'manuscript_234578.pdf'
   },
   {
     id: '234579',
-    username: 'Dr. Anna Kowalski',
     title: 'Biomedical Engineering Applications in Regenerative Medicine',
-    abstract: 'Regenerative medicine represents a paradigm shift in healthcare, offering potential cures for previously incurable conditions. This comprehensive review examines the latest biomedical engineering approaches in tissue engineering, stem cell therapy, and organ regeneration. We analyze current clinical trials and discuss future prospects for personalized regenerative treatments.',
+    abstract: 'Regenerative medicine represents a paradigm shift in healthcare, offering potential cures for previously incurable conditions. This comprehensive review examines the latest biomedical engineering approaches.',
     keywords: ['Regenerative Medicine', 'Biomedical Engineering', 'Tissue Engineering', 'Stem Cells'],
-    authors: 'Anna Kowalski*, Thomas Mueller, Sophie Zhang',
-    submissionDate: '2024-02-20',
-    reviewers: [
-      { name: 'Prof. Helen Carter', status: 'pending' },
-      { name: 'Dr. Rachel Green', status: 'accepted' }
-    ],
-    reviewDeadlines: ['2024-04-05', '2024-04-08']
+    acceptedDate: '2024-03-12',
+    dueDate: '2024-04-12',
+    editor: 'Prof. Sarah Johnson',
+    manuscriptFile: 'manuscript_234579.pdf'
+  },
+  {
+    id: '234580',
+    title: 'Deep Learning for Medical Image Analysis',
+    abstract: 'Medical imaging plays a crucial role in modern healthcare. This research explores deep learning approaches for automated disease detection and diagnosis from medical images, demonstrating improved accuracy over traditional methods.',
+    keywords: ['Deep Learning', 'Medical Imaging', 'Computer Vision', 'Healthcare'],
+    acceptedDate: '2024-03-10',
+    dueDate: '2024-04-10',
+    editor: 'Dr. Lisa Wang',
+    manuscriptFile: 'manuscript_234580.pdf'
+  },
+  {
+    id: '234581',
+    title: 'Smart Grid Technologies for Energy Distribution',
+    abstract: 'The integration of renewable energy sources requires advanced grid management systems. This paper presents smart grid technologies that optimize energy distribution and improve grid reliability.',
+    keywords: ['Smart Grid', 'Energy Distribution', 'Renewable Energy', 'Optimization'],
+    acceptedDate: '2024-03-08',
+    dueDate: '2024-04-08',
+    editor: 'Dr. John Smith',
+    manuscriptFile: 'manuscript_234581.pdf'
+  },
+  {
+    id: '234582',
+    title: 'Nanotechnology in Drug Delivery Systems',
+    abstract: 'Nanotechnology offers revolutionary approaches to drug delivery. This study investigates nanoparticle-based delivery systems that enhance drug efficacy while minimizing side effects.',
+    keywords: ['Nanotechnology', 'Drug Delivery', 'Pharmaceuticals', 'Nanoparticles'],
+    acceptedDate: '2024-03-06',
+    dueDate: '2024-04-06',
+    editor: 'Prof. Emily Chen',
+    manuscriptFile: 'manuscript_234582.pdf'
+  },
+  {
+    id: '234583',
+    title: 'Artificial Intelligence in Autonomous Vehicles',
+    abstract: 'Autonomous vehicles represent the future of transportation. This research examines AI algorithms for vehicle perception, decision-making, and control in complex traffic scenarios.',
+    keywords: ['AI', 'Autonomous Vehicles', 'Machine Learning', 'Transportation'],
+    acceptedDate: '2024-03-04',
+    dueDate: '2024-04-04',
+    editor: 'Dr. Michael Rodriguez',
+    manuscriptFile: 'manuscript_234583.pdf'
   },
   {
     id: '234613',
@@ -1088,19 +1113,54 @@ const ReviewerManuscripts = () => {
                       <TableRow>
                         <TableHead>Manuscript ID</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>Authors</TableHead>
+                        <TableHead>Abstract</TableHead>
+                        <TableHead>File</TableHead>
                         <TableHead>Accepted Date</TableHead>
                         <TableHead>Due Date</TableHead>
-                        <TableHead>Progress</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Editor</TableHead>
+                        <TableHead>Submit Review</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          No pending reviews found
-                        </TableCell>
-                      </TableRow>
+                      {mockPendingReviewManuscripts.map((manuscript) => (
+                        <TableRow key={manuscript.id}>
+                          <TableCell className="font-medium">{manuscript.id}</TableCell>
+                          <TableCell>{manuscript.title}</TableCell>
+                          <TableCell className="max-w-xs">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="truncate cursor-help">
+                                    {manuscript.abstract}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-md">
+                                  <p>{manuscript.abstract}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <a
+                              href={`/manuscripts/${manuscript.manuscriptFile}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {manuscript.manuscriptFile}
+                            </a>
+                          </TableCell>
+                          <TableCell>{manuscript.acceptedDate}</TableCell>
+                          <TableCell>{manuscript.dueDate}</TableCell>
+                          <TableCell>{manuscript.editor}</TableCell>
+                          <TableCell>
+                            <Button variant="outline" size="sm">
+                              <Send className="mr-2 h-4 w-4" />
+                              Submit
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
@@ -1461,9 +1521,14 @@ const Manuscripts = () => {
       // Remove from waiting review and add to pending reviewer
       setWaitingReviewManuscripts(prev => prev.filter(m => m.id !== selectedManuscriptId));
       const newPendingManuscript = {
-        ...manuscript,
-        reviewers: [],
-        reviewDeadlines: []
+        id: manuscript.id,
+        title: manuscript.title,
+        abstract: manuscript.abstract,
+        keywords: manuscript.keywords,
+        acceptedDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        editor: 'Dr. John Smith', // Default editor
+        manuscriptFile: manuscript.manuscriptFile
       };
       setPendingReviewManuscripts(prev => [...prev, newPendingManuscript]);
       
@@ -1558,17 +1623,8 @@ const Manuscripts = () => {
       
       const manuscript = pendingReviewManuscripts.find(m => m.id === selectedManuscriptId);
       if (manuscript) {
-        // Update manuscript with assigned reviewers
-        setPendingReviewManuscripts(prev => prev.map(m => 
-          m.id === selectedManuscriptId 
-            ? {
-                ...m,
-                reviewers: validatedData.reviewers.map(r => ({ name: r.reviewerName, status: 'pending' })),
-                reviewDeadlines: validatedData.reviewers.map(r => format(r.deadline, 'yyyy-MM-dd'))
-              }
-            : m
-        ));
-        
+        // For now, just show success message
+        // In a real app, this would assign reviewers to the manuscript
         toast({
           title: "Reviewers Assigned",
           description: `${validatedData.reviewers.length} reviewer(s) have been assigned to the manuscript.`,
