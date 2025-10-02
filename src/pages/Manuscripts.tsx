@@ -868,8 +868,15 @@ const ReviewerManuscripts = () => {
   const [filterEditor, setFilterEditor] = useState('');
   const [filteredInvitations, setFilteredInvitations] = useState(mockReviewInvitations);
 
+  // Filter states for Pending Review tab
+  const [pendingFilterId, setPendingFilterId] = useState('');
+  const [pendingFilterTitle, setPendingFilterTitle] = useState('');
+  const [pendingFilterEditor, setPendingFilterEditor] = useState('');
+  const [filteredPendingReviews, setFilteredPendingReviews] = useState(mockPendingReviewManuscripts);
+
   // Get unique editors for dropdown
   const uniqueEditors = Array.from(new Set(mockReviewInvitations.map(inv => inv.editor)));
+  const uniquePendingEditors = Array.from(new Set(mockPendingReviewManuscripts.map(m => m.editor)));
 
   // Handle search
   const handleSearch = () => {
@@ -894,6 +901,35 @@ const ReviewerManuscripts = () => {
     setFilterTitle('');
     setFilterEditor('');
     setFilteredInvitations(mockReviewInvitations);
+    toast({
+      title: "Filters Reset",
+      description: "All filters have been cleared",
+    });
+  };
+
+  // Handle search for Pending Review tab
+  const handlePendingSearch = () => {
+    const filtered = mockPendingReviewManuscripts.filter(manuscript => {
+      const matchesId = !pendingFilterId || manuscript.id.toLowerCase().includes(pendingFilterId.toLowerCase());
+      const matchesTitle = !pendingFilterTitle || manuscript.title.toLowerCase().includes(pendingFilterTitle.toLowerCase());
+      const matchesEditor = !pendingFilterEditor || pendingFilterEditor === 'all' || manuscript.editor === pendingFilterEditor;
+      
+      return matchesId && matchesTitle && matchesEditor;
+    });
+    
+    setFilteredPendingReviews(filtered);
+    toast({
+      title: "Search Applied",
+      description: `Found ${filtered.length} manuscript(s)`,
+    });
+  };
+
+  // Handle reset for Pending Review tab
+  const handlePendingReset = () => {
+    setPendingFilterId('');
+    setPendingFilterTitle('');
+    setPendingFilterEditor('');
+    setFilteredPendingReviews(mockPendingReviewManuscripts);
     toast({
       title: "Filters Reset",
       description: "All filters have been cleared",
@@ -1093,18 +1129,52 @@ const ReviewerManuscripts = () => {
 
             <TabsContent value="pending-review" className="mt-6">
               <div className="space-y-4">
-                <div className="flex gap-4 items-center">
-                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">ID</label>
+                    <Input 
+                      placeholder="Enter manuscript ID" 
+                      value={pendingFilterId}
+                      onChange={(e) => setPendingFilterId(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Title</label>
+                    <Input 
+                      placeholder="Enter title keywords" 
+                      value={pendingFilterTitle}
+                      onChange={(e) => setPendingFilterTitle(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Editor Name</label>
+                    <Select value={pendingFilterEditor} onValueChange={setPendingFilterEditor}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select editor" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="all">All Editors</SelectItem>
+                        {uniquePendingEditors.map((editor) => (
+                          <SelectItem key={editor} value={editor}>
+                            {editor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-end gap-2">
+                    <Button onClick={handlePendingSearch} className="flex-1">
+                      <Search className="mr-2 h-4 w-4" />
+                      Search
+                    </Button>
+                    <Button onClick={handlePendingReset} variant="outline" className="flex-1">
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Reset
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="border rounded-lg">
@@ -1122,7 +1192,7 @@ const ReviewerManuscripts = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockPendingReviewManuscripts.map((manuscript) => (
+                      {filteredPendingReviews.map((manuscript) => (
                         <TableRow key={manuscript.id}>
                           <TableCell className="font-medium">{manuscript.id}</TableCell>
                           <TableCell>{manuscript.title}</TableCell>
