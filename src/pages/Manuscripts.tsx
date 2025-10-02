@@ -20,7 +20,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck, Gavel } from 'lucide-react';
+import { UserPlus, ArrowLeft, Bell, Download, Send, Undo2, UserCheck, Gavel, Search, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { z } from 'zod';
@@ -836,6 +836,44 @@ const ReviewerManuscripts = () => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
+  
+  // Filter states for Review Invitation tab
+  const [filterId, setFilterId] = useState('');
+  const [filterTitle, setFilterTitle] = useState('');
+  const [filterEditor, setFilterEditor] = useState('');
+  const [filteredInvitations, setFilteredInvitations] = useState(mockReviewInvitations);
+
+  // Get unique editors for dropdown
+  const uniqueEditors = Array.from(new Set(mockReviewInvitations.map(inv => inv.editor)));
+
+  // Handle search
+  const handleSearch = () => {
+    const filtered = mockReviewInvitations.filter(invitation => {
+      const matchesId = !filterId || invitation.id.toLowerCase().includes(filterId.toLowerCase());
+      const matchesTitle = !filterTitle || invitation.title.toLowerCase().includes(filterTitle.toLowerCase());
+      const matchesEditor = !filterEditor || invitation.editor === filterEditor;
+      
+      return matchesId && matchesTitle && matchesEditor;
+    });
+    
+    setFilteredInvitations(filtered);
+    toast({
+      title: "Search Applied",
+      description: `Found ${filtered.length} manuscript(s)`,
+    });
+  };
+
+  // Handle reset
+  const handleReset = () => {
+    setFilterId('');
+    setFilterTitle('');
+    setFilterEditor('');
+    setFilteredInvitations(mockReviewInvitations);
+    toast({
+      title: "Filters Reset",
+      description: "All filters have been cleared",
+    });
+  };
 
   return (
     <SidebarProvider>
@@ -854,19 +892,52 @@ const ReviewerManuscripts = () => {
 
             <TabsContent value="review-invitation" className="mt-6">
               <div className="space-y-4">
-                <div className="flex gap-4 items-center">
-                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by field" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Fields</SelectItem>
-                      <SelectItem value="medical">Medical Sciences</SelectItem>
-                      <SelectItem value="engineering">Engineering</SelectItem>
-                      <SelectItem value="computer-science">Computer Science</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">ID</label>
+                    <Input 
+                      placeholder="Enter manuscript ID" 
+                      value={filterId}
+                      onChange={(e) => setFilterId(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Title</label>
+                    <Input 
+                      placeholder="Enter title keywords" 
+                      value={filterTitle}
+                      onChange={(e) => setFilterTitle(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Editor Name</label>
+                    <Select value={filterEditor} onValueChange={setFilterEditor}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select editor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Editors</SelectItem>
+                        {uniqueEditors.map((editor) => (
+                          <SelectItem key={editor} value={editor}>
+                            {editor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-end gap-2">
+                    <Button onClick={handleSearch} className="flex-1">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search
+                    </Button>
+                    <Button variant="outline" onClick={handleReset} className="flex-1">
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Reset
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="border rounded-lg">
@@ -884,7 +955,7 @@ const ReviewerManuscripts = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockReviewInvitations.map((invitation) => (
+                      {filteredInvitations.map((invitation) => (
                         <TableRow key={invitation.id} className="hover:bg-muted/50">
                           <TableCell>
                             <button className="text-primary hover:underline font-medium">
