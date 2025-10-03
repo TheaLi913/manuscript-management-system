@@ -1508,7 +1508,7 @@ const Manuscripts = () => {
 
   // Filter pending manuscripts (only show those with fewer than 3 accepted reviewers)
   const pendingManuscriptsFiltered = pendingReviewManuscripts.filter(manuscript => {
-    const acceptedCount = manuscript.reviewers.filter(r => r.status === 'accepted').length;
+    const acceptedCount = (manuscript.reviewers ?? []).filter(r => r.status === 'accepted').length;
     return acceptedCount < 3;
   });
 
@@ -1517,7 +1517,7 @@ const Manuscripts = () => {
     const matchesId = manuscript.id.toLowerCase().includes(pendingIdFilter.toLowerCase());
     const matchesTitle = manuscript.title.toLowerCase().includes(pendingTitleFilter.toLowerCase());
     const matchesReviewer = pendingReviewerFilter === 'all' || 
-      manuscript.reviewers.some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
+      (manuscript.reviewers ?? []).some(reviewer => reviewer.name.toLowerCase().includes(pendingReviewerFilter.toLowerCase()));
     return matchesId && matchesTitle && matchesReviewer;
   });
 
@@ -2182,9 +2182,9 @@ const Manuscripts = () => {
                               </TooltipProvider>
                             </TableCell>
                             <TableCell>
-                              {manuscript.reviewers.length > 0 ? (
+                              {(manuscript.reviewers?.length ?? 0) > 0 ? (
                                 <div className="space-y-1">
-                                  {manuscript.reviewers.map((reviewer, index) => (
+                                  {(manuscript.reviewers ?? []).map((reviewer, index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">
                                       <span className={`${
                                         reviewer.status === 'accepted' 
@@ -2206,9 +2206,9 @@ const Manuscripts = () => {
                               )}
                             </TableCell>
                             <TableCell>
-                              {manuscript.reviewDeadlines.length > 0 ? (
+                              {(manuscript.reviewDeadlines?.length ?? 0) > 0 ? (
                                 <div className="space-y-1">
-                                  {manuscript.reviewDeadlines.map((deadline, index) => (
+                                  {(manuscript.reviewDeadlines ?? []).map((deadline, index) => (
                                     <div key={index} className="text-sm">
                                       {deadline}
                                     </div>
@@ -2297,8 +2297,8 @@ const Manuscripts = () => {
                           </TableCell>
                           <TableCell>{manuscript.submissionDate}</TableCell>
                           <TableCell>
-                            <div className="space-y-2">
-                              {manuscript.reviewers.filter(r => r.status === 'accepted').map((reviewer, index) => (
+                              <div className="space-y-2">
+                                {(manuscript.reviewers ?? []).filter(r => r.status === 'accepted').map((reviewer, index) => (
                                 <div key={index} className="flex items-center justify-between py-1">
                                   <div className="flex items-center gap-2 text-sm">
                                     <span className="text-blue-700 font-medium">
