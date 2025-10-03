@@ -489,6 +489,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['Machine Learning', 'Autonomous Systems', 'Robotics', 'Computer Vision'],
     authors: 'Alan Foster*, Catherine Smith, Daniel Kim',
     submissionDate: '2024-02-18',
+    acceptedDate: '2024-03-02',
+    dueDate: '2024-04-02',
+    editor: 'Dr. John Smith',
+    manuscriptFile: 'manuscript_234613.pdf',
     reviewers: [
       { name: 'Dr. Emma Wilson', status: 'pending' },
       { name: 'Prof. Mark Thompson', status: 'accepted' }
@@ -503,6 +507,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['Precision Medicine', 'Oncology', 'Genomics', 'Cancer Treatment'],
     authors: 'Maria Rodriguez*, Kevin Zhang, Lisa Chen*',
     submissionDate: '2024-02-16',
+    acceptedDate: '2024-03-01',
+    dueDate: '2024-04-01',
+    editor: 'Prof. Emily Chen',
+    manuscriptFile: 'manuscript_234614.pdf',
     reviewers: [],
     reviewDeadlines: []
   },
@@ -514,6 +522,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['Sustainable Manufacturing', 'Circular Economy', 'Resource Efficiency', 'Environmental Impact'],
     authors: 'Thomas Anderson*, Sophie Brown, Mark Wilson',
     submissionDate: '2024-02-14',
+    acceptedDate: '2024-02-28',
+    dueDate: '2024-03-30',
+    editor: 'Dr. Michael Rodriguez',
+    manuscriptFile: 'manuscript_234615.pdf',
     reviewers: [
       { name: 'Dr. Rachel Green', status: 'accepted' },
       { name: 'Prof. James Wilson', status: 'pending' },
@@ -529,6 +541,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['Biomaterials', 'Neural Interfaces', 'Brain-Computer Interface', 'Biocompatibility'],
     authors: 'Helen Carter*, Mohammad Ali, Jennifer Park*',
     submissionDate: '2024-02-12',
+    acceptedDate: '2024-02-26',
+    dueDate: '2024-03-28',
+    editor: 'Prof. Sarah Johnson',
+    manuscriptFile: 'manuscript_234616.pdf',
     reviewers: [
       { name: 'Prof. David Chen', status: 'declined' },
       { name: 'Dr. Lisa Park', status: 'pending' }
@@ -543,6 +559,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['Smart Cities', 'IoT', 'Data Analytics', 'Urban Technology'],
     authors: 'Carlos Martinez*, Nina Patel, David Lee',
     submissionDate: '2024-02-10',
+    acceptedDate: '2024-02-24',
+    dueDate: '2024-03-26',
+    editor: 'Dr. Lisa Wang',
+    manuscriptFile: 'manuscript_234617.pdf',
     reviewers: [],
     reviewDeadlines: []
   },
@@ -554,6 +574,10 @@ const mockPendingReviewManuscripts = [
     keywords: ['AI', 'Financial Risk', 'Machine Learning', 'Risk Management'],
     authors: 'Jennifer Lee*, Robert Taylor, Anna Kowalski',
     submissionDate: '2024-02-08',
+    acceptedDate: '2024-02-22',
+    dueDate: '2024-03-24',
+    editor: 'Dr. John Smith',
+    manuscriptFile: 'manuscript_234618.pdf',
     reviewers: [
       { name: 'Dr. Emma Wilson', status: 'accepted' },
       { name: 'Prof. Alan Smith', status: 'pending' },
@@ -872,11 +896,14 @@ const ReviewerManuscripts = () => {
   const [pendingFilterId, setPendingFilterId] = useState('');
   const [pendingFilterTitle, setPendingFilterTitle] = useState('');
   const [pendingFilterEditor, setPendingFilterEditor] = useState('');
-  const [filteredPendingReviews, setFilteredPendingReviews] = useState(mockPendingReviewManuscripts);
+  
+  // Filter mockPendingReviewManuscripts to only include items with editor field for Pending Review tab
+  const pendingReviewData = mockPendingReviewManuscripts.filter(m => m.editor);
+  const [filteredPendingReviews, setFilteredPendingReviews] = useState(pendingReviewData);
 
   // Get unique editors for dropdown
   const uniqueEditors = Array.from(new Set(mockReviewInvitations.map(inv => inv.editor)));
-  const uniquePendingEditors = Array.from(new Set(mockPendingReviewManuscripts.map(m => m.editor)));
+  const uniquePendingEditors = Array.from(new Set(pendingReviewData.map(m => m.editor)));
 
   // Handle search
   const handleSearch = () => {
@@ -909,7 +936,7 @@ const ReviewerManuscripts = () => {
 
   // Handle search for Pending Review tab
   const handlePendingSearch = () => {
-    const filtered = mockPendingReviewManuscripts.filter(manuscript => {
+    const filtered = pendingReviewData.filter(manuscript => {
       const matchesId = !pendingFilterId || manuscript.id.toLowerCase().includes(pendingFilterId.toLowerCase());
       const matchesTitle = !pendingFilterTitle || manuscript.title.toLowerCase().includes(pendingFilterTitle.toLowerCase());
       const matchesEditor = !pendingFilterEditor || pendingFilterEditor === 'all' || manuscript.editor === pendingFilterEditor;
@@ -929,7 +956,7 @@ const ReviewerManuscripts = () => {
     setPendingFilterId('');
     setPendingFilterTitle('');
     setPendingFilterEditor('');
-    setFilteredPendingReviews(mockPendingReviewManuscripts);
+    setFilteredPendingReviews(pendingReviewData);
     toast({
       title: "Filters Reset",
       description: "All filters have been cleared",
