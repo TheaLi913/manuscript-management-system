@@ -1468,6 +1468,7 @@ const Manuscripts = () => {
   const [sendBackDialogOpen, setSendBackDialogOpen] = useState(false);
   const [assignReviewerDialogOpen, setAssignReviewerDialogOpen] = useState(false);
   const [decideDialogOpen, setDecideDialogOpen] = useState(false);
+  const [submitReviewDialogOpen, setSubmitReviewDialogOpen] = useState(false);
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>('');
   
   // Send back form state
@@ -1492,6 +1493,15 @@ const Manuscripts = () => {
     comments: ''
   });
   const [decideFormErrors, setDecideFormErrors] = useState<Partial<Record<keyof typeof decideForm, string>>>({});
+
+  // Submit review form state
+  const [submitReviewForm, setSubmitReviewForm] = useState({
+    score: 5,
+    decision: '' as 'Major Revision' | 'Minor Revision' | 'Accept' | 'Reject' | '',
+    confidentialComments: '',
+    publicComments: ''
+  });
+  const [submitReviewFormErrors, setSubmitReviewFormErrors] = useState<Partial<Record<keyof typeof submitReviewForm, string>>>({});
 
   const filteredManuscripts = mockManuscripts.filter(manuscript => {
     const matchesTitle = manuscript.title.toLowerCase().includes(titleFilter.toLowerCase());
@@ -1744,6 +1754,44 @@ const Manuscripts = () => {
         setAssignReviewerErrors(errors);
       }
     }
+  };
+
+
+  const handleSubmitReview = () => {
+    // Validate form
+    const errors: Partial<Record<keyof typeof submitReviewForm, string>> = {};
+    
+    if (!submitReviewForm.decision) {
+      errors.decision = 'Please select a decision';
+    }
+    if (!submitReviewForm.confidentialComments.trim()) {
+      errors.confidentialComments = 'Confidential comments are required';
+    }
+    if (!submitReviewForm.publicComments.trim()) {
+      errors.publicComments = 'Public comments are required';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setSubmitReviewFormErrors(errors);
+      return;
+    }
+    
+    // Success
+    toast({
+      title: "Review Submitted",
+      description: `Review has been submitted successfully with score ${submitReviewForm.score}/10`,
+    });
+    
+    // Reset form and close dialog
+    setSubmitReviewForm({
+      score: 5,
+      decision: '',
+      confidentialComments: '',
+      publicComments: ''
+    });
+    setSubmitReviewFormErrors({});
+    setSubmitReviewDialogOpen(false);
+    setSelectedManuscriptId('');
   };
 
 
@@ -2170,13 +2218,16 @@ const Manuscripts = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handleAssignReviewer(manuscript.id)}
+                                      onClick={() => {
+                                        setSelectedManuscriptId(manuscript.id);
+                                        setSubmitReviewDialogOpen(true);
+                                      }}
                                     >
-                                      <UserCheck size={14} />
+                                      <Send size={14} />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Assign Reviewer</p>
+                                    <p>Submit Review</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -2900,6 +2951,102 @@ const Manuscripts = () => {
                 setDecideFormErrors({});
               }}>
                 Submit Decision
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog for Submit Review */}
+        <Dialog open={submitReviewDialogOpen} onOpenChange={setSubmitReviewDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Submit Review</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="score">Score (1-10)</Label>
+                <Select
+                  value={submitReviewForm.score.toString()}
+                  onValueChange={(value) => setSubmitReviewForm(prev => ({ ...prev, score: parseInt(value) }))}
+                >
+                  <SelectTrigger id="score">
+                    <SelectValue placeholder="Select a score..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+                      <SelectItem key={score} value={score.toString()}>
+                        {score}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Suggested Decision</Label>
+                <RadioGroup
+                  value={submitReviewForm.decision}
+                  onValueChange={(value) => setSubmitReviewForm(prev => ({ ...prev, decision: value as typeof submitReviewForm.decision }))}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Major Revision" id="submit-major-revision" />
+                    <Label htmlFor="submit-major-revision">Major Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Minor Revision" id="submit-minor-revision" />
+                    <Label htmlFor="submit-minor-revision">Minor Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Accept" id="submit-accept" />
+                    <Label htmlFor="submit-accept">Accept</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Reject" id="submit-reject" />
+                    <Label htmlFor="submit-reject">Reject</Label>
+                  </div>
+                </RadioGroup>
+                {submitReviewFormErrors.decision && <p className="text-sm text-destructive">{submitReviewFormErrors.decision}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confidential-comments">Confidential Comments for Editors</Label>
+                <Textarea
+                  id="confidential-comments"
+                  placeholder="Enter confidential comments for editors..."
+                  value={submitReviewForm.confidentialComments}
+                  onChange={(e) => setSubmitReviewForm(prev => ({ ...prev, confidentialComments: e.target.value }))}
+                  className="min-h-[100px]"
+                />
+                {submitReviewFormErrors.confidentialComments && <p className="text-sm text-destructive">{submitReviewFormErrors.confidentialComments}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="public-comments">Public Comments for Authors</Label>
+                <Textarea
+                  id="public-comments"
+                  placeholder="Enter public comments for authors..."
+                  value={submitReviewForm.publicComments}
+                  onChange={(e) => setSubmitReviewForm(prev => ({ ...prev, publicComments: e.target.value }))}
+                  className="min-h-[100px]"
+                />
+                {submitReviewFormErrors.publicComments && <p className="text-sm text-destructive">{submitReviewFormErrors.publicComments}</p>}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setSubmitReviewDialogOpen(false);
+                setSubmitReviewForm({
+                  score: 5,
+                  decision: '',
+                  confidentialComments: '',
+                  publicComments: ''
+                });
+                setSubmitReviewFormErrors({});
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitReview}>
+                Submit Review
               </Button>
             </DialogFooter>
           </DialogContent>
