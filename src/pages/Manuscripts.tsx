@@ -406,10 +406,13 @@ const mockPendingReviewManuscripts = [
     title: 'Advanced Neural Networks for Natural Language Processing',
     abstract: 'Natural language processing has seen significant advancements with the introduction of transformer architectures. This research presents novel neural network designs that improve upon existing models in terms of efficiency and accuracy.',
     keywords: ['Neural Networks', 'NLP', 'Transformers', 'Deep Learning'],
+    submissionDate: '2024-03-05',
     acceptedDate: '2024-03-20',
     dueDate: '2024-04-20',
     editor: 'Dr. John Smith',
-    manuscriptFile: 'manuscript_234576.pdf'
+    manuscriptFile: 'manuscript_234576.pdf',
+    reviewers: [],
+    reviewDeadlines: []
   },
   {
     id: '234577',
