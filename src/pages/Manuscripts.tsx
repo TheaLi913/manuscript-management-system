@@ -399,6 +399,70 @@ const mockWaitingReviewManuscripts = [
   }
 ];
 
+// Mock data for completed reviews (Reviewer role)
+const mockCompletedReviews = [
+  {
+    id: '234617',
+    title: 'Advanced Machine Learning in Healthcare',
+    abstract: 'This study explores novel machine learning approaches for disease prediction and diagnosis. Our algorithms demonstrate improved accuracy in early detection of complex medical conditions.',
+    editor: 'Dr. John Smith',
+    manuscriptFile: 'manuscript_234617.pdf',
+    completedDate: '2024-03-22',
+    score: 8,
+    suggestedDecision: 'Accept',
+    confidentialComments: 'The methodology is sound and the results are promising. I recommend acceptance with minor revisions to the discussion section.',
+    publicComments: 'This is an excellent contribution to the field. The authors present innovative approaches with strong experimental validation.'
+  },
+  {
+    id: '234618',
+    title: 'Quantum Computing Applications in Drug Discovery',
+    abstract: 'We present quantum algorithms for molecular simulation that significantly reduce computational time while maintaining accuracy in drug candidate evaluation.',
+    editor: 'Prof. Emily Chen',
+    manuscriptFile: 'manuscript_234618.pdf',
+    completedDate: '2024-03-20',
+    score: 6,
+    suggestedDecision: 'Major Revision',
+    confidentialComments: 'While the concept is interesting, the experimental validation needs significant improvement. The comparison with classical methods is insufficient.',
+    publicComments: 'The paper addresses an important problem. However, more comprehensive experimental results and clearer comparisons with existing methods are needed.'
+  },
+  {
+    id: '234619',
+    title: 'Sustainable Energy Systems for Smart Cities',
+    abstract: 'This research investigates integrated renewable energy solutions for urban environments, focusing on solar and wind power optimization through AI-driven grid management.',
+    editor: 'Dr. Michael Rodriguez',
+    manuscriptFile: 'manuscript_234619.pdf',
+    completedDate: '2024-03-18',
+    score: 7,
+    suggestedDecision: 'Minor Revision',
+    confidentialComments: 'The paper is well-written and the methodology is solid. Some additional discussion on scalability would strengthen the work.',
+    publicComments: 'This work provides valuable insights into smart city energy management. Minor improvements in the results presentation would enhance clarity.'
+  },
+  {
+    id: '234620',
+    title: 'Blockchain Security in Financial Systems',
+    abstract: 'Our study examines vulnerabilities in blockchain-based financial systems and proposes novel cryptographic protocols to enhance security.',
+    editor: 'Prof. Sarah Johnson',
+    manuscriptFile: 'manuscript_234620.pdf',
+    completedDate: '2024-03-15',
+    score: 4,
+    suggestedDecision: 'Reject',
+    confidentialComments: 'The proposed approach lacks novelty and the security analysis is incomplete. Several claims are not adequately supported by the results.',
+    publicComments: 'The paper addresses an important topic, but the current version requires substantial improvements in both methodology and experimental validation.'
+  },
+  {
+    id: '234621',
+    title: 'Neural Networks for Climate Change Prediction',
+    abstract: 'We develop deep learning models for long-term climate forecasting, integrating multiple data sources including satellite imagery and atmospheric measurements.',
+    editor: 'Dr. Lisa Wang',
+    manuscriptFile: 'manuscript_234621.pdf',
+    completedDate: '2024-03-12',
+    score: 9,
+    suggestedDecision: 'Accept',
+    confidentialComments: 'Outstanding work with significant contributions to both methodology and practical applications. The validation is thorough and convincing.',
+    publicComments: 'This is an exceptional paper that advances the state-of-the-art in climate prediction. The methodology is innovative and the results are compelling.'
+  }
+];
+
 // Mock data for pending reviewer manuscripts
 const mockPendingReviewManuscripts = [
   {
@@ -1346,18 +1410,78 @@ const ReviewerManuscripts = () => {
                       <TableRow>
                         <TableHead>Manuscript ID</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>Authors</TableHead>
+                        <TableHead>Abstract</TableHead>
+                        <TableHead>File</TableHead>
+                        <TableHead>Editor</TableHead>
                         <TableHead>Completed Date</TableHead>
-                        <TableHead>Decision</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Score & Suggested Decision</TableHead>
+                        <TableHead>Comments</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          No completed reviews found
-                        </TableCell>
-                      </TableRow>
+                      {mockCompletedReviews.map((review) => (
+                        <TableRow key={review.id}>
+                          <TableCell className="font-medium">{review.id}</TableCell>
+                          <TableCell>{review.title}</TableCell>
+                          <TableCell className="max-w-xs">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="truncate cursor-help">
+                                    {review.abstract}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-md">
+                                  <p>{review.abstract}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <a
+                              href={`/manuscripts/${review.manuscriptFile}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {review.manuscriptFile}
+                            </a>
+                          </TableCell>
+                          <TableCell>{review.editor}</TableCell>
+                          <TableCell>{review.completedDate}</TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium">Score: {review.score}/10</div>
+                              <Badge 
+                                variant="outline" 
+                                className={
+                                  review.suggestedDecision === 'Accept' 
+                                    ? 'bg-green-50 text-green-700 border-green-200' 
+                                    : review.suggestedDecision === 'Minor Revision'
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                    : review.suggestedDecision === 'Major Revision'
+                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                    : 'bg-red-50 text-red-700 border-red-200'
+                                }
+                              >
+                                {review.suggestedDecision}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-sm">
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <div className="font-medium text-orange-700 mb-1">Confidential:</div>
+                                <div className="text-muted-foreground line-clamp-2">{review.confidentialComments}</div>
+                              </div>
+                              <div className="text-sm">
+                                <div className="font-medium text-blue-700 mb-1">Public:</div>
+                                <div className="text-muted-foreground line-clamp-2">{review.publicComments}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
