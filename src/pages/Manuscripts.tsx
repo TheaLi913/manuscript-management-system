@@ -1027,9 +1027,18 @@ const ReviewerManuscripts = () => {
   const pendingReviewData = mockPendingReviewManuscripts.filter(m => m.editor);
   const [filteredPendingReviews, setFilteredPendingReviews] = useState(pendingReviewData);
 
+  // Filter states for Completed Review tab
+  const [completedFilterId, setCompletedFilterId] = useState('');
+  const [completedFilterTitle, setCompletedFilterTitle] = useState('');
+  const [completedFilterEditor, setCompletedFilterEditor] = useState('');
+  const [completedFilterDecision, setCompletedFilterDecision] = useState('');
+  const [filteredCompletedReviews, setFilteredCompletedReviews] = useState(mockCompletedReviews);
+
   // Get unique editors for dropdown
   const uniqueEditors = Array.from(new Set(mockReviewInvitations.map(inv => inv.editor)));
   const uniquePendingEditors = Array.from(new Set(pendingReviewData.map(m => m.editor)));
+  const uniqueCompletedEditors = Array.from(new Set(mockCompletedReviews.map(r => r.editor)));
+  const uniqueCompletedDecisions = Array.from(new Set(mockCompletedReviews.map(r => r.suggestedDecision)));
 
   // Handle search
   const handleSearch = () => {
@@ -1083,6 +1092,37 @@ const ReviewerManuscripts = () => {
     setPendingFilterTitle('');
     setPendingFilterEditor('');
     setFilteredPendingReviews(pendingReviewData);
+    toast({
+      title: "Filters Reset",
+      description: "All filters have been cleared",
+    });
+  };
+
+  // Handle search for Completed Review tab
+  const handleCompletedSearch = () => {
+    const filtered = mockCompletedReviews.filter(review => {
+      const matchesId = !completedFilterId || review.id.toLowerCase().includes(completedFilterId.toLowerCase());
+      const matchesTitle = !completedFilterTitle || review.title.toLowerCase().includes(completedFilterTitle.toLowerCase());
+      const matchesEditor = !completedFilterEditor || completedFilterEditor === 'all' || review.editor === completedFilterEditor;
+      const matchesDecision = !completedFilterDecision || completedFilterDecision === 'all' || review.suggestedDecision === completedFilterDecision;
+      
+      return matchesId && matchesTitle && matchesEditor && matchesDecision;
+    });
+    
+    setFilteredCompletedReviews(filtered);
+    toast({
+      title: "Search Complete",
+      description: `Found ${filtered.length} review(s)`,
+    });
+  };
+
+  // Handle reset for Completed Review tab
+  const handleCompletedReset = () => {
+    setCompletedFilterId('');
+    setCompletedFilterTitle('');
+    setCompletedFilterEditor('');
+    setCompletedFilterDecision('');
+    setFilteredCompletedReviews(mockCompletedReviews);
     toast({
       title: "Filters Reset",
       description: "All filters have been cleared",
@@ -1436,20 +1476,69 @@ const ReviewerManuscripts = () => {
 
             <TabsContent value="completed-review" className="mt-6">
               <div className="space-y-4">
-                <div className="flex gap-4 items-center">
-                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by decision" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Decisions</SelectItem>
-                      <SelectItem value="accept">Accept</SelectItem>
-                      <SelectItem value="minor-revision">Minor Revision</SelectItem>
-                      <SelectItem value="major-revision">Major Revision</SelectItem>
-                      <SelectItem value="reject">Reject</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">ID</label>
+                    <Input 
+                      placeholder="Enter manuscript ID" 
+                      value={completedFilterId}
+                      onChange={(e) => setCompletedFilterId(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Title</label>
+                    <Input 
+                      placeholder="Enter title keywords" 
+                      value={completedFilterTitle}
+                      onChange={(e) => setCompletedFilterTitle(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Editor Name</label>
+                    <Select value={completedFilterEditor} onValueChange={setCompletedFilterEditor}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select editor" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="all">All Editors</SelectItem>
+                        {uniqueCompletedEditors.map((editor) => (
+                          <SelectItem key={editor} value={editor}>
+                            {editor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Suggested Decision</label>
+                    <Select value={completedFilterDecision} onValueChange={setCompletedFilterDecision}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select decision" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="all">All Decisions</SelectItem>
+                        {uniqueCompletedDecisions.map((decision) => (
+                          <SelectItem key={decision} value={decision}>
+                            {decision}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleCompletedSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Search
+                  </Button>
+                  <Button onClick={handleCompletedReset} variant="outline">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </Button>
                 </div>
                 
                 <div className="border rounded-lg">
@@ -1467,7 +1556,7 @@ const ReviewerManuscripts = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockCompletedReviews.map((review) => (
+                      {filteredCompletedReviews.map((review) => (
                         <TableRow key={review.id}>
                           <TableCell className="font-medium">{review.id}</TableCell>
                           <TableCell>{review.title}</TableCell>
