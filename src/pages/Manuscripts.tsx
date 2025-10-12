@@ -1512,7 +1512,9 @@ const ReviewerManuscripts = () => {
                       <TableRow>
                         <TableHead>Manuscript ID</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>Authors</TableHead>
+                        <TableHead>Abstract</TableHead>
+                        <TableHead>File</TableHead>
+                        <TableHead>Editor</TableHead>
                         <TableHead>Invited Date</TableHead>
                         <TableHead>Rejected Date</TableHead>
                         <TableHead>Reason</TableHead>
@@ -1520,7 +1522,7 @@ const ReviewerManuscripts = () => {
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                           No rejected invitations found
                         </TableCell>
                       </TableRow>
