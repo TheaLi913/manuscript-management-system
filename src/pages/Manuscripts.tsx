@@ -263,6 +263,54 @@ const mockReviewInvitations = [
   }
 ];
 
+// Mock data for rejected review invitations (Reviewer role)
+const mockRejectedInvitations = [
+  {
+    id: '234610',
+    title: 'Blockchain Applications in Supply Chain Management',
+    abstract: 'This paper explores the integration of blockchain technology in modern supply chain systems. We analyze transparency, traceability, and efficiency improvements in logistics operations.',
+    keywords: ['Blockchain', 'Supply Chain', 'Logistics', 'Technology'],
+    editor: 'Dr. Patricia Williams',
+    invitedDate: '2024-02-10',
+    rejectedDate: '2024-02-12',
+    reason: 'Conflict of Interest',
+    manuscriptFile: 'manuscript_234610.pdf'
+  },
+  {
+    id: '234611',
+    title: 'Microplastics in Ocean Ecosystems: A Global Perspective',
+    abstract: 'We investigate the widespread presence of microplastics in marine environments and their impact on aquatic life. Our findings reveal alarming accumulation rates in various ocean zones.',
+    keywords: ['Microplastics', 'Marine Pollution', 'Environmental Science', 'Ocean Health'],
+    editor: 'Prof. Richard Anderson',
+    invitedDate: '2024-02-08',
+    rejectedDate: '2024-02-10',
+    reason: 'Not My Expertise',
+    manuscriptFile: 'manuscript_234611.pdf'
+  },
+  {
+    id: '234612',
+    title: 'Advanced Robotics in Manufacturing Automation',
+    abstract: 'This study examines the implementation of intelligent robotic systems in manufacturing processes. We present case studies demonstrating productivity gains and quality improvements.',
+    keywords: ['Robotics', 'Automation', 'Manufacturing', 'Industry 4.0'],
+    editor: 'Dr. Michelle Lee',
+    invitedDate: '2024-02-05',
+    rejectedDate: '2024-02-07',
+    reason: 'Time Constraints',
+    manuscriptFile: 'manuscript_234612.pdf'
+  },
+  {
+    id: '234613',
+    title: 'Epigenetics and Disease Susceptibility in Modern Populations',
+    abstract: 'Our research investigates epigenetic modifications and their role in disease development. We explore how environmental factors influence gene expression patterns.',
+    keywords: ['Epigenetics', 'Disease', 'Genetics', 'Public Health'],
+    editor: 'Prof. Thomas Brown',
+    invitedDate: '2024-02-01',
+    rejectedDate: '2024-02-03',
+    reason: 'Other',
+    manuscriptFile: 'manuscript_234613.pdf'
+  }
+];
+
 // Mock data for waiting for review manuscripts
 const mockWaitingReviewManuscripts = [
   {
@@ -1521,11 +1569,70 @@ const ReviewerManuscripts = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          No rejected invitations found
-                        </TableCell>
-                      </TableRow>
+                      {mockRejectedInvitations.map((manuscript) => (
+                        <TableRow key={manuscript.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <button className="text-primary hover:underline font-medium">
+                              {manuscript.id}
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium mb-1">{manuscript.title}</div>
+                              <div className="flex flex-wrap gap-1">
+                                {manuscript.keywords.map((keyword, index) => (
+                                  <span
+                                    key={index}
+                                    className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded"
+                                  >
+                                    {keyword}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm max-w-md line-clamp-3">
+                              {manuscript.abstract}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Download size={14} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{manuscript.manuscriptFile}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {manuscript.editor}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {manuscript.invitedDate}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {manuscript.rejectedDate}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="destructive">
+                              {manuscript.reason}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {mockRejectedInvitations.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            No rejected invitations found
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </div>
