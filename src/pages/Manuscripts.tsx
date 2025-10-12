@@ -308,6 +308,17 @@ const mockRejectedInvitations = [
     rejectedDate: '2024-02-03',
     reason: 'Other',
     manuscriptFile: 'manuscript_234613.pdf'
+  },
+  {
+    id: '234614',
+    title: 'Artificial Intelligence in Autonomous Transportation Systems',
+    abstract: 'This paper presents advanced AI algorithms for autonomous vehicle navigation and traffic management. We demonstrate improved safety and efficiency in complex urban environments.',
+    keywords: ['AI', 'Autonomous Vehicles', 'Transportation', 'Machine Learning'],
+    editor: 'Dr. James Wilson',
+    invitedDate: '2024-01-28',
+    rejectedDate: '2024-02-15',
+    reason: 'Expired',
+    manuscriptFile: 'manuscript_234614.pdf'
   }
 ];
 
@@ -1034,11 +1045,20 @@ const ReviewerManuscripts = () => {
   const [completedFilterDecision, setCompletedFilterDecision] = useState('');
   const [filteredCompletedReviews, setFilteredCompletedReviews] = useState(mockCompletedReviews);
 
+  // Filter states for Rejected tab
+  const [rejectedFilterId, setRejectedFilterId] = useState('');
+  const [rejectedFilterTitle, setRejectedFilterTitle] = useState('');
+  const [rejectedFilterEditor, setRejectedFilterEditor] = useState('');
+  const [rejectedFilterReason, setRejectedFilterReason] = useState('');
+  const [filteredRejectedInvitations, setFilteredRejectedInvitations] = useState(mockRejectedInvitations);
+
   // Get unique editors for dropdown
   const uniqueEditors = Array.from(new Set(mockReviewInvitations.map(inv => inv.editor)));
   const uniquePendingEditors = Array.from(new Set(pendingReviewData.map(m => m.editor)));
   const uniqueCompletedEditors = Array.from(new Set(mockCompletedReviews.map(r => r.editor)));
   const uniqueCompletedDecisions = Array.from(new Set(mockCompletedReviews.map(r => r.suggestedDecision)));
+  const uniqueRejectedEditors = Array.from(new Set(mockRejectedInvitations.map(r => r.editor)));
+  const uniqueRejectedReasons = Array.from(new Set(mockRejectedInvitations.map(r => r.reason)));
 
   // Handle search
   const handleSearch = () => {
@@ -1123,6 +1143,37 @@ const ReviewerManuscripts = () => {
     setCompletedFilterEditor('');
     setCompletedFilterDecision('');
     setFilteredCompletedReviews(mockCompletedReviews);
+    toast({
+      title: "Filters Reset",
+      description: "All filters have been cleared",
+    });
+  };
+
+  // Handle search for Rejected tab
+  const handleRejectedSearch = () => {
+    const filtered = mockRejectedInvitations.filter(invitation => {
+      const matchesId = !rejectedFilterId || invitation.id.toLowerCase().includes(rejectedFilterId.toLowerCase());
+      const matchesTitle = !rejectedFilterTitle || invitation.title.toLowerCase().includes(rejectedFilterTitle.toLowerCase());
+      const matchesEditor = !rejectedFilterEditor || rejectedFilterEditor === 'all' || invitation.editor === rejectedFilterEditor;
+      const matchesReason = !rejectedFilterReason || rejectedFilterReason === 'all' || invitation.reason === rejectedFilterReason;
+      
+      return matchesId && matchesTitle && matchesEditor && matchesReason;
+    });
+    
+    setFilteredRejectedInvitations(filtered);
+    toast({
+      title: "Search Complete",
+      description: `Found ${filtered.length} invitation(s)`,
+    });
+  };
+
+  // Handle reset for Rejected tab
+  const handleRejectedReset = () => {
+    setRejectedFilterId('');
+    setRejectedFilterTitle('');
+    setRejectedFilterEditor('');
+    setRejectedFilterReason('');
+    setFilteredRejectedInvitations(mockRejectedInvitations);
     toast({
       title: "Filters Reset",
       description: "All filters have been cleared",
@@ -1627,20 +1678,69 @@ const ReviewerManuscripts = () => {
 
             <TabsContent value="rejected" className="mt-6">
               <div className="space-y-4">
-                <div className="flex gap-4 items-center">
-                  <Input placeholder="Search manuscripts..." className="max-w-sm" />
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Reasons</SelectItem>
-                      <SelectItem value="conflict-of-interest">Conflict of Interest</SelectItem>
-                      <SelectItem value="not-expertise">Not My Expertise</SelectItem>
-                      <SelectItem value="time-constraints">Time Constraints</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">ID</label>
+                    <Input 
+                      placeholder="Enter manuscript ID" 
+                      value={rejectedFilterId}
+                      onChange={(e) => setRejectedFilterId(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Title</label>
+                    <Input 
+                      placeholder="Enter title keywords" 
+                      value={rejectedFilterTitle}
+                      onChange={(e) => setRejectedFilterTitle(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Editor Name</label>
+                    <Select value={rejectedFilterEditor} onValueChange={setRejectedFilterEditor}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select editor" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="all">All Editors</SelectItem>
+                        {uniqueRejectedEditors.map((editor) => (
+                          <SelectItem key={editor} value={editor}>
+                            {editor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Reason</label>
+                    <Select value={rejectedFilterReason} onValueChange={setRejectedFilterReason}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select reason" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        <SelectItem value="all">All Reasons</SelectItem>
+                        {uniqueRejectedReasons.map((reason) => (
+                          <SelectItem key={reason} value={reason}>
+                            {reason}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleRejectedSearch}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Search
+                  </Button>
+                  <Button onClick={handleRejectedReset} variant="outline">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </Button>
                 </div>
                 
                 <div className="border rounded-lg">
@@ -1658,7 +1758,7 @@ const ReviewerManuscripts = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockRejectedInvitations.map((manuscript) => (
+                      {filteredRejectedInvitations.map((manuscript) => (
                         <TableRow key={manuscript.id} className="hover:bg-muted/50">
                           <TableCell>
                             <button className="text-primary hover:underline font-medium">
@@ -1709,13 +1809,26 @@ const ReviewerManuscripts = () => {
                             {manuscript.rejectedDate}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="destructive">
+                            <Badge 
+                              variant="outline"
+                              className={
+                                manuscript.reason === 'Conflict of Interest'
+                                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                  : manuscript.reason === 'Not My Expertise'
+                                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                  : manuscript.reason === 'Time Constraints'
+                                  ? 'bg-orange-50 text-orange-700 border-orange-200'
+                                  : manuscript.reason === 'Expired'
+                                  ? 'bg-red-50 text-red-700 border-red-200'
+                                  : 'bg-gray-50 text-gray-700 border-gray-200'
+                              }
+                            >
                               {manuscript.reason}
                             </Badge>
                           </TableCell>
                         </TableRow>
                       ))}
-                      {mockRejectedInvitations.length === 0 && (
+                      {filteredRejectedInvitations.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                             No rejected invitations found
