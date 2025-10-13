@@ -1010,6 +1010,7 @@ const ReviewerManuscripts = () => {
   const [activeTab, setActiveTab] = useState('review-invitation');
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [otherRejectReason, setOtherRejectReason] = useState('');
   const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
   
   const rejectionReasons = [
@@ -1868,12 +1869,22 @@ const ReviewerManuscripts = () => {
                       </div>
                     ))}
                   </RadioGroup>
+                  {rejectReason === 'Other' && (
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Please specify your reason..."
+                        value={otherRejectReason}
+                        onChange={(e) => setOtherRejectReason(e.target.value)}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => {
                   setRejectDialogOpen(false);
                   setRejectReason('');
+                  setOtherRejectReason('');
                   setSelectedInvitationId(null);
                 }}>
                   Cancel
@@ -1887,12 +1898,22 @@ const ReviewerManuscripts = () => {
                     });
                     return;
                   }
+                  if (rejectReason === 'Other' && !otherRejectReason.trim()) {
+                    toast({
+                      title: "Reason Required",
+                      description: "Please specify your reason for rejecting the invitation.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  const finalReason = rejectReason === 'Other' ? otherRejectReason : rejectReason;
                   toast({
                     title: "Invitation Rejected",
-                    description: `You have rejected the review invitation for manuscript ${selectedInvitationId} due to: ${rejectReason}.`,
+                    description: `You have rejected the review invitation for manuscript ${selectedInvitationId} due to: ${finalReason}.`,
                   });
                   setRejectDialogOpen(false);
                   setRejectReason('');
+                  setOtherRejectReason('');
                   setSelectedInvitationId(null);
                 }}>
                   Reject
