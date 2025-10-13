@@ -2835,16 +2835,13 @@ const Manuscripts = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => {
-                                        setSelectedManuscriptId(manuscript.id);
-                                        setSubmitReviewDialogOpen(true);
-                                      }}
+                                      onClick={() => handleAssignReviewer(manuscript.id)}
                                     >
-                                      <Send size={14} />
+                                      <UserPlus size={14} />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Submit Review</p>
+                                    <p>Assign Reviewer</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -3376,7 +3373,7 @@ const Manuscripts = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Review Deadline</Label>
+                    <Label>Review Deadline (Date & Time)</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -3387,7 +3384,7 @@ const Manuscripts = () => {
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {assignment.deadline ? format(assignment.deadline, "PPP") : <span>Pick a date</span>}
+                          {assignment.deadline ? format(assignment.deadline, "PPP 'at' p") : <span>Pick a date and time</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -3399,6 +3396,21 @@ const Manuscripts = () => {
                           initialFocus
                           className={cn("p-3 pointer-events-auto")}
                         />
+                        <div className="p-3 border-t">
+                          <Label className="text-xs mb-2 block">Time</Label>
+                          <Input
+                            type="time"
+                            value={assignment.deadline ? format(assignment.deadline, "HH:mm") : ""}
+                            onChange={(e) => {
+                              if (assignment.deadline && e.target.value) {
+                                const [hours, minutes] = e.target.value.split(':');
+                                const newDate = new Date(assignment.deadline);
+                                newDate.setHours(parseInt(hours), parseInt(minutes));
+                                handleDeadlineSelect(index, newDate);
+                              }
+                            }}
+                          />
+                        </div>
                       </PopoverContent>
                     </Popover>
                   </div>
