@@ -538,76 +538,6 @@ const mockPendingReviewManuscripts = [
     reviewDeadlines: []
   },
   {
-    id: '234577',
-    title: 'Quantum Cryptography: Security in the Post-Quantum Era',
-    abstract: 'As quantum computers become more powerful, traditional cryptographic methods face unprecedented threats. This study investigates quantum-resistant cryptographic protocols and their practical implementation.',
-    keywords: ['Quantum Cryptography', 'Post-Quantum Security', 'Encryption', 'Cybersecurity'],
-    acceptedDate: '2024-03-18',
-    dueDate: '2024-04-18',
-    editor: 'Prof. Emily Chen',
-    manuscriptFile: 'manuscript_234577.pdf'
-  },
-  {
-    id: '234578',
-    title: 'Sustainable Agriculture Technologies for Climate Adaptation',
-    abstract: 'Climate change poses significant challenges to global food security. This research explores innovative agricultural technologies that can help farmers adapt to changing climate conditions.',
-    keywords: ['Sustainable Agriculture', 'Climate Adaptation', 'Precision Farming', 'Food Security'],
-    acceptedDate: '2024-03-15',
-    dueDate: '2024-04-15',
-    editor: 'Dr. Michael Rodriguez',
-    manuscriptFile: 'manuscript_234578.pdf'
-  },
-  {
-    id: '234579',
-    title: 'Biomedical Engineering Applications in Regenerative Medicine',
-    abstract: 'Regenerative medicine represents a paradigm shift in healthcare, offering potential cures for previously incurable conditions. This comprehensive review examines the latest biomedical engineering approaches.',
-    keywords: ['Regenerative Medicine', 'Biomedical Engineering', 'Tissue Engineering', 'Stem Cells'],
-    acceptedDate: '2024-03-12',
-    dueDate: '2024-04-12',
-    editor: 'Prof. Sarah Johnson',
-    manuscriptFile: 'manuscript_234579.pdf'
-  },
-  {
-    id: '234580',
-    title: 'Deep Learning for Medical Image Analysis',
-    abstract: 'Medical imaging plays a crucial role in modern healthcare. This research explores deep learning approaches for automated disease detection and diagnosis from medical images, demonstrating improved accuracy over traditional methods.',
-    keywords: ['Deep Learning', 'Medical Imaging', 'Computer Vision', 'Healthcare'],
-    acceptedDate: '2024-03-10',
-    dueDate: '2024-04-10',
-    editor: 'Dr. Lisa Wang',
-    manuscriptFile: 'manuscript_234580.pdf'
-  },
-  {
-    id: '234581',
-    title: 'Smart Grid Technologies for Energy Distribution',
-    abstract: 'The integration of renewable energy sources requires advanced grid management systems. This paper presents smart grid technologies that optimize energy distribution and improve grid reliability.',
-    keywords: ['Smart Grid', 'Energy Distribution', 'Renewable Energy', 'Optimization'],
-    acceptedDate: '2024-03-08',
-    dueDate: '2024-04-08',
-    editor: 'Dr. John Smith',
-    manuscriptFile: 'manuscript_234581.pdf'
-  },
-  {
-    id: '234582',
-    title: 'Nanotechnology in Drug Delivery Systems',
-    abstract: 'Nanotechnology offers revolutionary approaches to drug delivery. This study investigates nanoparticle-based delivery systems that enhance drug efficacy while minimizing side effects.',
-    keywords: ['Nanotechnology', 'Drug Delivery', 'Pharmaceuticals', 'Nanoparticles'],
-    acceptedDate: '2024-03-06',
-    dueDate: '2024-04-06',
-    editor: 'Prof. Emily Chen',
-    manuscriptFile: 'manuscript_234582.pdf'
-  },
-  {
-    id: '234583',
-    title: 'Artificial Intelligence in Autonomous Vehicles',
-    abstract: 'Autonomous vehicles represent the future of transportation. This research examines AI algorithms for vehicle perception, decision-making, and control in complex traffic scenarios.',
-    keywords: ['AI', 'Autonomous Vehicles', 'Machine Learning', 'Transportation'],
-    acceptedDate: '2024-03-04',
-    dueDate: '2024-04-04',
-    editor: 'Dr. Michael Rodriguez',
-    manuscriptFile: 'manuscript_234583.pdf'
-  },
-  {
     id: '234613',
     username: 'Dr. Alan Foster',
     title: 'Machine Learning for Autonomous Systems',
@@ -2252,10 +2182,13 @@ const Manuscripts = () => {
         title: manuscript.title,
         abstract: manuscript.abstract,
         keywords: manuscript.keywords,
+        submissionDate: manuscript.submissionDate,
         acceptedDate: new Date().toISOString().split('T')[0],
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
         editor: 'Dr. John Smith', // Default editor
-        manuscriptFile: manuscript.manuscriptFile
+        manuscriptFile: manuscript.manuscriptFile,
+        reviewers: [],
+        reviewDeadlines: []
       };
       setPendingReviewManuscripts(prev => [...prev, newPendingManuscript]);
       
