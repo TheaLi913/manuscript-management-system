@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, LogOut, Languages } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -16,26 +16,28 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-
-const menuItems = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Manuscripts',
-    url: '/manuscripts',
-    icon: FileText,
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function AppSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
   const { state } = useSidebar();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
+
+  const menuItems = [
+    {
+      title: t('nav.dashboard'),
+      url: '/dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      title: t('nav.manuscripts'),
+      url: '/manuscripts',
+      icon: FileText,
+    },
+  ];
 
   const isActive = (path: string) => currentPath === path;
 
@@ -51,19 +53,32 @@ export function AppSidebar() {
           </div>
           {!isCollapsed && (
             <div>
-              <h2 className="font-semibold text-sm">Journal Platform</h2>
+              <h2 className="font-semibold text-sm">{t('nav.journalPlatform')}</h2>
               <p className="text-xs text-muted-foreground">
                 {user?.role} - {user?.username}
               </p>
             </div>
           )}
         </div>
-        <SidebarTrigger className="mt-2 self-end" />
+        <div className="flex items-center gap-2 mt-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className={`${isCollapsed ? "w-10 h-10 p-0" : ""} gap-1`}
+            onClick={toggleLanguage}
+          >
+            <Languages className="w-4 h-4" />
+            {!isCollapsed && (
+              <span className="text-xs">{language === 'en' ? '中文' : 'EN'}</span>
+            )}
+          </Button>
+          <SidebarTrigger />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          {!isCollapsed && <SidebarGroupLabel>Navigation</SidebarGroupLabel>}
+          {!isCollapsed && <SidebarGroupLabel>{t('nav.navigation')}</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -88,7 +103,7 @@ export function AppSidebar() {
           onClick={logout}
         >
           <LogOut className="w-4 h-4" />
-          {!isCollapsed && "Logout"}
+          {!isCollapsed && t('nav.logout')}
         </Button>
       </SidebarFooter>
     </Sidebar>
