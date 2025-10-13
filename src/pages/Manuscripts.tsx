@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Navigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -937,6 +938,7 @@ type AssignReviewerFormData = z.infer<typeof assignReviewerSchema>;
 // Reviewer Manuscripts Component
 const ReviewerManuscripts = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('review-invitation');
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -1955,6 +1957,7 @@ const ReviewerManuscripts = () => {
 
 const Manuscripts = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   
   if (!user) {
     return <Navigate to="/login" replace />;

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { BookOpen } from 'lucide-react';
 
@@ -13,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,21 +26,21 @@ const Login = () => {
       
       if (success) {
         toast({
-          title: "Login successful",
-          description: "Welcome to the Journal Management Platform",
+          title: t('login.successTitle'),
+          description: t('login.successDesc'),
         });
         navigate('/dashboard');
       } else {
         toast({
-          title: "Login failed",
-          description: "Invalid username or password",
+          title: t('login.failedTitle'),
+          description: t('login.failedDesc'),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Login error",
-        description: "An unexpected error occurred",
+        title: t('login.errorTitle'),
+        description: t('login.errorDesc'),
         variant: "destructive",
       });
     } finally {
@@ -53,45 +55,45 @@ const Login = () => {
           <div className="mx-auto mb-4 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">Journal Management</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('login.title')}</CardTitle>
           <CardDescription>
-            Sign in to your account to manage manuscripts
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('login.username')}</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder={t('login.usernamePlaceholder')}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t('login.passwordPlaceholder')}
                 required
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Login"}
+              {isLoading ? t('login.signingIn') : t('login.button')}
             </Button>
           </form>
           
           <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-2">Demo Credentials:</p>
+            <p className="text-sm text-muted-foreground text-center mb-2">{t('login.demoCredentials')}</p>
             <div className="text-xs text-muted-foreground space-y-1">
-              <p><strong>Editor:</strong> Thea / 1998</p>
-              <p><strong>Reviewer:</strong> Xinan / 0913</p>
+              <p><strong>{t('login.editor')}:</strong> Thea / 1998</p>
+              <p><strong>{t('login.reviewer')}:</strong> Xinan / 0913</p>
             </div>
           </div>
         </CardContent>
