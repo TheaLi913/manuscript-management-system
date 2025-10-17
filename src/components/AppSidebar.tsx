@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, LogOut, Languages } from 'lucide-react';
+import { LayoutDashboard, FileText, RefreshCw, LogOut, Languages } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -36,6 +36,11 @@ export function AppSidebar() {
       title: t('nav.manuscripts'),
       url: '/manuscripts',
       icon: FileText,
+    },
+    {
+      title: t('nav.revision'),
+      url: '/revision',
+      icon: RefreshCw,
     },
   ];
 

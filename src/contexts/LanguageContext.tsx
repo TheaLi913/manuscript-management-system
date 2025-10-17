@@ -16,6 +16,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Navigation
     'nav.dashboard': 'Dashboard',
     'nav.manuscripts': 'Manuscripts',
+    'nav.revision': 'Revision',
     'nav.logout': 'Logout',
     'nav.journalPlatform': 'Journal Platform',
     'nav.navigation': 'Navigation',
@@ -186,11 +187,27 @@ const translations: Record<Language, Record<string, string>> = {
     'notFound.title': '404',
     'notFound.message': 'Oops! Page not found',
     'notFound.returnHome': 'Return to Home',
+    
+    // Revision Page
+    'revision.title': 'Revision Management',
+    'revision.description': 'Manage manuscript revisions and reviews',
+    'revision.waitingForReview': 'Waiting for Review',
+    'revision.pendingReviewer': 'Pending Reviewer',
+    'revision.assignedReviewer': 'Assigned Reviewer',
+    'revision.waitingForDecision': 'Waiting for Decision',
+    'revision.reviewInvitation': 'Review Invitation',
+    'revision.completedReviewer': 'Completed Reviewer',
+    'revision.rejected': 'Rejected',
+    'revision.tabDescription': 'View and manage items in this category',
+    'revision.searchPlaceholder': 'Search...',
+    'revision.filter': 'Filter',
+    'revision.noData': 'No data available',
   },
   zh: {
     // Navigation
     'nav.dashboard': '仪表板',
     'nav.manuscripts': '稿件管理',
+    'nav.revision': '修订管理',
     'nav.logout': '退出登录',
     'nav.journalPlatform': '期刊平台',
     'nav.navigation': '导航',
@@ -361,6 +378,21 @@ const translations: Record<Language, Record<string, string>> = {
     'notFound.title': '404',
     'notFound.message': '哎呀！页面未找到',
     'notFound.returnHome': '返回首页',
+    
+    // Revision Page
+    'revision.title': '修订管理',
+    'revision.description': '管理稿件修订和审稿',
+    'revision.waitingForReview': '等待审稿',
+    'revision.pendingReviewer': '待审稿人处理',
+    'revision.assignedReviewer': '已分配审稿人',
+    'revision.waitingForDecision': '等待决策',
+    'revision.reviewInvitation': '审稿邀请',
+    'revision.completedReviewer': '已完成审稿',
+    'revision.rejected': '已拒绝',
+    'revision.tabDescription': '查看和管理此类别中的项目',
+    'revision.searchPlaceholder': '搜索...',
+    'revision.filter': '筛选',
+    'revision.noData': '暂无数据',
   }
 };
 
