@@ -1,5 +1,5 @@
 import { LayoutDashboard, FileText, RefreshCw, LogOut, Languages } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -20,11 +20,17 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
   const { state } = useSidebar();
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const menuItems = [
     {
@@ -105,7 +111,7 @@ export function AppSidebar() {
         <Button 
           variant="outline" 
           className={`${isCollapsed ? "w-10 h-10 p-0" : "w-full"} justify-${isCollapsed ? "center" : "start"} gap-2`}
-          onClick={logout}
+          onClick={handleLogout}
         >
           <LogOut className="w-4 h-4" />
           {!isCollapsed && t('nav.logout')}
