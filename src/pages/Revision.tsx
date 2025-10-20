@@ -9,24 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCcw, Download, Check, X } from "lucide-react";
+import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp } from "lucide-react";
 
-// Mock data - identical to Manuscripts page
+// Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
   {
     id: '334567',
+    ordinal: 1,
     username: 'Dr. Sarah Chen',
     title: 'Advanced Machine Learning Applications in Medical Diagnosis',
+    previousTitle: 'Machine Learning Applications in Medical Diagnosis',
     keywords: ['Machine Learning', 'Medical AI', 'Diagnosis', 'Healthcare'],
     authors: 'Sarah Chen*, Michael Rodriguez, Lisa Wang, David Kim',
-    submissionDate: '2024-03-15',
+    previousAuthors: undefined,
+    submissionDate: '2024-03-20',
     status: 'Under Review',
-    abstract: 'This study explores the integration of machine learning techniques in clinical decision-making processes.',
+    abstract: 'This study explores the integration of advanced machine learning techniques in clinical decision-making processes, with focus on real-time diagnostic systems.',
+    previousAbstract: 'This study explores the integration of machine learning techniques in clinical decision-making processes.',
     editor: 'Dr. John Smith',
     invitedDate: '2024-03-15',
     dueDate: '2024-04-15',
-    manuscriptFile: 'manuscript_334567.pdf',
-    filesZip: '334567_all_files.zip',
+    manuscriptFile: 'manuscript_334567_rev1.pdf',
+    filesZip: '334567_rev1_all_files.zip',
     reviewers: [
       { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
       { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined }
@@ -34,36 +38,44 @@ const mockRevisions = [
   },
   {
     id: '334568',
+    ordinal: 2,
     username: 'Prof. James Wilson',
-    title: 'Climate Change Impact on Marine Ecosystems',
+    title: 'Climate Change Impact on Marine Ecosystems: A Comprehensive Analysis',
+    previousTitle: 'Climate Change Impact on Marine Ecosystems',
     keywords: ['Climate Change', 'Marine Biology', 'Ecosystem'],
-    authors: 'James Wilson*, Emma Thompson, Robert Johnson',
-    submissionDate: '2024-03-12',
+    authors: 'James Wilson*, Emma Thompson, Robert Johnson, Lisa Martinez',
+    previousAuthors: 'James Wilson*, Emma Thompson, Robert Johnson',
+    submissionDate: '2024-03-18',
     status: 'With Editor',
     abstract: 'This research examines the effects of rising ocean temperatures and acidification on marine biodiversity.',
+    previousAbstract: undefined,
     editor: 'Prof. Emily Chen',
     invitedDate: '2024-03-12',
     dueDate: '2024-04-12',
-    manuscriptFile: 'manuscript_334568.pdf',
-    filesZip: '334568_all_files.zip',
+    manuscriptFile: 'manuscript_334568_rev2.pdf',
+    filesZip: '334568_rev2_all_files.zip',
     reviewers: [
       { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined }
     ]
   },
   {
     id: '334569',
+    ordinal: 1,
     username: 'Dr. Maria Garcia',
     title: 'Quantum Computing Algorithms for Cryptographic Security',
+    previousTitle: undefined,
     keywords: ['Quantum Computing', 'Cryptography', 'Security'],
     authors: 'Maria Garcia*, Alex Chen, Sophie Anderson*',
-    submissionDate: '2024-03-10',
+    previousAuthors: undefined,
+    submissionDate: '2024-03-16',
     status: 'Decision in Process',
     abstract: 'We present novel quantum algorithms designed to enhance cryptographic protocols against emerging threats.',
+    previousAbstract: undefined,
     editor: 'Dr. Michael Rodriguez',
     invitedDate: '2024-03-10',
     dueDate: '2024-04-10',
-    manuscriptFile: 'manuscript_334569.pdf',
-    filesZip: '334569_all_files.zip',
+    manuscriptFile: 'manuscript_334569_rev1.pdf',
+    filesZip: '334569_rev1_all_files.zip',
     reviewers: [
       { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
       { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' }
@@ -104,6 +116,14 @@ const Revision = () => {
 
   const tabs = user?.role === "Editor" ? editorTabs : reviewerTabs;
   const [activeTab, setActiveTab] = useState(tabs[0].value);
+
+  // State for expanded cells
+  const [expandedCells, setExpandedCells] = useState<{ [key: string]: boolean }>({});
+
+  const toggleCell = (revisionId: string, field: string) => {
+    const key = `${revisionId}-${field}`;
+    setExpandedCells(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   // Filter states for each tab
   const [waitingIdFilter, setWaitingIdFilter] = useState('');
@@ -248,9 +268,10 @@ const Revision = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="w-32">Revision ID</TableHead>
                             <TableHead className="min-w-80">Article Title</TableHead>
                             <TableHead className="min-w-96">Abstract</TableHead>
-                            <TableHead>Author Info</TableHead>
+                            <TableHead className="min-w-48">Author Info</TableHead>
                             <TableHead>Submission Date</TableHead>
                             <TableHead>Manuscript</TableHead>
                             <TableHead>Files</TableHead>
@@ -258,50 +279,119 @@ const Revision = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockRevisions.map((revision) => (
-                            <TableRow key={revision.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium mb-1">{revision.title}</div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {revision.keywords.map((keyword, index) => (
-                                      <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                                        {keyword}
-                                      </span>
-                                    ))}
+                          {mockRevisions.map((revision) => {
+                            const titleExpanded = expandedCells[`${revision.id}-title`];
+                            const abstractExpanded = expandedCells[`${revision.id}-abstract`];
+                            const authorsExpanded = expandedCells[`${revision.id}-authors`];
+                            
+                            return (
+                              <TableRow key={revision.id} className="hover:bg-muted/50">
+                                <TableCell>
+                                  <button className="text-primary hover:underline font-medium">
+                                    {revision.id}_{revision.ordinal}
+                                  </button>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <div className="font-medium mb-1 flex items-center gap-2">
+                                        {revision.title}
+                                      </div>
+                                      {titleExpanded && revision.previousTitle && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t">
+                                          <span className="font-medium">Previous: </span>
+                                          {revision.previousTitle}
+                                        </div>
+                                      )}
+                                      <div className="flex flex-wrap gap-1 mt-2">
+                                        {revision.keywords.map((keyword, index) => (
+                                          <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
+                                            {keyword}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    {revision.previousTitle && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 flex-shrink-0"
+                                        onClick={() => toggleCell(revision.id, 'title')}
+                                      >
+                                        {titleExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                      </Button>
+                                    )}
                                   </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm max-w-xs">
-                                  <p className="line-clamp-4">{revision.abstract}</p>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm">{revision.authors}</div>
-                                <div className="text-xs text-muted-foreground mt-1">* Corresponding Author</div>
-                              </TableCell>
-                              <TableCell>{revision.submissionDate}</TableCell>
-                              <TableCell>
-                                <button className="text-primary hover:underline text-sm flex items-center gap-1">
-                                  <Download size={14} />
-                                  {revision.manuscriptFile}
-                                </button>
-                              </TableCell>
-                              <TableCell>
-                                <button className="text-primary hover:underline text-sm flex items-center gap-1">
-                                  <Download size={14} />
-                                  {revision.filesZip}
-                                </button>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
-                                  <Button variant="outline" size="sm">Send</Button>
-                                  <Button variant="outline" size="sm">Return</Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="text-sm max-w-xs flex-1">
+                                      <p className={titleExpanded || authorsExpanded ? "" : "line-clamp-4"}>{revision.abstract}</p>
+                                      {abstractExpanded && revision.previousAbstract && (
+                                        <div className="text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t">
+                                          <span className="font-medium">Previous: </span>
+                                          {revision.previousAbstract}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {revision.previousAbstract && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 flex-shrink-0"
+                                        onClick={() => toggleCell(revision.id, 'abstract')}
+                                      >
+                                        {abstractExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <div className="text-sm">{revision.authors}</div>
+                                      {authorsExpanded && revision.previousAuthors && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t">
+                                          <span className="font-medium">Previous: </span>
+                                          {revision.previousAuthors}
+                                        </div>
+                                      )}
+                                      <div className="text-xs text-muted-foreground mt-1">* Corresponding Author</div>
+                                    </div>
+                                    {revision.previousAuthors && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 flex-shrink-0"
+                                        onClick={() => toggleCell(revision.id, 'authors')}
+                                      >
+                                        {authorsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{revision.submissionDate}</TableCell>
+                                <TableCell>
+                                  <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                    <Download size={14} />
+                                    {revision.manuscriptFile}
+                                  </button>
+                                </TableCell>
+                                <TableCell>
+                                  <button className="text-primary hover:underline text-sm flex items-center gap-1">
+                                    <Download size={14} />
+                                    {revision.filesZip}
+                                  </button>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button variant="outline" size="sm">Send</Button>
+                                    <Button variant="outline" size="sm">Return</Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
