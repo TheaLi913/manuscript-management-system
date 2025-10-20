@@ -97,8 +97,8 @@ const Revision = () => {
 
   const reviewerTabs = [
     { value: "review-invitation", label: t("revision.reviewInvitation") },
-    { value: "pending-reviewer", label: t("revision.pendingReviewer") },
-    { value: "completed-reviewer", label: t("revision.completedReviewer") },
+    { value: "pending-reviewer", label: t("revision.pendingReview") },
+    { value: "completed-reviewer", label: t("revision.completedReview") },
     { value: "rejected", label: t("revision.rejected") },
   ];
 
