@@ -56,37 +56,6 @@ const assignReviewerSchema = z.object({
 // Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
   {
-    id: '334567',
-    ordinal: 1,
-    username: 'Dr. Sarah Chen',
-    title: 'Advanced Machine Learning Applications in Medical Diagnosis',
-    previousTitle: 'Machine Learning Applications in Medical Diagnosis',
-    keywords: ['Machine Learning', 'Medical AI', 'Diagnosis', 'Healthcare'],
-    authors: 'Sarah Chen*, Michael Rodriguez, Lisa Wang, David Kim',
-    previousAuthors: undefined,
-    submissionDate: '2024-03-20',
-    status: 'Under Review',
-    abstract: 'This study explores the integration of advanced machine learning techniques in clinical decision-making processes, with focus on real-time diagnostic systems.',
-    previousAbstract: 'This study explores the integration of machine learning techniques in clinical decision-making processes.',
-    editor: 'Dr. John Smith',
-    invitedDate: '2024-03-15',
-    dueDate: '2024-04-15',
-    manuscriptFile: 'manuscript_334567_rev1.pdf',
-    filesZip: '334567_rev1_all_files.zip',
-    lastDecision: 'Major Revision',
-    revisionComments: 'The methodology section needs significant improvement. Please provide more detailed statistical analysis and expand the discussion on model validation.',
-    lastReviewers: [
-      { name: 'Dr. John Smith', status: 'completed' },
-      { name: 'Prof. Emily Chen', status: 'completed' },
-      { name: 'Dr. Robert Chen', status: 'completed' }
-    ],
-    reviewers: [
-      { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined },
-      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined },
-      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined }
-    ]
-  },
-  {
     id: '334568',
     ordinal: 2,
     username: 'Prof. James Wilson',
@@ -962,7 +931,7 @@ const Revision = () => {
                               <TableCell>
                                 <div className="space-y-4">
                                   {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm min-h-[70px] flex items-center">
+                                    <div key={idx} className="text-sm min-h-[100px] flex items-center">
                                       {reviewer.name}
                                     </div>
                                   ))}
@@ -971,7 +940,7 @@ const Revision = () => {
                               <TableCell>
                                 <div className="space-y-4 max-w-md">
                                   {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
-                                    <div key={idx} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[70px]">
+                                    <div key={idx} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[100px]">
                                       <div className="text-sm font-medium mb-2">
                                         Score: {reviewer.score || 'N/A'}/10
                                       </div>
@@ -1005,7 +974,7 @@ const Revision = () => {
                               <TableCell>
                                 <div className="space-y-4">
                                   {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm min-h-[70px] flex items-center">
+                                    <div key={idx} className="text-sm min-h-[100px] flex items-center">
                                       {revision.submissionDate}
                                     </div>
                                   ))}
