@@ -11,6 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
@@ -106,6 +110,7 @@ const getStatusColor = (status: string) => {
 const Revision = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const editorTabs = [
     { value: "waiting-review", label: t("revision.waitingForReview") },
@@ -128,6 +133,14 @@ const Revision = () => {
   const [decideDialogOpen, setDecideDialogOpen] = useState(false);
   const [sendReviewerDialogOpen, setSendReviewerDialogOpen] = useState(false);
   const [selectedRevision, setSelectedRevision] = useState<any>(null);
+
+  // Decide form state
+  const [decideForm, setDecideForm] = useState({
+    decision: '' as 'Major Revision' | 'Minor Revision' | 'Accept' | 'Reject' | '',
+    reason: '',
+    comments: ''
+  });
+  const [decideFormErrors, setDecideFormErrors] = useState<Partial<Record<keyof typeof decideForm, string>>>({});
 
   // State for expanded cells
   const [expandedCells, setExpandedCells] = useState<{ [key: string]: boolean }>({});
@@ -1136,35 +1149,92 @@ const Revision = () => {
 
         {/* Decide Dialog */}
         <Dialog open={decideDialogOpen} onOpenChange={setDecideDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Make Decision</DialogTitle>
-              <DialogDescription>
-                Review the manuscript and make your editorial decision.
-              </DialogDescription>
+              <DialogTitle>Decide</DialogTitle>
             </DialogHeader>
-            {selectedRevision && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium">Revision ID:</p>
-                  <p className="text-sm text-muted-foreground">{selectedRevision.id}_{selectedRevision.ordinal}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Title:</p>
-                  <p className="text-sm text-muted-foreground">{selectedRevision.title}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Last Decision:</p>
-                  <Badge variant="outline" className={getStatusColor(selectedRevision.lastDecision)}>
-                    {selectedRevision.lastDecision}
-                  </Badge>
-                </div>
-                {/* Add decision form here */}
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <Label>Decision</Label>
+                <RadioGroup
+                  value={decideForm.decision}
+                  onValueChange={(value) => setDecideForm(prev => ({ ...prev, decision: value as typeof decideForm.decision }))}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Major Revision" id="major-revision" />
+                    <Label htmlFor="major-revision">Major Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Minor Revision" id="minor-revision" />
+                    <Label htmlFor="minor-revision">Minor Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Accept" id="accept" />
+                    <Label htmlFor="accept">Accept</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Reject" id="reject" />
+                    <Label htmlFor="reject">Reject</Label>
+                  </div>
+                </RadioGroup>
+                {decideFormErrors.decision && <p className="text-sm text-destructive">{decideFormErrors.decision}</p>}
               </div>
-            )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="decide-reason">Reason Behind Decision</Label>
+                <Textarea
+                  id="decide-reason"
+                  placeholder="Please provide the reason behind your decision..."
+                  value={decideForm.reason}
+                  onChange={(e) => setDecideForm(prev => ({ ...prev, reason: e.target.value }))}
+                  className="min-h-[80px]"
+                />
+                {decideFormErrors.reason && <p className="text-sm text-destructive">{decideFormErrors.reason}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="decide-comments">Review Comments to Author</Label>
+                <Textarea
+                  id="decide-comments"
+                  placeholder="Enter comments to be returned to the author..."
+                  value={decideForm.comments}
+                  onChange={(e) => setDecideForm(prev => ({ ...prev, comments: e.target.value }))}
+                  className="min-h-[80px]"
+                />
+                {decideFormErrors.comments && <p className="text-sm text-destructive">{decideFormErrors.comments}</p>}
+              </div>
+            </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDecideDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => setDecideDialogOpen(false)}>Confirm</Button>
+              <Button variant="outline" onClick={() => {
+                setDecideDialogOpen(false);
+                setDecideForm({ decision: '', reason: '', comments: '' });
+                setDecideFormErrors({});
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                // Basic validation
+                const errors: Partial<Record<keyof typeof decideForm, string>> = {};
+                if (!decideForm.decision) errors.decision = "Please select a decision";
+                if (!decideForm.reason.trim()) errors.reason = "Please provide a reason for your decision";
+                if (!decideForm.comments.trim()) errors.comments = "Please provide comments for the author";
+                
+                if (Object.keys(errors).length > 0) {
+                  setDecideFormErrors(errors);
+                  return;
+                }
+
+                toast({
+                  title: "Decision Submitted",
+                  description: `Your decision (${decideForm.decision}) for revision ${selectedRevision?.id}_${selectedRevision?.ordinal} has been submitted.`,
+                });
+                
+                setDecideDialogOpen(false);
+                setDecideForm({ decision: '', reason: '', comments: '' });
+                setDecideFormErrors({});
+              }}>
+                Submit Decision
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
