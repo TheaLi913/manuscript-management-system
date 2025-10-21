@@ -31,6 +31,8 @@ const mockRevisions = [
     dueDate: '2024-04-15',
     manuscriptFile: 'manuscript_334567_rev1.pdf',
     filesZip: '334567_rev1_all_files.zip',
+    lastDecision: 'Major Revision',
+    revisionComments: 'The methodology section needs significant improvement. Please provide more detailed statistical analysis and expand the discussion on model validation.',
     reviewers: [
       { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
       { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined }
@@ -54,6 +56,8 @@ const mockRevisions = [
     dueDate: '2024-04-12',
     manuscriptFile: 'manuscript_334568_rev2.pdf',
     filesZip: '334568_rev2_all_files.zip',
+    lastDecision: 'Minor Revision',
+    revisionComments: 'Please address the references formatting and clarify the data collection timeline. Minor language editing needed.',
     reviewers: [
       { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined }
     ]
@@ -76,6 +80,8 @@ const mockRevisions = [
     dueDate: '2024-04-10',
     manuscriptFile: 'manuscript_334569_rev1.pdf',
     filesZip: '334569_rev1_all_files.zip',
+    lastDecision: 'Major Revision',
+    revisionComments: 'The theoretical framework requires substantial revision. Include more comprehensive security analysis and performance benchmarks.',
     reviewers: [
       { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
       { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' }
@@ -275,6 +281,8 @@ const Revision = () => {
                             <TableHead>Submission Date</TableHead>
                             <TableHead>Manuscript</TableHead>
                             <TableHead>Files</TableHead>
+                            <TableHead className="min-w-40">Last Decision</TableHead>
+                            <TableHead className="min-w-72">Revision Comments</TableHead>
                             <TableHead>Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -384,9 +392,19 @@ const Revision = () => {
                                   </button>
                                 </TableCell>
                                 <TableCell>
+                                  <Badge variant="outline" className={getStatusColor(revision.lastDecision)}>
+                                    {revision.lastDecision}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="text-sm max-w-xs line-clamp-3">
+                                    {revision.revisionComments}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="outline" size="sm">Send</Button>
-                                    <Button variant="outline" size="sm">Return</Button>
+                                    <Button variant="outline" size="sm">Decide</Button>
+                                    <Button variant="outline" size="sm">Send to Reviewer</Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
