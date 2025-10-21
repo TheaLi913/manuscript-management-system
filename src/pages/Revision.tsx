@@ -768,16 +768,16 @@ const Revision = () => {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
+                                <div className="flex flex-col gap-1">
                                   {revision.reviewers?.map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm">{reviewer.name}</div>
+                                    <div key={idx} className="text-sm h-8 flex items-center">{reviewer.name}</div>
                                   ))}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
+                                <div className="flex flex-col gap-1">
                                   {revision.reviewers?.map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm">{reviewer.deadline}</div>
+                                    <div key={idx} className="text-sm h-8 flex items-center">{reviewer.deadline}</div>
                                   ))}
                                 </div>
                               </TableCell>
