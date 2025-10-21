@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon, User, Bell } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -784,9 +785,43 @@ const Revision = () => {
                               <TableCell>
                                 <div className="flex flex-col gap-1">
                                   {revision.reviewers?.map((reviewer, idx) => (
-                                    <Button key={idx} variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                      <Bell className="h-4 w-4" />
-                                    </Button>
+                                    <TooltipProvider key={idx}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                <Bell className="h-4 w-4" />
+                                              </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                              <AlertDialogHeader>
+                                                <AlertDialogTitle>Send a reminder email</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                  Confirm that a reminder email will be sent to {reviewer.name} to prompt them in returning the review sooner?
+                                                </AlertDialogDescription>
+                                              </AlertDialogHeader>
+                                              <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction 
+                                                  onClick={() => {
+                                                    toast({
+                                                      title: "Reminder Sent",
+                                                      description: `A reminder email has been sent to ${reviewer.name}.`,
+                                                    });
+                                                  }}
+                                                >
+                                                  Confirm
+                                                </AlertDialogAction>
+                                              </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                          </AlertDialog>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Remind {reviewer.name}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   ))}
                                 </div>
                               </TableCell>
