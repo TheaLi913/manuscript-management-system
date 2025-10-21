@@ -81,9 +81,9 @@ const mockRevisions = [
       { name: 'Dr. Robert Chen', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
-      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined },
-      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined }
+      { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined, score: undefined },
+      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined, score: undefined },
+      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined, score: undefined }
     ]
   },
   {
@@ -112,9 +112,9 @@ const mockRevisions = [
       { name: 'Dr. Thomas Mueller', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined },
-      { name: 'Prof. Maria Santos', status: 'accepted', deadline: '2024-04-12', decision: undefined },
-      { name: 'Dr. Thomas Mueller', status: 'pending', deadline: '2024-04-14', decision: undefined }
+      { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined, score: undefined },
+      { name: 'Prof. Maria Santos', status: 'accepted', deadline: '2024-04-12', decision: undefined, score: undefined },
+      { name: 'Dr. Thomas Mueller', status: 'pending', deadline: '2024-04-14', decision: undefined, score: undefined }
     ]
   },
   {
@@ -143,9 +143,9 @@ const mockRevisions = [
       { name: 'Dr. Emma Wilson', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
-      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' },
-      { name: 'Dr. Emma Wilson', status: 'completed', deadline: '2024-04-10', decision: 'Accept' }
+      { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 8 },
+      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision', score: 7 },
+      { name: 'Dr. Emma Wilson', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 9 }
     ]
   }
 ];
@@ -891,7 +891,7 @@ const Revision = () => {
                             <TableRow key={revision.id} className="hover:bg-muted/50">
                               <TableCell>
                                 <button className="text-primary hover:underline font-medium">
-                                  {revision.id}-{revision.ordinal}
+                                  {revision.id}_{revision.ordinal}
                                 </button>
                               </TableCell>
                               <TableCell>
@@ -911,7 +911,10 @@ const Revision = () => {
                                   {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
                                     <div key={idx} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[70px]">
                                       <div className="text-sm font-medium mb-2">
-                                        Score: <span className={`${
+                                        Score: {reviewer.score || 'N/A'}/10
+                                      </div>
+                                      <div className="text-sm font-medium mb-2">
+                                        Decision: <span className={`${
                                           reviewer.decision === 'Accept' ? 'text-green-700' :
                                           reviewer.decision === 'Reject' ? 'text-red-700' :
                                           reviewer.decision === 'Minor Revision' ? 'text-orange-700' :
