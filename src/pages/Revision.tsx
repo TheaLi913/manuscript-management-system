@@ -321,7 +321,14 @@ const Revision = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockRevisions.map((revision) => {
+                          {mockRevisions
+                            .filter((revision) => {
+                              if (waitingDecisionFilter !== 'all' && revision.lastDecision !== waitingDecisionFilter) {
+                                return false;
+                              }
+                              return true;
+                            })
+                            .map((revision) => {
                             const titleExpanded = expandedCells[`${revision.id}-title`];
                             const abstractExpanded = expandedCells[`${revision.id}-abstract`];
                             const authorsExpanded = expandedCells[`${revision.id}-authors`];
