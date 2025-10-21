@@ -81,9 +81,9 @@ const mockRevisions = [
       { name: 'Dr. Robert Chen', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined, score: undefined },
-      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined, score: undefined },
-      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined, score: undefined }
+      { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined },
+      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined },
+      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined, score: undefined, confidentialComments: undefined, publicComments: undefined }
     ]
   },
   {
@@ -96,7 +96,7 @@ const mockRevisions = [
     authors: 'James Wilson*, Emma Thompson, Robert Johnson, Lisa Martinez',
     previousAuthors: 'James Wilson*, Emma Thompson, Robert Johnson',
     submissionDate: '2024-03-18',
-    status: 'With Editor',
+    status: 'Decision in Process',
     abstract: 'This research examines the effects of rising ocean temperatures and acidification on marine biodiversity.',
     previousAbstract: undefined,
     editor: 'Prof. Emily Chen',
@@ -112,9 +112,9 @@ const mockRevisions = [
       { name: 'Dr. Thomas Mueller', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined, score: undefined },
-      { name: 'Prof. Maria Santos', status: 'accepted', deadline: '2024-04-12', decision: undefined, score: undefined },
-      { name: 'Dr. Thomas Mueller', status: 'pending', deadline: '2024-04-14', decision: undefined, score: undefined }
+      { name: 'Dr. Michael Lee', status: 'completed', deadline: '2024-04-12', decision: 'Accept', score: 9, confidentialComments: 'Excellent revision addressing all major concerns. The methodology is now much clearer and the results are well-presented.', publicComments: 'The paper has been significantly improved. The revised methodology section clearly addresses previous concerns and the additional data strengthens your conclusions.' },
+      { name: 'Prof. Maria Santos', status: 'completed', deadline: '2024-04-12', decision: 'Minor Revision', score: 7, confidentialComments: 'Good improvements overall but some minor language editing is still needed in the discussion section.', publicComments: 'The revision addresses most concerns. Please perform a careful language check on the discussion section and fix the remaining typographical errors.' },
+      { name: 'Dr. Thomas Mueller', status: 'completed', deadline: '2024-04-14', decision: 'Accept', score: 8, confidentialComments: 'All previous issues have been adequately addressed. The paper is ready for publication.', publicComments: 'The authors have successfully addressed all previous comments. The paper now presents a comprehensive analysis of climate change impacts on marine ecosystems.' }
     ]
   },
   {
@@ -143,9 +143,71 @@ const mockRevisions = [
       { name: 'Dr. Emma Wilson', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 8 },
-      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision', score: 7 },
-      { name: 'Dr. Emma Wilson', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 9 }
+      { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 8, confidentialComments: 'The revised theoretical framework is solid. The authors have done an excellent job addressing the security analysis concerns.', publicComments: 'The manuscript has been significantly improved. The theoretical framework is now well-established and the security analysis is comprehensive.' },
+      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision', score: 7, confidentialComments: 'Good revision but the performance benchmarks section could use more detail about the experimental setup.', publicComments: 'The paper is much improved. Please add more details about the experimental setup in the performance benchmarks section to enhance reproducibility.' },
+      { name: 'Dr. Emma Wilson', status: 'completed', deadline: '2024-04-10', decision: 'Accept', score: 9, confidentialComments: 'Outstanding revision. All major concerns have been thoroughly addressed. Ready for publication.', publicComments: 'The authors have comprehensively addressed all previous comments. The paper presents novel and significant contributions to quantum cryptography.' }
+    ]
+  },
+  {
+    id: '334570',
+    ordinal: 1,
+    username: 'Dr. Robert Martinez',
+    title: 'Deep Learning Approaches for Real-Time Sentiment Analysis in Social Media',
+    previousTitle: undefined,
+    keywords: ['Deep Learning', 'Sentiment Analysis', 'Social Media', 'NLP'],
+    authors: 'Robert Martinez*, Jennifer Brown, Kevin Liu',
+    previousAuthors: undefined,
+    submissionDate: '2024-03-14',
+    status: 'Decision in Process',
+    abstract: 'This paper introduces a novel deep learning architecture for real-time sentiment analysis in social media platforms, achieving state-of-the-art performance.',
+    previousAbstract: undefined,
+    editor: 'Dr. John Smith',
+    invitedDate: '2024-03-08',
+    dueDate: '2024-04-08',
+    manuscriptFile: 'manuscript_334570_rev1.pdf',
+    filesZip: '334570_rev1_all_files.zip',
+    lastDecision: 'Major Revision',
+    revisionComments: 'The experimental validation needs to be more comprehensive. Include comparison with more baseline methods and provide error analysis.',
+    lastReviewers: [
+      { name: 'Dr. Helen Carter', status: 'completed' },
+      { name: 'Prof. Alan Smith', status: 'completed' },
+      { name: 'Dr. Lisa Park', status: 'completed' }
+    ],
+    reviewers: [
+      { name: 'Dr. Helen Carter', status: 'completed', deadline: '2024-04-08', decision: 'Accept', score: 9, confidentialComments: 'Excellent revision. The additional baseline comparisons and error analysis significantly strengthen the paper.', publicComments: 'The revised manuscript now includes comprehensive experimental validation. The comparison with additional baselines and detailed error analysis greatly improve the quality of the work.' },
+      { name: 'Prof. Alan Smith', status: 'completed', deadline: '2024-04-08', decision: 'Accept', score: 8, confidentialComments: 'All previous concerns have been addressed. The paper makes significant contributions to the field.', publicComments: 'The authors have successfully addressed all review comments. The experimental section is now thorough and the results are convincing.' },
+      { name: 'Dr. Lisa Park', status: 'completed', deadline: '2024-04-08', decision: 'Minor Revision', score: 7, confidentialComments: 'Good improvements but the discussion of limitations could be expanded slightly.', publicComments: 'The paper has been significantly improved. Please expand the discussion of potential limitations and future work directions in the conclusion section.' }
+    ]
+  },
+  {
+    id: '334571',
+    ordinal: 2,
+    username: 'Prof. Anna Kowalski',
+    title: 'Blockchain-Based Supply Chain Management: Security and Efficiency Analysis',
+    previousTitle: 'Blockchain Applications in Supply Chain Management',
+    keywords: ['Blockchain', 'Supply Chain', 'Security', 'Efficiency'],
+    authors: 'Anna Kowalski*, Mark Davis, Rachel Green, Thomas Anderson',
+    previousAuthors: 'Anna Kowalski*, Mark Davis, Rachel Green',
+    submissionDate: '2024-03-12',
+    status: 'Decision in Process',
+    abstract: 'We propose a blockchain-based framework for supply chain management that ensures both security and operational efficiency through innovative consensus mechanisms.',
+    previousAbstract: 'We propose a blockchain-based solution for supply chain management.',
+    editor: 'Prof. Emily Chen',
+    invitedDate: '2024-03-05',
+    dueDate: '2024-04-05',
+    manuscriptFile: 'manuscript_334571_rev2.pdf',
+    filesZip: '334571_rev2_all_files.zip',
+    lastDecision: 'Minor Revision',
+    revisionComments: 'Please clarify the consensus mechanism implementation details and add more real-world case studies.',
+    lastReviewers: [
+      { name: 'Dr. Kevin Zhang', status: 'completed' },
+      { name: 'Dr. Sarah Connor', status: 'completed' },
+      { name: 'Prof. David Lee', status: 'completed' }
+    ],
+    reviewers: [
+      { name: 'Dr. Kevin Zhang', status: 'completed', deadline: '2024-04-05', decision: 'Accept', score: 8, confidentialComments: 'The revised implementation details are clear and the additional case studies strengthen the practical applicability.', publicComments: 'The manuscript has been well-revised. The clarified consensus mechanism and additional case studies demonstrate strong practical value.' },
+      { name: 'Dr. Sarah Connor', status: 'completed', deadline: '2024-04-05', decision: 'Accept', score: 9, confidentialComments: 'Outstanding work. The framework is innovative and well-validated. Ready for publication.', publicComments: 'Excellent revision addressing all concerns. The blockchain framework presents significant contributions to supply chain security and efficiency.' },
+      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-05', decision: 'Accept', score: 8, confidentialComments: 'All previous issues resolved. The paper is publication-ready.', publicComments: 'The authors have thoroughly addressed all review comments. The framework is well-designed and thoroughly evaluated.' }
     ]
   }
 ];
@@ -924,11 +986,17 @@ const Revision = () => {
                                           {reviewer.decision}
                                         </span>
                                       </div>
-                                      <div className="text-gray-700 font-medium mb-1">
-                                        Comments:
+                                      <div className="text-blue-700 font-medium mb-1 text-xs">
+                                        Confidential (Editor):
+                                      </div>
+                                      <div className="text-blue-600 mb-2 line-clamp-2">
+                                        {reviewer.confidentialComments || 'No confidential comments provided.'}
+                                      </div>
+                                      <div className="text-gray-700 font-medium mb-1 text-xs">
+                                        Public (Author):
                                       </div>
                                       <div className="text-gray-600 line-clamp-2">
-                                        Review comments and feedback for this submission.
+                                        {reviewer.publicComments || 'No public comments provided.'}
                                       </div>
                                     </div>
                                   ))}
