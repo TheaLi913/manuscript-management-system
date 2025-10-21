@@ -75,8 +75,9 @@ const mockRevisions = [
     lastDecision: 'Major Revision',
     revisionComments: 'The methodology section needs significant improvement. Please provide more detailed statistical analysis and expand the discussion on model validation.',
     lastReviewers: [
-      { name: 'Dr. Robert Chen', status: 'completed' },
-      { name: 'Prof. Lisa Anderson', status: 'completed' }
+      { name: 'Dr. John Smith', status: 'completed' },
+      { name: 'Prof. Emily Chen', status: 'completed' },
+      { name: 'Dr. Robert Chen', status: 'completed' }
     ],
     reviewers: [
       { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
@@ -133,8 +134,9 @@ const mockRevisions = [
     lastDecision: 'Major Revision',
     revisionComments: 'The theoretical framework requires substantial revision. Include more comprehensive security analysis and performance benchmarks.',
     lastReviewers: [
-      { name: 'Dr. Emma Wilson', status: 'completed' },
-      { name: 'Prof. Alan Smith', status: 'completed' }
+      { name: 'Dr. Sarah Kim', status: 'completed' },
+      { name: 'Prof. David Lee', status: 'completed' },
+      { name: 'Dr. Emma Wilson', status: 'completed' }
     ],
     reviewers: [
       { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
