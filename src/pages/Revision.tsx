@@ -782,9 +782,13 @@ const Revision = () => {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <Bell className="h-4 w-4" />
-                                </Button>
+                                <div className="space-y-1">
+                                  {revision.reviewers?.map((reviewer, idx) => (
+                                    <Button key={idx} variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <Bell className="h-4 w-4" />
+                                    </Button>
+                                  ))}
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}
