@@ -782,7 +782,7 @@ const Revision = () => {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
+                                <div className="flex flex-col gap-1">
                                   {revision.reviewers?.map((reviewer, idx) => (
                                     <Button key={idx} variant="ghost" size="sm" className="h-8 w-8 p-0">
                                       <Bell className="h-4 w-4" />
