@@ -91,15 +91,15 @@ const mockRevisions = [
 
 const getStatusColor = (status: string) => {
   const statusColorMap: { [key: string]: string } = {
-    'Under Review': 'border-blue-500 text-blue-700',
-    'With Editor': 'border-purple-500 text-purple-700',
-    'Decision in Process': 'border-orange-500 text-orange-700',
-    'Accept': 'border-green-500 text-green-700',
-    'Reject': 'border-red-500 text-red-700',
-    'Major Revision': 'border-yellow-500 text-yellow-700',
-    'Minor Revision': 'border-amber-500 text-amber-700',
+    'Under Review': 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-950',
+    'With Editor': 'border-purple-500 text-purple-700 bg-purple-50 dark:bg-purple-950',
+    'Decision in Process': 'border-orange-500 text-orange-700 bg-orange-50 dark:bg-orange-950',
+    'Accept': 'border-green-500 text-green-700 bg-green-50 dark:bg-green-950',
+    'Reject': 'border-red-500 text-red-700 bg-red-50 dark:bg-red-950',
+    'Major Revision': 'border-orange-600 text-orange-800 bg-orange-100 dark:bg-orange-900 dark:text-orange-200 font-semibold',
+    'Minor Revision': 'border-yellow-500 text-yellow-700 bg-yellow-50 dark:bg-yellow-900 dark:text-yellow-200',
   };
-  return statusColorMap[status] || 'border-gray-500 text-gray-700';
+  return statusColorMap[status] || 'border-gray-500 text-gray-700 bg-gray-50 dark:bg-gray-950';
 };
 
 const Revision = () => {
