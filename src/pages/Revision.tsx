@@ -101,7 +101,7 @@ const getStatusColor = (status: string) => {
     'Decision in Process': 'border-orange-500 text-orange-700 bg-orange-50 dark:bg-orange-950',
     'Accept': 'border-green-500 text-green-700 bg-green-50 dark:bg-green-950',
     'Reject': 'border-red-500 text-red-700 bg-red-50 dark:bg-red-950',
-    'Major Revision': 'border-orange-600 text-orange-800 bg-orange-100 dark:bg-orange-900 dark:text-orange-200 font-semibold',
+    'Major Revision': 'border-2 border-orange-600 text-orange-900 bg-orange-200 dark:bg-orange-800 dark:text-orange-50 font-bold shadow-sm dark:border-orange-500',
     'Minor Revision': 'border-yellow-500 text-yellow-700 bg-yellow-50 dark:bg-yellow-900 dark:text-yellow-200',
   };
   return statusColorMap[status] || 'border-gray-500 text-gray-700 bg-gray-50 dark:bg-gray-950';
