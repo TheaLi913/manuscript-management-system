@@ -572,6 +572,7 @@ const Revision = () => {
                             <TableHead className="min-w-80">Abstract</TableHead>
                             <TableHead>Submission Date</TableHead>
                             <TableHead className="w-32">Action</TableHead>
+                            <TableHead>Last Reviewers</TableHead>
                             <TableHead>Reviewers</TableHead>
                             <TableHead>Review DDL</TableHead>
                           </TableRow>
@@ -620,22 +621,44 @@ const Revision = () => {
                                 </TooltipProvider>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
-                                  {revision.reviewers?.map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm">
-                                      <Badge variant="outline" className="text-xs">
-                                        {reviewer.name} ({reviewer.status})
-                                      </Badge>
-                                    </div>
-                                  ))}
-                                </div>
+                                <span className="text-muted-foreground">—</span>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
-                                  {revision.reviewers?.map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm">{reviewer.deadline}</div>
-                                  ))}
-                                </div>
+                                {(revision.reviewers?.length ?? 0) > 0 ? (
+                                  <div className="space-y-1">
+                                    {(revision.reviewers ?? []).map((reviewer, idx) => (
+                                      <div key={idx} className="flex items-center gap-2 text-sm">
+                                        <span className={`${
+                                          reviewer.status === 'accepted' 
+                                            ? 'text-blue-700 font-medium' 
+                                            : reviewer.status === 'declined'
+                                            ? 'text-gray-500 line-through'
+                                            : 'text-gray-700'
+                                        }`}>
+                                          {reviewer.name}
+                                        </span>
+                                        {reviewer.status === 'accepted' && (
+                                          <Check className="h-3 w-3 text-blue-700" />
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {(revision.reviewers?.length ?? 0) > 0 ? (
+                                  <div className="space-y-1">
+                                    {(revision.reviewers ?? []).map((reviewer, idx) => (
+                                      <div key={idx} className="text-sm">
+                                        {reviewer.deadline}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
                               </TableCell>
                             </TableRow>
                           ))}
