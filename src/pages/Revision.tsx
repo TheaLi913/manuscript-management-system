@@ -153,6 +153,7 @@ const Revision = () => {
   // Filter states for each tab
   const [waitingIdFilter, setWaitingIdFilter] = useState('');
   const [waitingTitleFilter, setWaitingTitleFilter] = useState('');
+  const [waitingDecisionFilter, setWaitingDecisionFilter] = useState('all');
   
   const [pendingIdFilter, setPendingIdFilter] = useState('');
   const [pendingTitleFilter, setPendingTitleFilter] = useState('');
@@ -191,6 +192,7 @@ const Revision = () => {
         case 'waiting-review':
           setWaitingIdFilter('');
           setWaitingTitleFilter('');
+          setWaitingDecisionFilter('all');
           break;
         case 'pending-reviewer':
           setPendingIdFilter('');
@@ -260,7 +262,7 @@ const Revision = () => {
                 <>
                   {/* Waiting for Review Tab */}
                   <TabsContent value="waiting-review" className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ID</label>
                         <Input 
@@ -276,6 +278,19 @@ const Revision = () => {
                           value={waitingTitleFilter}
                           onChange={(e) => setWaitingTitleFilter(e.target.value)}
                         />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Last Decision</label>
+                        <Select value={waitingDecisionFilter} onValueChange={setWaitingDecisionFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All Decisions" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Decisions</SelectItem>
+                            <SelectItem value="Major Revision">Major Revision</SelectItem>
+                            <SelectItem value="Minor Revision">Minor Revision</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex items-end gap-2">
                         <Button className="flex-1">
