@@ -9,12 +9,48 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send } from "lucide-react";
+import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { z } from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+
+// Mock data for reviewers
+const mockReviewers = [
+  { id: '1', name: 'Dr. Emma Wilson', expertise: 'Machine Learning' },
+  { id: '2', name: 'Prof. David Chen', expertise: 'Computer Science' },
+  { id: '3', name: 'Prof. Alan Smith', expertise: 'Cryptography' },
+  { id: '4', name: 'Dr. Sarah Connor', expertise: 'Cybersecurity' },
+  { id: '5', name: 'Dr. Kevin Liu', expertise: 'Quantum Computing' },
+  { id: '6', name: 'Prof. Helen Carter', expertise: 'Biomedical Engineering' },
+  { id: '7', name: 'Dr. Rachel Green', expertise: 'Environmental Science' },
+  { id: '8', name: 'Prof. James Wilson', expertise: 'Materials Science' },
+  { id: '9', name: 'Dr. Lisa Park', expertise: 'Neuroscience' },
+  { id: '10', name: 'Prof. Mark Thompson', expertise: 'Physics' }
+];
+
+// Type for reviewer assignment
+type ReviewerAssignment = {
+  reviewerId: string;
+  reviewerName: string;
+  deadline: Date | undefined;
+};
+
+// Schema for assign reviewer form validation
+const assignReviewerSchema = z.object({
+  reviewers: z.array(z.object({
+    reviewerId: z.string().min(1, "Please select a reviewer"),
+    reviewerName: z.string(),
+    deadline: z.date({ required_error: "Please select a deadline" })
+  })).min(1, "At least one reviewer must be assigned")
+});
 
 // Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
@@ -132,6 +168,7 @@ const Revision = () => {
   // State for dialog management
   const [decideDialogOpen, setDecideDialogOpen] = useState(false);
   const [sendReviewerDialogOpen, setSendReviewerDialogOpen] = useState(false);
+  const [assignReviewerDialogOpen, setAssignReviewerDialogOpen] = useState(false);
   const [selectedRevision, setSelectedRevision] = useState<any>(null);
 
   // Decide form state
@@ -141,6 +178,14 @@ const Revision = () => {
     comments: ''
   });
   const [decideFormErrors, setDecideFormErrors] = useState<Partial<Record<keyof typeof decideForm, string>>>({});
+
+  // Assign reviewer form state
+  const [reviewerAssignments, setReviewerAssignments] = useState<ReviewerAssignment[]>([{
+    reviewerId: '',
+    reviewerName: '',
+    deadline: undefined
+  }]);
+  const [assignReviewerErrors, setAssignReviewerErrors] = useState<string[]>([]);
 
   // State for expanded cells
   const [expandedCells, setExpandedCells] = useState<{ [key: string]: boolean }>({});
@@ -522,7 +567,7 @@ const Revision = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-20">ID</TableHead>
+                            <TableHead className="w-32">Revision ID</TableHead>
                             <TableHead className="min-w-60">Article Title</TableHead>
                             <TableHead className="min-w-80">Abstract</TableHead>
                             <TableHead>Submission Date</TableHead>
@@ -536,7 +581,7 @@ const Revision = () => {
                             <TableRow key={revision.id} className="hover:bg-muted/50">
                               <TableCell>
                                 <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
+                                  {revision.id}_{revision.ordinal}
                                 </button>
                               </TableCell>
                               <TableCell>
@@ -554,7 +599,25 @@ const Revision = () => {
                               </TableCell>
                               <TableCell>{revision.submissionDate}</TableCell>
                               <TableCell>
-                                <Button variant="outline" size="sm">Assign</Button>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedRevision(revision);
+                                          setAssignReviewerDialogOpen(true);
+                                        }}
+                                      >
+                                        <UserPlus size={14} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Assign Reviewer</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </TableCell>
                               <TableCell>
                                 <div className="space-y-1">
@@ -1286,6 +1349,175 @@ const Revision = () => {
             <DialogFooter>
               <Button variant="outline" onClick={() => setSendReviewerDialogOpen(false)}>Cancel</Button>
               <Button onClick={() => setSendReviewerDialogOpen(false)}>Send</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Reviewer Dialog */}
+        <Dialog open={assignReviewerDialogOpen} onOpenChange={setAssignReviewerDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Assign Reviewer</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {assignReviewerErrors.length > 0 && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  {assignReviewerErrors.map((error, index) => (
+                    <p key={index} className="text-sm text-destructive">{error}</p>
+                  ))}
+                </div>
+              )}
+              
+              {reviewerAssignments.map((assignment, index) => (
+                <div key={index} className="space-y-3 p-4 border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Reviewer {index + 1}</h4>
+                    {reviewerAssignments.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (reviewerAssignments.length > 1) {
+                            setReviewerAssignments(prev => prev.filter((_, i) => i !== index));
+                          }
+                        }}
+                      >
+                        <X size={14} />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Reviewer Name</Label>
+                    <Select
+                      value={assignment.reviewerId}
+                      onValueChange={(value) => {
+                        const reviewer = mockReviewers.find(r => r.id === value);
+                        if (reviewer) {
+                          setReviewerAssignments(prev => prev.map((a, i) => 
+                            i === index ? { ...a, reviewerId: value, reviewerName: reviewer.name } : a
+                          ));
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Search and select reviewer..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockReviewers.map((reviewer) => (
+                          <SelectItem key={reviewer.id} value={reviewer.id}>
+                            <div>
+                              <div className="font-medium">{reviewer.name}</div>
+                              <div className="text-xs text-muted-foreground">{reviewer.expertise}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Review Deadline (Date & Time)</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !assignment.deadline && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {assignment.deadline ? format(assignment.deadline, "PPP 'at' p") : <span>Pick a date and time</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={assignment.deadline}
+                          onSelect={(date) => {
+                            setReviewerAssignments(prev => prev.map((a, i) => 
+                              i === index ? { ...a, deadline: date } : a
+                            ));
+                          }}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                        <div className="p-3 border-t">
+                          <Label className="text-xs mb-2 block">Time</Label>
+                          <Input
+                            type="time"
+                            value={assignment.deadline ? format(assignment.deadline, "HH:mm") : ""}
+                            onChange={(e) => {
+                              if (assignment.deadline && e.target.value) {
+                                const [hours, minutes] = e.target.value.split(':');
+                                const newDate = new Date(assignment.deadline);
+                                newDate.setHours(parseInt(hours), parseInt(minutes));
+                                setReviewerAssignments(prev => prev.map((a, i) => 
+                                  i === index ? { ...a, deadline: newDate } : a
+                                ));
+                              }
+                            }}
+                          />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              ))}
+              
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReviewerAssignments(prev => [...prev, {
+                    reviewerId: '',
+                    reviewerName: '',
+                    deadline: undefined
+                  }]);
+                }}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Another Reviewer
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setAssignReviewerDialogOpen(false);
+                setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
+                setAssignReviewerErrors([]);
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                try {
+                  const validatedData = assignReviewerSchema.parse({ reviewers: reviewerAssignments });
+                  setAssignReviewerErrors([]);
+                  
+                  if (selectedRevision) {
+                    toast({
+                      title: "Reviewers Assigned",
+                      description: `${validatedData.reviewers.length} reviewer(s) have been assigned to revision ${selectedRevision.id}_${selectedRevision.ordinal}.`,
+                    });
+                  }
+                  
+                  // Reset form and close dialog
+                  setReviewerAssignments([{ reviewerId: '', reviewerName: '', deadline: undefined }]);
+                  setAssignReviewerDialogOpen(false);
+                  setSelectedRevision(null);
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    const errors: string[] = [];
+                    error.errors.forEach((err) => {
+                      errors.push(err.message);
+                    });
+                    setAssignReviewerErrors(errors);
+                  }
+                }
+              }}>
+                Assign Reviewers
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
