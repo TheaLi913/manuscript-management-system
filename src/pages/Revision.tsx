@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon } from "lucide-react";
+import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon, User } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
