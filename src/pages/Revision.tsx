@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
@@ -122,6 +123,11 @@ const Revision = () => {
 
   const tabs = user?.role === "Editor" ? editorTabs : reviewerTabs;
   const [activeTab, setActiveTab] = useState(tabs[0].value);
+
+  // State for dialog management
+  const [decideDialogOpen, setDecideDialogOpen] = useState(false);
+  const [sendReviewerDialogOpen, setSendReviewerDialogOpen] = useState(false);
+  const [selectedRevision, setSelectedRevision] = useState<any>(null);
 
   // State for expanded cells
   const [expandedCells, setExpandedCells] = useState<{ [key: string]: boolean }>({});
@@ -403,8 +409,28 @@ const Revision = () => {
                                 </TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="outline" size="sm">Decide</Button>
-                                    <Button variant="outline" size="sm">Send to Reviewer</Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => {
+                                        setSelectedRevision(revision);
+                                        setDecideDialogOpen(true);
+                                      }}
+                                    >
+                                      <Gavel className="h-4 w-4" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => {
+                                        setSelectedRevision(revision);
+                                        setSendReviewerDialogOpen(true);
+                                      }}
+                                    >
+                                      <Send className="h-4 w-4" />
+                                    </Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
@@ -1107,6 +1133,70 @@ const Revision = () => {
             </Tabs>
           </div>
         </main>
+
+        {/* Decide Dialog */}
+        <Dialog open={decideDialogOpen} onOpenChange={setDecideDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Make Decision</DialogTitle>
+              <DialogDescription>
+                Review the manuscript and make your editorial decision.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRevision && (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium">Revision ID:</p>
+                  <p className="text-sm text-muted-foreground">{selectedRevision.id}_{selectedRevision.ordinal}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Title:</p>
+                  <p className="text-sm text-muted-foreground">{selectedRevision.title}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Last Decision:</p>
+                  <Badge variant="outline" className={getStatusColor(selectedRevision.lastDecision)}>
+                    {selectedRevision.lastDecision}
+                  </Badge>
+                </div>
+                {/* Add decision form here */}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDecideDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDecideDialogOpen(false)}>Confirm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send to Reviewer Dialog */}
+        <Dialog open={sendReviewerDialogOpen} onOpenChange={setSendReviewerDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send to Reviewer</DialogTitle>
+              <DialogDescription>
+                Select reviewers to send this revised manuscript to.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRevision && (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium">Revision ID:</p>
+                  <p className="text-sm text-muted-foreground">{selectedRevision.id}_{selectedRevision.ordinal}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Title:</p>
+                  <p className="text-sm text-muted-foreground">{selectedRevision.title}</p>
+                </div>
+                {/* Add reviewer selection form here */}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSendReviewerDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setSendReviewerDialogOpen(false)}>Send</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );
