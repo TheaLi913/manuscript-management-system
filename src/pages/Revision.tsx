@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon, User } from "lucide-react";
+import { Search, RotateCcw, Download, Check, X, ChevronDown, ChevronUp, Gavel, Send, UserPlus, Plus, CalendarIcon, User, Bell } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -81,7 +81,8 @@ const mockRevisions = [
     ],
     reviewers: [
       { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
-      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined }
+      { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined },
+      { name: 'Dr. Robert Chen', status: 'pending', deadline: '2024-04-18', decision: undefined }
     ]
   },
   {
@@ -110,7 +111,9 @@ const mockRevisions = [
       { name: 'Dr. Thomas Mueller', status: 'completed' }
     ],
     reviewers: [
-      { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined }
+      { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined },
+      { name: 'Prof. Maria Santos', status: 'accepted', deadline: '2024-04-12', decision: undefined },
+      { name: 'Dr. Thomas Mueller', status: 'pending', deadline: '2024-04-14', decision: undefined }
     ]
   },
   {
@@ -140,7 +143,8 @@ const mockRevisions = [
     ],
     reviewers: [
       { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
-      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' }
+      { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' },
+      { name: 'Dr. Emma Wilson', status: 'completed', deadline: '2024-04-10', decision: 'Accept' }
     ]
   }
 ];
@@ -738,10 +742,9 @@ const Revision = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-20">ID</TableHead>
+                            <TableHead className="w-32">Revision ID</TableHead>
                             <TableHead className="min-w-60">Article Title</TableHead>
                             <TableHead>Reviewers</TableHead>
-                            <TableHead>Review Status</TableHead>
                             <TableHead>Review DDL</TableHead>
                             <TableHead>Actions</TableHead>
                           </TableRow>
@@ -751,7 +754,7 @@ const Revision = () => {
                             <TableRow key={revision.id} className="hover:bg-muted/50">
                               <TableCell>
                                 <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
+                                  {revision.id}_{revision.ordinal}
                                 </button>
                               </TableCell>
                               <TableCell>
@@ -774,21 +777,14 @@ const Revision = () => {
                               <TableCell>
                                 <div className="space-y-1">
                                   {revision.reviewers?.map((reviewer, idx) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {reviewer.status}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="space-y-1">
-                                  {revision.reviewers?.map((reviewer, idx) => (
                                     <div key={idx} className="text-sm">{reviewer.deadline}</div>
                                   ))}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Button variant="outline" size="sm">Remind</Button>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Bell className="h-4 w-4" />
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
