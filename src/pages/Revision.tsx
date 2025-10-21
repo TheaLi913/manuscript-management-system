@@ -843,11 +843,12 @@ const Revision = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-20">ID</TableHead>
+                            <TableHead className="w-32">Revision ID</TableHead>
                             <TableHead className="min-w-60">Article Title</TableHead>
-                            <TableHead>Reviewers</TableHead>
-                            <TableHead>Review Result</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead className="min-w-48">Reviewers</TableHead>
+                            <TableHead className="min-w-32">Reviewer Result</TableHead>
+                            <TableHead>Submission Date</TableHead>
+                            <TableHead className="w-24">Action</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -855,37 +856,75 @@ const Revision = () => {
                             <TableRow key={revision.id} className="hover:bg-muted/50">
                               <TableCell>
                                 <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
+                                  {revision.id}-{revision.ordinal}
                                 </button>
                               </TableCell>
                               <TableCell>
-                                <div className="font-medium mb-1">{revision.title}</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {revision.keywords.map((keyword, index) => (
-                                    <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
+                                <div className="font-medium">{revision.title}</div>
                               </TableCell>
                               <TableCell>
-                                <div className="space-y-1">
-                                  {revision.reviewers?.map((reviewer, idx) => (
-                                    <div key={idx} className="text-sm">{reviewer.name}</div>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="space-y-1">
+                                <div className="space-y-4">
                                   {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
-                                    <Badge key={idx} variant="outline" className={getStatusColor(reviewer.decision || '')}>
-                                      {reviewer.decision}
-                                    </Badge>
+                                    <div key={idx} className="text-sm min-h-[70px] flex items-center">
+                                      {reviewer.name}
+                                    </div>
                                   ))}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Button variant="outline" size="sm">Decide</Button>
+                                <div className="space-y-4 max-w-md">
+                                  {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
+                                    <div key={idx} className="text-xs border-l-2 border-gray-200 pl-2 min-h-[70px]">
+                                      <div className="text-sm font-medium mb-2">
+                                        Score: <span className={`${
+                                          reviewer.decision === 'Accept' ? 'text-green-700' :
+                                          reviewer.decision === 'Reject' ? 'text-red-700' :
+                                          reviewer.decision === 'Minor Revision' ? 'text-orange-700' :
+                                          reviewer.decision === 'Major Revision' ? 'text-yellow-700' :
+                                          'text-gray-700'
+                                        }`}>
+                                          {reviewer.decision}
+                                        </span>
+                                      </div>
+                                      <div className="text-gray-700 font-medium mb-1">
+                                        Comments:
+                                      </div>
+                                      <div className="text-gray-600 line-clamp-2">
+                                        Review comments and feedback for this submission.
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="space-y-4">
+                                  {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
+                                    <div key={idx} className="text-sm min-h-[70px] flex items-center">
+                                      {revision.submissionDate}
+                                    </div>
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedRevision(revision);
+                                          setDecideDialogOpen(true);
+                                        }}
+                                      >
+                                        <Gavel className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Decide</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </TableCell>
                             </TableRow>
                           ))}
