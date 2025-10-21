@@ -74,6 +74,10 @@ const mockRevisions = [
     filesZip: '334567_rev1_all_files.zip',
     lastDecision: 'Major Revision',
     revisionComments: 'The methodology section needs significant improvement. Please provide more detailed statistical analysis and expand the discussion on model validation.',
+    lastReviewers: [
+      { name: 'Dr. Robert Chen', status: 'completed' },
+      { name: 'Prof. Lisa Anderson', status: 'completed' }
+    ],
     reviewers: [
       { name: 'Dr. John Smith', status: 'accepted', deadline: '2024-04-15', decision: undefined },
       { name: 'Prof. Emily Chen', status: 'pending', deadline: '2024-04-20', decision: undefined }
@@ -99,6 +103,11 @@ const mockRevisions = [
     filesZip: '334568_rev2_all_files.zip',
     lastDecision: 'Minor Revision',
     revisionComments: 'Please address the references formatting and clarify the data collection timeline. Minor language editing needed.',
+    lastReviewers: [
+      { name: 'Dr. Kevin Zhang', status: 'completed' },
+      { name: 'Prof. Maria Santos', status: 'completed' },
+      { name: 'Dr. Thomas Mueller', status: 'completed' }
+    ],
     reviewers: [
       { name: 'Dr. Michael Lee', status: 'accepted', deadline: '2024-04-12', decision: undefined }
     ]
@@ -123,6 +132,10 @@ const mockRevisions = [
     filesZip: '334569_rev1_all_files.zip',
     lastDecision: 'Major Revision',
     revisionComments: 'The theoretical framework requires substantial revision. Include more comprehensive security analysis and performance benchmarks.',
+    lastReviewers: [
+      { name: 'Dr. Emma Wilson', status: 'completed' },
+      { name: 'Prof. Alan Smith', status: 'completed' }
+    ],
     reviewers: [
       { name: 'Dr. Sarah Kim', status: 'completed', deadline: '2024-04-10', decision: 'Accept' },
       { name: 'Prof. David Lee', status: 'completed', deadline: '2024-04-10', decision: 'Minor Revision' }
@@ -621,7 +634,17 @@ const Revision = () => {
                                 </TooltipProvider>
                               </TableCell>
                               <TableCell>
-                                <span className="text-muted-foreground">—</span>
+                                {(revision.lastReviewers?.length ?? 0) > 0 ? (
+                                  <div className="space-y-1">
+                                    {(revision.lastReviewers ?? []).map((reviewer, idx) => (
+                                      <div key={idx} className="text-sm text-gray-700">
+                                        {reviewer.name}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                )}
                               </TableCell>
                               <TableCell>
                                 {(revision.reviewers?.length ?? 0) > 0 ? (
