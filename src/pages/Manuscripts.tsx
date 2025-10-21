@@ -3241,7 +3241,7 @@ const Manuscripts = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
               <AlertDialogDescription>
-                Confirm submission of this manuscript for review?
+                Confirm submission of this revision for review?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
