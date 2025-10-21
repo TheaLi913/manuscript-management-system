@@ -3239,7 +3239,7 @@ const Manuscripts = () => {
         <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Submission</AlertDialogTitle>
+              <AlertDialogTitle>Send to Reviewer</AlertDialogTitle>
               <AlertDialogDescription>
                 Confirm submission of this revision for review?
               </AlertDialogDescription>
