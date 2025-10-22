@@ -1426,7 +1426,7 @@ const Revision = () => {
 
                   {/* Completed Reviewer Tab */}
                   <TabsContent value="completed-reviewer" className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ID</label>
                         <Input 
@@ -1469,16 +1469,16 @@ const Revision = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="flex items-end gap-2">
-                        <Button className="flex-1">
-                          <Search className="h-4 w-4 mr-2" />
-                          Search
-                        </Button>
-                        <Button variant="outline" onClick={() => handleReset('completed-reviewer')} className="flex-1">
-                          <RotateCcw className="h-4 w-4 mr-2" />
-                          Reset
-                        </Button>
-                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button>
+                        <Search className="h-4 w-4 mr-2" />
+                        Search
+                      </Button>
+                      <Button variant="outline" onClick={() => handleReset('completed-reviewer')}>
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset
+                      </Button>
                     </div>
                     
                     <div className="border rounded-lg">
@@ -1487,42 +1487,119 @@ const Revision = () => {
                           <TableRow>
                             <TableHead>Revision ID</TableHead>
                             <TableHead>Title</TableHead>
+                            <TableHead>Abstract</TableHead>
+                            <TableHead>File</TableHead>
                             <TableHead>Editor</TableHead>
-                            <TableHead>Submitted Date</TableHead>
-                            <TableHead>Score</TableHead>
-                            <TableHead>Suggested Decision</TableHead>
+                            <TableHead>Completed Date</TableHead>
+                            <TableHead>Score & Suggested Decision</TableHead>
+                            <TableHead>Comments</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockRevisions.filter(r => r.reviewers?.some(rev => rev.decision)).map((revision) => (
-                            <TableRow key={revision.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
-                                </button>
-                              </TableCell>
-                              <TableCell>
-                                <div className="font-medium max-w-xs">{revision.title}</div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {revision.keywords.map((keyword, index) => (
-                                    <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell>{revision.editor}</TableCell>
-                              <TableCell>{revision.submissionDate}</TableCell>
-                              <TableCell>8/10</TableCell>
-                              <TableCell>
-                                {revision.reviewers?.filter(r => r.decision).map((reviewer, idx) => (
-                                  <Badge key={idx} variant="outline" className={getStatusColor(reviewer.decision || '')}>
-                                    {reviewer.decision}
-                                  </Badge>
-                                ))}
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {mockRevisions.filter(r => r.reviewers?.some(rev => rev.decision)).map((revision) => {
+                            const isTitleExpanded = expandedCells[`${revision.id}-title`];
+                            const isAbstractExpanded = expandedCells[`${revision.id}-abstract`];
+                            const hasTitleChanged = revision.previousTitle && revision.previousTitle !== revision.title;
+                            const hasAbstractChanged = revision.previousAbstract && revision.previousAbstract !== revision.abstract;
+                            const reviewerData = revision.reviewers?.find(r => r.decision);
+
+                            return (
+                              <TableRow key={revision.id} className="hover:bg-muted/50">
+                                <TableCell className="align-middle">
+                                  <button className="text-primary hover:underline font-medium">
+                                    {revision.id}_{revision.ordinal}
+                                  </button>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div>
+                                    <div className="font-medium mb-1">{revision.title}</div>
+                                    {isTitleExpanded && hasTitleChanged && (
+                                      <div className="text-sm text-muted-foreground italic mt-2">
+                                        Previous: {revision.previousTitle}
+                                      </div>
+                                    )}
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {revision.keywords.map((keyword, index) => (
+                                        <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
+                                          {keyword}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    {hasTitleChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'title')}
+                                        className="mt-1 h-6 px-2 shrink-0"
+                                      >
+                                        {isTitleExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle max-w-sm">
+                                  <div className="text-sm line-clamp-3">
+                                    {revision.abstract}
+                                  </div>
+                                  {isAbstractExpanded && hasAbstractChanged && (
+                                    <div className="text-sm text-muted-foreground italic mt-2">
+                                      Previous: {revision.previousAbstract}
+                                    </div>
+                                  )}
+                                  {hasAbstractChanged && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => toggleCell(revision.id, 'abstract')}
+                                      className="mt-1 h-6 px-2 shrink-0"
+                                    >
+                                      {isAbstractExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                    </Button>
+                                  )}
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <Download className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{revision.manuscriptFile}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </TableCell>
+                                <TableCell className="align-middle">{revision.editor}</TableCell>
+                                <TableCell className="align-middle">{revision.submissionDate}</TableCell>
+                                <TableCell className="align-middle">
+                                  {reviewerData && (
+                                    <div className="space-y-1">
+                                      <div className="font-medium">Score: {reviewerData.score}/10</div>
+                                      <Badge variant="outline" className={getStatusColor(reviewerData.decision || '')}>
+                                        {reviewerData.decision}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="align-middle max-w-sm">
+                                  {reviewerData && (
+                                    <div className="space-y-2">
+                                      <div className="text-sm">
+                                        <div className="font-medium text-orange-700 mb-1">Confidential:</div>
+                                        <div className="text-muted-foreground line-clamp-2">{reviewerData.confidentialComments}</div>
+                                      </div>
+                                      <div className="text-sm">
+                                        <div className="font-medium text-blue-700 mb-1">Public:</div>
+                                        <div className="text-muted-foreground line-clamp-2">{reviewerData.publicComments}</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
@@ -1530,7 +1607,7 @@ const Revision = () => {
 
                   {/* Rejected Tab */}
                   <TabsContent value="rejected" className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ID</label>
                         <Input 
@@ -1573,16 +1650,16 @@ const Revision = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="flex items-end gap-2">
-                        <Button className="flex-1">
-                          <Search className="h-4 w-4 mr-2" />
-                          Search
-                        </Button>
-                        <Button variant="outline" onClick={() => handleReset('rejected')} className="flex-1">
-                          <RotateCcw className="h-4 w-4 mr-2" />
-                          Reset
-                        </Button>
-                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button>
+                        <Search className="h-4 w-4 mr-2" />
+                        Search
+                      </Button>
+                      <Button variant="outline" onClick={() => handleReset('rejected')}>
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset
+                      </Button>
                     </div>
                     
                     <div className="border rounded-lg">
@@ -1591,6 +1668,8 @@ const Revision = () => {
                           <TableRow>
                             <TableHead>Revision ID</TableHead>
                             <TableHead>Title</TableHead>
+                            <TableHead>Abstract</TableHead>
+                            <TableHead>File</TableHead>
                             <TableHead>Editor</TableHead>
                             <TableHead>Invited Date</TableHead>
                             <TableHead>Rejected Date</TableHead>
@@ -1598,11 +1677,14 @@ const Revision = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                              No rejected revisions
-                            </TableCell>
-                          </TableRow>
+                          {/* Mock data - replace with actual rejected revisions */}
+                          {[].length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                                No rejected revisions
+                              </TableCell>
+                            </TableRow>
+                          )}
                         </TableBody>
                       </Table>
                     </div>
