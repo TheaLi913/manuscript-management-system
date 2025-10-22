@@ -241,6 +241,9 @@ const Revision = () => {
   // State for expanded cells
   const [expandedCells, setExpandedCells] = useState<{ [key: string]: boolean }>({});
 
+  // State for reject reason
+  const [rejectReason, setRejectReason] = useState('');
+
   const toggleCell = (revisionId: string, field: string) => {
     const key = `${revisionId}-${field}`;
     setExpandedCells(prev => ({ ...prev, [key]: !prev[key] }));
@@ -1145,12 +1148,87 @@ const Revision = () => {
                                 <TableCell className="align-middle">{revision.dueDate}</TableCell>
                                 <TableCell className="align-middle">
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
-                                      <Check className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="outline" size="sm" className="text-green-600 hover:text-green-700 border-green-600">
+                                          Accept
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Accept Review Invitation</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to accept this review invitation for revision {revision.id}_{revision.ordinal}?
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction 
+                                            onClick={() => {
+                                              toast({
+                                                title: "Review Accepted",
+                                                description: `You have accepted the review invitation for revision ${revision.id}_${revision.ordinal}.`,
+                                              });
+                                            }}
+                                          >
+                                            Confirm
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="text-red-600 hover:text-red-700 border-red-600"
+                                          onClick={() => setRejectReason('')}
+                                        >
+                                          Reject
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Reject Review Invitation</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Please provide a reason for rejecting this review invitation for revision {revision.id}_{revision.ordinal}.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <div className="py-4">
+                                          <Label htmlFor="reject-reason" className="mb-2 block">Reason *</Label>
+                                          <Textarea
+                                            id="reject-reason"
+                                            placeholder="Please provide your reason for rejecting..."
+                                            value={rejectReason}
+                                            onChange={(e) => setRejectReason(e.target.value)}
+                                            className="min-h-[100px]"
+                                          />
+                                        </div>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel onClick={() => setRejectReason('')}>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction 
+                                            onClick={() => {
+                                              if (!rejectReason.trim()) {
+                                                toast({
+                                                  title: "Reason Required",
+                                                  description: "Please provide a reason for rejecting this invitation.",
+                                                  variant: "destructive"
+                                                });
+                                                return;
+                                              }
+                                              toast({
+                                                title: "Review Rejected",
+                                                description: `You have rejected the review invitation for revision ${revision.id}_${revision.ordinal}.`,
+                                              });
+                                              setRejectReason('');
+                                            }}
+                                          >
+                                            Confirm
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
                                   </div>
                                 </TableCell>
                               </TableRow>
