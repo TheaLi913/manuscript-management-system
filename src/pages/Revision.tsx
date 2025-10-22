@@ -244,6 +244,47 @@ const Revision = () => {
   // State for reject reason
   const [rejectReason, setRejectReason] = useState('');
 
+  // Submit review form state
+  const [submitReviewDialogOpen, setSubmitReviewDialogOpen] = useState(false);
+  const [submitReviewForm, setSubmitReviewForm] = useState({
+    score: 5,
+    decision: '' as 'Major Revision' | 'Minor Revision' | 'Accept' | 'Reject' | '',
+    confidentialComments: '',
+    publicComments: ''
+  });
+  const [submitReviewFormErrors, setSubmitReviewFormErrors] = useState<Partial<Record<keyof typeof submitReviewForm, string>>>({});
+
+  const handleSubmitReview = () => {
+    const errors: Partial<Record<keyof typeof submitReviewForm, string>> = {};
+    
+    if (!submitReviewForm.decision) {
+      errors.decision = 'Please select a decision';
+    }
+    if (!submitReviewForm.confidentialComments.trim()) {
+      errors.confidentialComments = 'Confidential comments are required';
+    }
+    if (!submitReviewForm.publicComments.trim()) {
+      errors.publicComments = 'Public comments are required';
+    }
+
+    setSubmitReviewFormErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      toast({
+        title: "Review Submitted",
+        description: `You have successfully submitted your review.`,
+      });
+      setSubmitReviewDialogOpen(false);
+      setSubmitReviewForm({
+        score: 5,
+        decision: '',
+        confidentialComments: '',
+        publicComments: ''
+      });
+      setSubmitReviewFormErrors({});
+    }
+  };
+
   const toggleCell = (revisionId: string, field: string) => {
     const key = `${revisionId}-${field}`;
     setExpandedCells(prev => ({ ...prev, [key]: !prev[key] }));
@@ -1291,40 +1332,93 @@ const Revision = () => {
                             <TableHead>Editor</TableHead>
                             <TableHead>Accepted Date</TableHead>
                             <TableHead>Due Date</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead>Action</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockRevisions.map((revision) => (
-                            <TableRow key={revision.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
-                                </button>
-                              </TableCell>
-                              <TableCell>
-                                <div className="font-medium max-w-xs">{revision.title}</div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {revision.keywords.map((keyword, index) => (
-                                    <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
-                                  {revision.abstract}
-                                </div>
-                              </TableCell>
-                              <TableCell>{revision.editor}</TableCell>
-                              <TableCell>{revision.invitedDate}</TableCell>
-                              <TableCell>{revision.dueDate}</TableCell>
-                              <TableCell>
-                                <Button variant="outline" size="sm">Submit Review</Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {mockRevisions.map((revision) => {
+                            const titleCellKey = `${revision.id}-pending-title`;
+                            const abstractCellKey = `${revision.id}-pending-abstract`;
+                            const isTitleExpanded = expandedCells[titleCellKey];
+                            const isAbstractExpanded = expandedCells[abstractCellKey];
+                            const hasTitleChanged = revision.previousTitle && revision.previousTitle !== revision.title;
+                            const hasAbstractChanged = revision.previousAbstract && revision.previousAbstract !== revision.abstract;
+                            
+                            return (
+                              <TableRow key={revision.id} className="hover:bg-muted/50">
+                                <TableCell className="align-middle">
+                                  <button className="text-primary hover:underline font-medium">
+                                    {revision.id}_{revision.ordinal}
+                                  </button>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                      <div className="font-medium max-w-xs">{revision.title}</div>
+                                      {hasTitleChanged && isTitleExpanded && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic max-w-xs">
+                                          Previous: {revision.previousTitle}
+                                        </div>
+                                      )}
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {revision.keywords.map((keyword, index) => (
+                                          <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
+                                            {keyword}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    {hasTitleChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'pending-title')}
+                                        className="shrink-0"
+                                      >
+                                        {isTitleExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                      <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
+                                        {revision.abstract}
+                                      </div>
+                                      {hasAbstractChanged && isAbstractExpanded && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic max-w-md">
+                                          Previous: {revision.previousAbstract}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {hasAbstractChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'pending-abstract')}
+                                        className="shrink-0"
+                                      >
+                                        {isAbstractExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle">{revision.editor}</TableCell>
+                                <TableCell className="align-middle">{revision.invitedDate}</TableCell>
+                                <TableCell className="align-middle">{revision.dueDate}</TableCell>
+                                <TableCell className="align-middle">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => setSubmitReviewDialogOpen(true)}
+                                  >
+                                    Submit Review
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
@@ -1804,6 +1898,102 @@ const Revision = () => {
                 }
               }}>
                 Assign Reviewers
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog for Submit Review */}
+        <Dialog open={submitReviewDialogOpen} onOpenChange={setSubmitReviewDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Submit Review</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="score">Score (1-10)</Label>
+                <Select
+                  value={submitReviewForm.score.toString()}
+                  onValueChange={(value) => setSubmitReviewForm(prev => ({ ...prev, score: parseInt(value) }))}
+                >
+                  <SelectTrigger id="score">
+                    <SelectValue placeholder="Select a score..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+                      <SelectItem key={score} value={score.toString()}>
+                        {score}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Suggested Decision</Label>
+                <RadioGroup
+                  value={submitReviewForm.decision}
+                  onValueChange={(value) => setSubmitReviewForm(prev => ({ ...prev, decision: value as typeof submitReviewForm.decision }))}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Major Revision" id="revision-major-revision" />
+                    <Label htmlFor="revision-major-revision">Major Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Minor Revision" id="revision-minor-revision" />
+                    <Label htmlFor="revision-minor-revision">Minor Revision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Accept" id="revision-accept" />
+                    <Label htmlFor="revision-accept">Accept</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Reject" id="revision-reject" />
+                    <Label htmlFor="revision-reject">Reject</Label>
+                  </div>
+                </RadioGroup>
+                {submitReviewFormErrors.decision && <p className="text-sm text-destructive">{submitReviewFormErrors.decision}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="revision-confidential-comments">Confidential Comments for Editors</Label>
+                <Textarea
+                  id="revision-confidential-comments"
+                  placeholder="Enter confidential comments for editors..."
+                  value={submitReviewForm.confidentialComments}
+                  onChange={(e) => setSubmitReviewForm(prev => ({ ...prev, confidentialComments: e.target.value }))}
+                  className="min-h-[100px]"
+                />
+                {submitReviewFormErrors.confidentialComments && <p className="text-sm text-destructive">{submitReviewFormErrors.confidentialComments}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="revision-public-comments">Public Comments for Authors</Label>
+                <Textarea
+                  id="revision-public-comments"
+                  placeholder="Enter public comments for authors..."
+                  value={submitReviewForm.publicComments}
+                  onChange={(e) => setSubmitReviewForm(prev => ({ ...prev, publicComments: e.target.value }))}
+                  className="min-h-[100px]"
+                />
+                {submitReviewFormErrors.publicComments && <p className="text-sm text-destructive">{submitReviewFormErrors.publicComments}</p>}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setSubmitReviewDialogOpen(false);
+                setSubmitReviewForm({
+                  score: 5,
+                  decision: '',
+                  confidentialComments: '',
+                  publicComments: ''
+                });
+                setSubmitReviewFormErrors({});
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitReview}>
+                Submit Review
               </Button>
             </DialogFooter>
           </DialogContent>
