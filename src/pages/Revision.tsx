@@ -1067,48 +1067,95 @@ const Revision = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockRevisions.map((revision) => (
-                            <TableRow key={revision.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <button className="text-primary hover:underline font-medium">
-                                  {revision.id}
-                                </button>
-                              </TableCell>
-                              <TableCell>
-                                <div className="font-medium max-w-xs">{revision.title}</div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {revision.keywords.map((keyword, index) => (
-                                    <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
-                                  {revision.abstract}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <button className="text-primary hover:underline font-medium text-sm">
-                                  {revision.manuscriptFile}
-                                </button>
-                              </TableCell>
-                              <TableCell>{revision.editor}</TableCell>
-                              <TableCell>{revision.invitedDate}</TableCell>
-                              <TableCell>{revision.dueDate}</TableCell>
-                              <TableCell>
-                                <div className="flex gap-2">
-                                  <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {mockRevisions.map((revision) => {
+                            const titleCellKey = `${revision.id}-title`;
+                            const abstractCellKey = `${revision.id}-abstract`;
+                            const isTitleExpanded = expandedCells[titleCellKey];
+                            const isAbstractExpanded = expandedCells[abstractCellKey];
+                            const hasTitleChanged = revision.previousTitle && revision.previousTitle !== revision.title;
+                            const hasAbstractChanged = revision.previousAbstract && revision.previousAbstract !== revision.abstract;
+                            
+                            return (
+                              <TableRow key={revision.id} className="hover:bg-muted/50">
+                                <TableCell className="align-middle">
+                                  <button className="text-primary hover:underline font-medium">
+                                    {revision.id}_{revision.ordinal}
+                                  </button>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                      <div className="font-medium max-w-xs">{revision.title}</div>
+                                      {hasTitleChanged && isTitleExpanded && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic max-w-xs">
+                                          Previous: {revision.previousTitle}
+                                        </div>
+                                      )}
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {revision.keywords.map((keyword, index) => (
+                                          <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
+                                            {keyword}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    {hasTitleChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'title')}
+                                        className="shrink-0"
+                                      >
+                                        {isTitleExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                      <div className="text-sm text-muted-foreground line-clamp-3 max-w-md">
+                                        {revision.abstract}
+                                      </div>
+                                      {hasAbstractChanged && isAbstractExpanded && (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic max-w-md">
+                                          Previous: {revision.previousAbstract}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {hasAbstractChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'abstract')}
+                                        className="shrink-0"
+                                      >
+                                        {isAbstractExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <button className="text-primary hover:underline font-medium text-sm">
+                                    {revision.manuscriptFile}
+                                  </button>
+                                </TableCell>
+                                <TableCell className="align-middle">{revision.editor}</TableCell>
+                                <TableCell className="align-middle">{revision.invitedDate}</TableCell>
+                                <TableCell className="align-middle">{revision.dueDate}</TableCell>
+                                <TableCell className="align-middle">
+                                  <div className="flex gap-2">
+                                    <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
