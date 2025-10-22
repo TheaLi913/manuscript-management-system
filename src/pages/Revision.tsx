@@ -53,6 +53,66 @@ const assignReviewerSchema = z.object({
   })).min(1, "At least one reviewer must be assigned")
 });
 
+// Mock data for rejected review invitations (Reviewer role - Revision)
+const mockRejectedRevisions = [
+  {
+    id: '334572',
+    ordinal: 1,
+    title: 'Artificial Intelligence in Healthcare: Ethical Considerations and Future Directions',
+    previousTitle: undefined,
+    keywords: ['AI', 'Healthcare', 'Ethics', 'Medical Technology'],
+    abstract: 'This paper examines the ethical implications of artificial intelligence deployment in healthcare settings, focusing on patient privacy, algorithmic bias, and decision-making accountability.',
+    previousAbstract: undefined,
+    editor: 'Dr. Robert Chen',
+    invitedDate: '2024-02-10',
+    rejectedDate: '2024-02-12',
+    reason: 'Conflict of Interest',
+    manuscriptFile: 'manuscript_334572_rev1.pdf'
+  },
+  {
+    id: '334573',
+    ordinal: 2,
+    title: 'Sustainable Urban Planning: Green Infrastructure and Climate Adaptation Strategies',
+    previousTitle: 'Sustainable Urban Planning: Green Infrastructure Implementation',
+    keywords: ['Urban Planning', 'Sustainability', 'Climate Change', 'Green Infrastructure'],
+    abstract: 'We present a comprehensive framework for integrating green infrastructure into urban planning processes to enhance climate resilience and environmental sustainability in metropolitan areas.',
+    previousAbstract: 'We present a framework for integrating green infrastructure into urban planning processes.',
+    editor: 'Prof. Sarah Martinez',
+    invitedDate: '2024-02-15',
+    rejectedDate: '2024-02-17',
+    reason: 'Not My Expertise',
+    manuscriptFile: 'manuscript_334573_rev2.pdf'
+  },
+  {
+    id: '334574',
+    ordinal: 1,
+    title: 'Nanotechnology Applications in Drug Delivery Systems',
+    previousTitle: undefined,
+    keywords: ['Nanotechnology', 'Drug Delivery', 'Pharmaceuticals', 'Medicine'],
+    abstract: 'This research explores novel nanotechnology-based approaches for targeted drug delivery, demonstrating improved efficacy and reduced side effects in preclinical studies.',
+    previousAbstract: undefined,
+    editor: 'Dr. Jennifer Liu',
+    invitedDate: '2024-02-20',
+    rejectedDate: '2024-02-22',
+    reason: 'Time Constraints',
+    manuscriptFile: 'manuscript_334574_rev1.pdf'
+  },
+  {
+    id: '334575',
+    ordinal: 1,
+    title: 'Machine Learning for Financial Fraud Detection',
+    previousTitle: undefined,
+    keywords: ['Machine Learning', 'Fraud Detection', 'Finance', 'Security'],
+    abstract: 'We propose an advanced machine learning framework for real-time detection of financial fraud, achieving high accuracy rates while minimizing false positives.',
+    previousAbstract: undefined,
+    editor: 'Prof. Michael Anderson',
+    invitedDate: '2024-02-25',
+    rejectedDate: '2024-02-27',
+    reason: 'Other',
+    manuscriptFile: 'manuscript_334575_rev1.pdf'
+  }
+];
+
 // Mock data for revisions with ordinal and previous versions
 const mockRevisions = [
   {
@@ -1677,14 +1737,102 @@ const Revision = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {/* Mock data - replace with actual rejected revisions */}
-                          {[].length === 0 && (
-                            <TableRow>
-                              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                                No rejected revisions
-                              </TableCell>
-                            </TableRow>
-                          )}
+                          {mockRejectedRevisions.map((revision) => {
+                            const isTitleExpanded = expandedCells[`${revision.id}-title`];
+                            const isAbstractExpanded = expandedCells[`${revision.id}-abstract`];
+                            const hasTitleChanged = revision.previousTitle && revision.previousTitle !== revision.title;
+                            const hasAbstractChanged = revision.previousAbstract && revision.previousAbstract !== revision.abstract;
+
+                            return (
+                              <TableRow key={revision.id} className="hover:bg-muted/50">
+                                <TableCell className="align-middle">
+                                  <button className="text-primary hover:underline font-medium">
+                                    {revision.id}_{revision.ordinal}
+                                  </button>
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <div>
+                                    <div className="font-medium mb-1">{revision.title}</div>
+                                    {isTitleExpanded && hasTitleChanged && (
+                                      <div className="text-sm text-muted-foreground italic mt-2">
+                                        Previous: {revision.previousTitle}
+                                      </div>
+                                    )}
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {revision.keywords.map((keyword, index) => (
+                                        <span key={index} className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
+                                          {keyword}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    {hasTitleChanged && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => toggleCell(revision.id, 'title')}
+                                        className="mt-1 h-6 px-2 shrink-0"
+                                      >
+                                        {isTitleExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="align-middle max-w-sm">
+                                  <div className="text-sm line-clamp-3">
+                                    {revision.abstract}
+                                  </div>
+                                  {isAbstractExpanded && hasAbstractChanged && (
+                                    <div className="text-sm text-muted-foreground italic mt-2">
+                                      Previous: {revision.previousAbstract}
+                                    </div>
+                                  )}
+                                  {hasAbstractChanged && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => toggleCell(revision.id, 'abstract')}
+                                      className="mt-1 h-6 px-2 shrink-0"
+                                    >
+                                      {isAbstractExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                    </Button>
+                                  )}
+                                </TableCell>
+                                <TableCell className="align-middle">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <Download className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{revision.manuscriptFile}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </TableCell>
+                                <TableCell className="align-middle font-medium">{revision.editor}</TableCell>
+                                <TableCell className="align-middle text-sm text-muted-foreground">{revision.invitedDate}</TableCell>
+                                <TableCell className="align-middle text-sm text-muted-foreground">{revision.rejectedDate}</TableCell>
+                                <TableCell className="align-middle">
+                                  <Badge 
+                                    variant="outline"
+                                    className={
+                                      revision.reason === 'Conflict of Interest'
+                                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                        : revision.reason === 'Not My Expertise'
+                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                        : revision.reason === 'Time Constraints'
+                                        ? 'bg-orange-50 text-orange-700 border-orange-200'
+                                        : 'bg-gray-50 text-gray-700 border-gray-200'
+                                    }
+                                  >
+                                    {revision.reason}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
