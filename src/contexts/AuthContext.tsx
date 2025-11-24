@@ -15,20 +15,30 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user credentials
-const MOCK_CREDENTIALS = {
-  'Thea': { password: '1998', role: 'Editor' as UserRole },
-  'Xinan': { password: '0913', role: 'Reviewer' as UserRole },
+// Get user credentials from localStorage or use defaults
+const getStoredUsers = () => {
+  const stored = localStorage.getItem('systemUsers');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  // Default users
+  const defaultUsers = [
+    { username: 'Thea', password: '1998', role: 'Editor' as UserRole },
+    { username: 'Xinan', password: '0913', role: 'Reviewer' as UserRole },
+  ];
+  localStorage.setItem('systemUsers', JSON.stringify(defaultUsers));
+  return defaultUsers;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = (username: string, password: string): boolean => {
-    const userCredentials = MOCK_CREDENTIALS[username as keyof typeof MOCK_CREDENTIALS];
+    const users = getStoredUsers();
+    const foundUser = users.find((u: any) => u.username === username && u.password === password);
     
-    if (userCredentials && userCredentials.password === password) {
-      setUser({ username, role: userCredentials.role });
+    if (foundUser) {
+      setUser({ username: foundUser.username, role: foundUser.role });
       return true;
     }
     return false;
